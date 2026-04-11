@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>点棒管理</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:       #e8000d;
+      --red-dim:   rgba(232, 0, 13, 0.12);
+      --red-line:  rgba(232, 0, 13, 0.28);
+      --gold:      #d4a017;
+      --gold-line: rgba(212, 160, 23, 0.3);
+      --bg:        #080808;
+      --card:      #101010;
+      --card-act:  #181818;
+      --text:      #f0f0f0;
+      --muted:     #555;
+      --border:    rgba(255,255,255,0.06);
+    }
+
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% -10%, rgba(232,0,13,0.07) 0%, transparent 60%);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic UI', system-ui, sans-serif;
+      padding: 20px 16px;
+      touch-action: pan-y;
+    }
+
+    .app { max-width: 440px; width: 100%; }
+
+    /* ── Header ─────────────────────────────────────── */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .header-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--red-line));
+    }
+    .header-line:last-child {
+      background: linear-gradient(90deg, var(--red-line), transparent);
+    }
+    .app-title {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 10px;
+      color: var(--red);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ── Grid ────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 8px;
+      align-items: center;
+      justify-items: center;
+      margin-bottom: 16px;
+    }
+
+    /* ── Player card ─────────────────────────────────── */
+    .player-card {
+      width: 100%;
+      max-width: 140px;
+      background: var(--card);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 14px 8px 12px;
+      text-align: center;
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.08s, border-color 0.1s, box-shadow 0.1s;
+    }
+    .player-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--red);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.15s;
+    }
+    .player-card:active {
+      transform: scale(0.93);
+      border-color: var(--red-line);
+      box-shadow: 0 0 24px rgba(232,0,13,0.18);
+      background: var(--card-act);
+      cursor: grabbing;
+    }
+    .player-card:active::before { transform: scaleX(1); }
+
+    /* Player name input */
+    .player-name {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      border-bottom: 1px solid transparent;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-align: center;
+      padding: 2px 4px;
+      margin-bottom: 10px;
+      outline: none;
+      cursor: text;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .player-name:focus {
+      color: var(--text);
+      border-bottom-color: var(--red);
+    }
+    .player-name::placeholder { color: var(--muted); opacity: 0.4; }
+
+    .score {
+      font-size: 1.9rem;
+      font-weight: 800;
+      font-feature-settings: "tnum";
+      color: var(--text);
+      letter-spacing: -1.5px;
+      line-height: 1;
+      margin-bottom: 8px;
+      transition: color 0.2s;
+    }
+    .score.negative { color: var(--red); }
+
+    .dir-hint {
+      font-size: 0.58rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      opacity: 0.45;
+    }
+
+    .pos-north { grid-column: 2/3; grid-row: 1/2; }
+    .pos-west  { grid-column: 1/2; grid-row: 2/3; }
+    .pos-east  { grid-column: 3/4; grid-row: 2/3; }
+    .pos-south { grid-column: 2/3; grid-row: 3/4; }
+
+    /* Center */
+    .center {
+      grid-column: 2/3; grid-row: 2/3;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .center-inner {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--red-line);
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(232,0,13,0.04);
+    }
+    .center-kanji {
+      font-size: 1.2rem; font-weight: 800;
+      color: var(--red); opacity: 0.45;
+    }
+
+    /* ── Action bar ──────────────────────────────────── */
+    .action-bar {
+      display: flex; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .btn {
+      flex: 1;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.09);
+      color: rgba(255,255,255,0.4);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 12px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      touch-action: manipulation;
+      letter-spacing: 0.5px;
+      transition: background 0.1s, color 0.1s;
+    }
+    .btn:active { background: rgba(255,255,255,0.05); color: var(--text); }
+    .btn-reset { border-color: rgba(232,0,13,0.2); color: rgba(232,0,13,0.5); }
+    .btn-reset:active { background: rgba(232,0,13,0.07); color: var(--red); }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      opacity: 0.5;
+    }
+
+    /* ── Modal ───────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      display: flex; align-items: flex-end; justify-content: center;
+      z-index: 1000;
+      visibility: hidden; opacity: 0;
+      transition: opacity 0.22s, visibility 0s 0.22s;
+    }
+    .modal-overlay.show {
+      visibility: visible; opacity: 1;
+      transition: opacity 0.22s;
+    }
+    .modal-sheet {
+      width: 100%; max-width: 480px;
+      background: #0f0f0f;
+      border-radius: 24px 24px 0 0;
+      border-top: 2px solid var(--red);
+      padding: 0 18px max(28px, env(safe-area-inset-bottom));
+      box-shadow: 0 -20px 60px rgba(0,0,0,0.9);
+      transform: translateY(24px);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.show .modal-sheet { transform: translateY(0); }
+
+    .sheet-handle {
+      width: 34px; height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin: 12px auto 16px;
+    }
+
+    /* Mode toggle (Ron / Tsumo) */
+    .mode-toggle {
+      display: flex; gap: 5px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px; padding: 4px;
+      margin-bottom: 16px;
+    }
+    .mode-btn {
+      flex: 1; background: none; border: none;
+      color: var(--muted);
+      font-size: 0.82rem; font-weight: 800;
+      letter-spacing: 3px; padding: 9px;
+      border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mode-btn.active { background: var(--red); color: #fff; }
+
+    .modal-label {
+      font-size: 0.6rem; font-weight: 800;
+      letter-spacing: 6px; color: var(--red);
+      opacity: 0.75; text-align: center;
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+    .modal-transfer {
+      font-size: 1.45rem; font-weight: 800;
+      color: var(--text); text-align: center;
+      margin-bottom: 16px; letter-spacing: 1px;
+    }
+
+    /* Presets */
+    .preset-row {
+      display: flex; gap: 6px;
+      margin-bottom: 14px;
+    }
+    .preset-btn {
+      flex: 1;
+      background: var(--red-dim);
+      border: 1px solid var(--red-line);
+      color: var(--red);
+      font-size: 0.7rem; font-weight: 700;
+      padding: 8px 2px; border-radius: 8px;
+      cursor: pointer; touch-action: manipulation;
+      transition: background 0.1s;
+      line-height: 1.4;
+    }
+    .preset-btn:active { background: rgba(232,0,13,0.24); }
+    .preset-btn small { font-size: 0.62rem; opacity: 0.8; }
+
+    /* Score display */
+    .score-display {
+      text-align: center;
+      margin-bottom: 16px; line-height: 1;
+    }
+    .score-big {
+      font-size: 3.4rem; font-weight: 800;
+      font-feature-settings: "tnum";
+      color: var(--text); letter-spacing: -3px;
+    }
+    .score-unit { font-size: 1rem; color: var(--muted); margin-left: 2px; }
+
+    /* ── Tsumo section ───────────────────────────────── */
+    .tsumo-winner-toggle {
+      display: flex; gap: 5px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px; padding: 3px;
+      margin-bottom: 12px;
+    }
+    .tsumo-winner-btn {
+      flex: 1; background: none; border: none;
+      color: var(--muted);
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 1px; padding: 7px 4px;
+      border-radius: 6px; cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+    .tsumo-winner-btn.active {
+      background: rgba(212,160,23,0.18);
+      color: var(--gold);
+    }
+
+    .tsumo-breakdown {
+      margin-bottom: 14px;
+      display: none;
+    }
+    .tsumo-breakdown.visible { display: block; }
+
+    .tsumo-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+    .tsumo-row.oya-row {
+      border-color: var(--gold-line);
+      background: rgba(212,160,23,0.05);
+    }
+    .tsumo-left { display: flex; align-items: center; gap: 8px; }
+    .tsumo-badge {
+      font-size: 0.6rem; font-weight: 800;
+      letter-spacing: 1px;
+      padding: 3px 7px; border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+    .tsumo-badge.oya {
+      color: var(--gold); background: rgba(212,160,23,0.15);
+      border: 1px solid var(--gold-line);
+    }
+    .tsumo-badge.ko {
+      color: var(--muted); background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+    }
+    .tsumo-pname { font-size: 0.84rem; font-weight: 700; color: var(--text); }
+    .tsumo-amount {
+      font-size: 1rem; font-weight: 800;
+      color: var(--red); font-feature-settings: "tnum";
+    }
+    .tsumo-total {
+      text-align: right;
+      font-size: 0.72rem; color: var(--muted);
+      letter-spacing: 1px; margin-top: 2px;
+    }
+
+    /* Numpad */
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px; margin-bottom: 12px;
+    }
+    .numpad-btn {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1.45rem; font-weight: 400;
+      padding: 12px 0; border-radius: 12px;
+      cursor: pointer; touch-action: manipulation;
+      transition: background 0.08s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .numpad-btn:active { background: rgba(255,255,255,0.1); }
+    .numpad-btn.special { color: var(--red); font-size: 1rem; font-weight: 700; }
+
+    /* Modal actions */
+    .modal-actions { display: flex; gap: 8px; }
+    .modal-btn {
+      flex: 1; border: none;
+      padding: 15px; font-size: 0.95rem; font-weight: 800;
+      border-radius: 12px; cursor: pointer;
+      touch-action: manipulation; letter-spacing: 1px;
+      transition: opacity 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .modal-btn:active { opacity: 0.7; }
+    .modal-btn.cancel  { background: rgba(255,255,255,0.06); color: var(--muted); }
+    .modal-btn.confirm { background: var(--red); color: #fff; }
+
+    /* ── Toast ───────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: max(28px, env(safe-area-inset-bottom));
+      left: 50%; transform: translateX(-50%) translateY(8px);
+      white-space: nowrap;
+      background: rgba(8,8,8,0.97);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      color: var(--text);
+      font-size: 0.82rem; font-weight: 600;
+      padding: 10px 22px; border-radius: 40px;
+      z-index: 1200; opacity: 0; pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: rgba(232,0,13,0.4); color: #ff7070; }
+
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      40%       { opacity: 0.25; }
+    }
+    .score.flash { animation: flash 0.3s ease; }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="app-header">
+    <div class="header-line"></div>
+    <div class="app-title">点棒管理</div>
+    <div class="header-line"></div>
+  </div>
+
+  <div class="grid">
+    <div class="player-card pos-north" data-player-id="north">
+      <input class="player-name" id="name-north" type="text" value="プレイヤー1" maxlength="8" placeholder="名前">
+      <div class="score" id="score-north">25,000</div>
+      <div class="dir-hint">← ↓ →</div>
+    </div>
+
+    <div class="player-card pos-west" data-player-id="west">
+      <input class="player-name" id="name-west" type="text" value="プレイヤー2" maxlength="8" placeholder="名前">
+      <div class="score" id="score-west">25,000</div>
+      <div class="dir-hint">↑ → ↓</div>
+    </div>
+
+    <div class="center">
+      <div class="center-inner">
+        <span class="center-kanji">中</span>
+      </div>
+    </div>
+
+    <div class="player-card pos-east" data-player-id="east">
+      <input class="player-name" id="name-east" type="text" value="プレイヤー3" maxlength="8" placeholder="名前">
+      <div class="score" id="score-east">25,000</div>
+      <div class="dir-hint">↑ ← ↓</div>
+    </div>
+
+    <div class="player-card pos-south" data-player-id="south">
+      <input class="player-name" id="name-south" type="text" value="プレイヤー4" maxlength="8" placeholder="名前">
+      <div class="score" id="score-south">25,000</div>
+      <div class="dir-hint">↑ ← →</div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn" id="undoBtn">↩ 取り消し</button>
+    <button class="btn btn-reset" id="resetBtn">全員リセット</button>
+  </div>
+  <div class="footer-note">スワイプ: ロン ／ ダブルタップ: ツモ</div>
+</div>
+
+<!-- Bottom sheet modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeRon">ロン</button>
+      <button class="mode-btn"        id="modeTsumo">ツモ</button>
+    </div>
+
+    <div class="modal-label"    id="modalLabel">点数移動</div>
+    <div class="modal-transfer" id="transferInfo">P1 → P2</div>
+
+    <!-- Ron presets -->
+    <div id="ronSection">
+      <div class="preset-row">
+        <button class="preset-btn" data-preset="1000">1,000</button>
+        <button class="preset-btn" data-preset="2000">2,000</button>
+        <button class="preset-btn" data-preset="3900">3,900</button>
+        <button class="preset-btn" data-preset="8000">8,000</button>
+      </div>
+      <div class="score-display">
+        <span class="score-big" id="scoreDisplay">0</span><span class="score-unit">点</span>
+      </div>
+      <div class="numpad" id="numpadSection">
+        <button class="numpad-btn" data-num="1">1</button>
+        <button class="numpad-btn" data-num="2">2</button>
+        <button class="numpad-btn" data-num="3">3</button>
+        <button class="numpad-btn" data-num="4">4</button>
+        <button class="numpad-btn" data-num="5">5</button>
+        <button class="numpad-btn" data-num="6">6</button>
+        <button class="numpad-btn" data-num="7">7</button>
+        <button class="numpad-btn" data-num="8">8</button>
+        <button class="numpad-btn" data-num="9">9</button>
+        <button class="numpad-btn special" data-num="00">00</button>
+        <button class="numpad-btn" data-num="0">0</button>
+        <button class="numpad-btn special" id="backspaceBtn">⌫</button>
+      </div>
+    </div>
+
+    <!-- Tsumo section -->
+    <div id="tsumoSection" style="display:none">
+      <!-- 子ツモ / 親ツモ toggle -->
+      <div class="tsumo-winner-toggle">
+        <button class="tsumo-winner-btn active" id="tsumoKoBtn">子ツモ</button>
+        <button class="tsumo-winner-btn"        id="tsumoOyaBtn">親ツモ</button>
+      </div>
+
+      <!-- 子ツモ presets -->
+      <div id="tsumoKoPresets">
+        <div class="preset-row">
+          <button class="preset-btn tsumo-p" data-ko="1000" data-oya="2000">満貫<br><small>1000/2000</small></button>
+          <button class="preset-btn tsumo-p" data-ko="1500" data-oya="3000">跳満<br><small>1500/3000</small></button>
+          <button class="preset-btn tsumo-p" data-ko="2000" data-oya="4000">倍満<br><small>2000/4000</small></button>
+          <button class="preset-btn tsumo-p" data-ko="4000" data-oya="8000">役満<br><small>4000/8000</small></button>
+        </div>
+      </div>
+
+      <!-- 親ツモ presets -->
+      <div id="tsumoOyaPresets" style="display:none">
+        <div class="preset-row">
+          <button class="preset-btn tsumo-all" data-all="2000">満貫<br><small>2000 all</small></button>
+          <button class="preset-btn tsumo-all" data-all="3000">跳満<br><small>3000 all</small></button>
+          <button class="preset-btn tsumo-all" data-all="4000">倍満<br><small>4000 all</small></button>
+          <button class="preset-btn tsumo-all" data-all="8000">役満<br><small>8000 all</small></button>
+        </div>
+      </div>
+
+      <!-- Payment breakdown -->
+      <div class="tsumo-breakdown" id="tsumoBreakdown"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn cancel"  id="cancelBtn">キャンセル</button>
+      <button class="modal-btn confirm" id="confirmBtn">決定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ── State ───────────────────────────────────────── */
+  const PLAYER_IDS = ['north', 'west', 'east', 'south'];
+
+  const players = {
+    north: { score: 25000 },
+    west:  { score: 25000 },
+    east:  { score: 25000 },
+    south: { score: 25000 },
+  };
+
+  const neighbors = {
+    north: { down: 'south', left: 'west',  right: 'east'  },
+    west:  { up:   'north', right: 'east', down:  'south' },
+    east:  { up:   'north', left:  'west', down:  'south' },
+    south: { up:   'north', left:  'west', right: 'east'  },
+  };
+
+  let lastTransfer = null;
+  let currentMode  = 'ron';   // 'ron' | 'tsumo'
+  let tsumoType    = 'ko';    // 'ko' (子ツモ) | 'oya' (親ツモ)
+
+  // Ron
+  let ronSrc = null, ronTgt = null;
+  let inputVal = '0';
+
+  // Tsumo
+  let tsumoWinnerId = null;
+  let tsumoDealerId = null;  // 親プレイヤーID（子ツモ時のみ）
+  let tsumoKoAmt    = 0;
+  let tsumoOyaAmt   = 0;
+
+  // Swipe
+  let swipeOrigin = null;
+  let swiping     = false;
+  const SWIPE_MIN  = 28;
+
+  // Double tap
+  let lastTapTime = 0;
+  let lastTapPid  = null;
+  const DTAP_MS    = 320;
+
+  /* ── DOM refs ────────────────────────────────────── */
+  const scoreEls = Object.fromEntries(
+    PLAYER_IDS.map(id => [id, document.getElementById('score-' + id)])
+  );
+  const nameEls = Object.fromEntries(
+    PLAYER_IDS.map(id => [id, document.getElementById('name-' + id)])
+  );
+  const modal          = document.getElementById('modal');
+  const transferInfo   = document.getElementById('transferInfo');
+  const modalLabel     = document.getElementById('modalLabel');
+  const scoreDisplay   = document.getElementById('scoreDisplay');
+  const toast          = document.getElementById('toast');
+  const ronSection     = document.getElementById('ronSection');
+  const tsumoSection   = document.getElementById('tsumoSection');
+  const tsumoBreakdown = document.getElementById('tsumoBreakdown');
+  const tsumoKoPresets = document.getElementById('tsumoKoPresets');
+  const tsumoOyaPresets= document.getElementById('tsumoOyaPresets');
+
+  function getName(id) { return nameEls[id].value.trim() || id; }
+
+  /* ── Scores ──────────────────────────────────────── */
+  function renderScores() {
+    for (const id of PLAYER_IDS) {
+      const el  = scoreEls[id];
+      const val = players[id].score;
+      const txt = val.toLocaleString();
+      if (el.textContent !== txt) {
+        el.textContent = txt;
+        el.classList.toggle('negative', val < 0);
+        el.classList.remove('flash');
+        void el.offsetWidth;
+        el.classList.add('flash');
+      }
+    }
+  }
+
+  function renderInput() {
+    const n = parseInt(inputVal, 10);
+    scoreDisplay.textContent = isNaN(n) ? '0' : n.toLocaleString();
+  }
+
+  /* ── Toast ───────────────────────────────────────── */
+  let toastTimer;
+  function showToast(msg, err = false) {
+    clearTimeout(toastTimer);
+    toast.textContent = msg;
+    toast.classList.toggle('error', err);
+    toast.classList.add('show');
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  /* ── Tsumo breakdown ─────────────────────────────── */
+  function renderTsumoBreakdown() {
+    if (!tsumoWinnerId) return;
+    tsumoBreakdown.innerHTML = '';
+
+    const payers = PLAYER_IDS.filter(id => id !== tsumoWinnerId);
+    let total = 0;
+
+    for (const id of payers) {
+      const isOya = (tsumoType === 'ko') && (id === tsumoDealerId);
+      const amt   = isOya ? tsumoOyaAmt : tsumoKoAmt;
+      total += amt;
+
+      const row = document.createElement('div');
+      row.className = 'tsumo-row' + (isOya ? ' oya-row' : '');
+
+      // Badge (タップで親/子切替 — 子ツモ時のみ)
+      const badge = document.createElement('span');
+      badge.className = 'tsumo-badge ' + (isOya ? 'oya' : 'ko');
+      badge.textContent = isOya ? '親' : '子';
+      if (tsumoType === 'ko') {
+        badge.style.cursor = 'pointer';
+        badge.addEventListener('click', () => {
+          tsumoDealerId = isOya ? null : id;
+          renderTsumoBreakdown();
+        });
+      }
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'tsumo-pname';
+      nameEl.textContent = getName(id);
+
+      const left = document.createElement('div');
+      left.className = 'tsumo-left';
+      left.appendChild(badge);
+      left.appendChild(nameEl);
+
+      const amtEl = document.createElement('span');
+      amtEl.className = 'tsumo-amount';
+      amtEl.textContent = amt > 0 ? `-${amt.toLocaleString()}` : '—';
+
+      row.appendChild(left);
+      row.appendChild(amtEl);
+      tsumoBreakdown.appendChild(row);
+    }
+
+    if (total > 0) {
+      const totalEl = document.createElement('div');
+      totalEl.className = 'tsumo-total';
+      totalEl.textContent = `合計 +${total.toLocaleString()}点`;
+      tsumoBreakdown.appendChild(totalEl);
+    }
+
+    tsumoBreakdown.classList.toggle('visible', tsumoKoAmt > 0 || tsumoOyaAmt > 0);
+  }
+
+  /* ── Tsumo type toggle ───────────────────────────── */
+  function setTsumoType(type) {
+    tsumoType    = type;
+    tsumoKoAmt   = 0;
+    tsumoOyaAmt  = 0;
+    tsumoDealerId = null;
+    document.getElementById('tsumoKoBtn').classList.toggle('active', type === 'ko');
+    document.getElementById('tsumoOyaBtn').classList.toggle('active', type === 'oya');
+    tsumoKoPresets.style.display  = type === 'ko'  ? '' : 'none';
+    tsumoOyaPresets.style.display = type === 'oya' ? '' : 'none';
+    tsumoBreakdown.classList.remove('visible');
+    tsumoBreakdown.innerHTML = '';
+    // Build empty rows
+    renderTsumoBreakdown();
+  }
+
+  /* ── Modal open/close ────────────────────────────── */
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('modeRon').classList.toggle('active', mode === 'ron');
+    document.getElementById('modeTsumo').classList.toggle('active', mode === 'tsumo');
+    ronSection.style.display   = mode === 'ron'   ? '' : 'none';
+    tsumoSection.style.display = mode === 'tsumo' ? '' : 'none';
+
+    if (mode === 'ron') {
+      modalLabel.textContent = 'ロン';
+      transferInfo.textContent = ronSrc && ronTgt
+        ? `${getName(ronSrc)}　→　${getName(ronTgt)}`
+        : '';
+    } else {
+      modalLabel.textContent = 'ツモ';
+      transferInfo.textContent = tsumoWinnerId
+        ? `${getName(tsumoWinnerId)}　のツモ`
+        : '';
+    }
+  }
+
+  function openRonModal(src, tgt) {
+    ronSrc = src; ronTgt = tgt;
+    tsumoWinnerId = src;
+    inputVal = '0';
+    renderInput();
+    setMode('ron');
+    modal.classList.add('show');
+  }
+
+  function openTsumoModal(winnerId) {
+    tsumoWinnerId = winnerId;
+    ronSrc = null; ronTgt = null;
+    tsumoKoAmt = 0; tsumoOyaAmt = 0; tsumoDealerId = null;
+    setMode('tsumo');
+    setTsumoType('ko');
+    modal.classList.add('show');
+  }
+
+  function closeModal() {
+    modal.classList.remove('show');
+  }
+
+  /* ── Transfer ────────────────────────────────────── */
+  function doRon() {
+    const amt = parseInt(inputVal, 10);
+    if (!ronSrc || !ronTgt) return false;
+    if (amt <= 0) { showToast('1点以上入力してください', true); return false; }
+    players[ronSrc].score -= amt;
+    players[ronTgt].score += amt;
+    lastTransfer = { type: 'ron', src: ronSrc, tgt: ronTgt, amt };
+    renderScores();
+    showToast(`${getName(ronSrc)} → ${getName(ronTgt)}　${amt.toLocaleString()}点`);
+    return true;
+  }
+
+  function doTsumo() {
+    if (!tsumoWinnerId) return false;
+    const payers = PLAYER_IDS.filter(id => id !== tsumoWinnerId);
+
+    let total = 0;
+    const payments = {};
+    for (const id of payers) {
+      const isOya = (tsumoType === 'ko') && (id === tsumoDealerId);
+      const amt   = isOya ? tsumoOyaAmt : tsumoKoAmt;
+      payments[id] = amt;
+      total += amt;
+    }
+
+    if (total <= 0) { showToast('点数を選択してください', true); return false; }
+
+    for (const [id, amt] of Object.entries(payments)) {
+      players[id].score -= amt;
+    }
+    players[tsumoWinnerId].score += total;
+
+    lastTransfer = { type: 'tsumo', winner: tsumoWinnerId, payments, total };
+    renderScores();
+    showToast(`${getName(tsumoWinnerId)} ツモ +${total.toLocaleString()}点`);
+    return true;
+  }
+
+  function undo() {
+    if (!lastTransfer) { showToast('取り消せる操作がありません', true); return; }
+    if (lastTransfer.type === 'ron') {
+      const { src, tgt, amt } = lastTransfer;
+      players[src].score += amt;
+      players[tgt].score -= amt;
+      showToast(`↩ 取り消し: ${getName(src)} +${amt.toLocaleString()}点`);
+    } else {
+      const { winner, payments, total } = lastTransfer;
+      players[winner].score -= total;
+      for (const [id, amt] of Object.entries(payments)) {
+        players[id].score += amt;
+      }
+      showToast(`↩ ツモ取り消し: ${getName(winner)} -${total.toLocaleString()}点`);
+    }
+    renderScores();
+    lastTransfer = null;
+  }
+
+  function resetAll() {
+    if (!confirm('全員を 25,000点 にリセットしますか？')) return;
+    for (const id of PLAYER_IDS) players[id].score = 25000;
+    lastTransfer = null;
+    renderScores();
+    showToast('全員 25,000点にリセットしました');
+  }
+
+  /* ── Swipe ───────────────────────────────────────── */
+  function swipeStart(e, pid) {
+    swiping = true;
+    const p = e.touches ? e.touches[0] : e;
+    swipeOrigin = { pid, x: p.clientX, y: p.clientY };
+    if (e.cancelable) e.preventDefault();
+  }
+  function swipeMove(e) { if (swiping && e.cancelable) e.preventDefault(); }
+  function swipeEnd(e) {
+    if (!swiping || !swipeOrigin) { resetSwipe(); return; }
+    const p  = e.changedTouches ? e.changedTouches[0] : e;
+    const dx = p.clientX - swipeOrigin.x;
+    const dy = p.clientY - swipeOrigin.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist >= SWIPE_MIN) {
+      const dir = Math.abs(dx) > Math.abs(dy)
+        ? (dx > 0 ? 'right' : 'left')
+        : (dy > 0 ? 'down'  : 'up');
+      const tgt = neighbors[swipeOrigin.pid]?.[dir];
+      tgt
+        ? openRonModal(swipeOrigin.pid, tgt)
+        : showToast('その方向にはプレイヤーがいません', true);
+    } else {
+      // Tap — check double tap
+      handleTap(swipeOrigin.pid);
+    }
+    resetSwipe();
+  }
+  function resetSwipe() { swiping = false; swipeOrigin = null; }
+
+  /* ── Double tap ──────────────────────────────────── */
+  function handleTap(pid) {
+    const now = Date.now();
+    if (lastTapPid === pid && now - lastTapTime < DTAP_MS) {
+      openTsumoModal(pid);
+      lastTapTime = 0; lastTapPid = null;
+    } else {
+      lastTapTime = now; lastTapPid = pid;
+    }
+  }
+
+  /* ── Init ────────────────────────────────────────── */
+  function init() {
+    renderScores();
+
+    // Card events
+    document.querySelectorAll('.player-card').forEach(card => {
+      const pid = card.dataset.playerId;
+
+      card.addEventListener('touchstart', e => {
+        if (e.target.tagName === 'INPUT') return;
+        swipeStart(e, pid);
+      }, { passive: false });
+
+      card.addEventListener('touchmove', e => {
+        if (e.target.tagName === 'INPUT') return;
+        swipeMove(e);
+      }, { passive: false });
+
+      card.addEventListener('touchend', e => {
+        if (e.target.tagName === 'INPUT') return;
+        swipeEnd(e);
+      });
+
+      card.addEventListener('touchcancel', () => {
+        if (e?.target?.tagName === 'INPUT') return;
+        resetSwipe();
+      });
+
+      card.addEventListener('mousedown', e => {
+        if (e.target.tagName === 'INPUT') return;
+        if (e.button === 0) { swipeStart(e, pid); e.preventDefault(); }
+      });
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (swiping) { swipeMove(e); e.preventDefault(); }
+    });
+    window.addEventListener('mouseup', e => {
+      if (!swipeOrigin) return;
+      swipeEnd(e);
+    });
+    window.addEventListener('mouseleave', () => { if (swiping) resetSwipe(); });
+
+    // Mode toggle
+    document.getElementById('modeRon').addEventListener('click', () => {
+      if (currentMode !== 'ron') {
+        if (ronSrc && ronTgt) setMode('ron');
+        else showToast('ロンはスワイプで開始してください', true);
+      }
+    });
+    document.getElementById('modeTsumo').addEventListener('click', () => {
+      if (currentMode !== 'tsumo') {
+        if (!tsumoWinnerId) tsumoWinnerId = ronSrc;
+        setMode('tsumo');
+        setTsumoType(tsumoType);
+      }
+    });
+
+    // Tsumo type toggle
+    document.getElementById('tsumoKoBtn').addEventListener('click', () => setTsumoType('ko'));
+    document.getElementById('tsumoOyaBtn').addEventListener('click', () => setTsumoType('oya'));
+
+    // Ron numpad
+    document.querySelectorAll('.numpad-btn[data-num]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const n = btn.dataset.num;
+        if (n === '00') {
+          inputVal = inputVal === '0' ? '0' : inputVal + '00';
+        } else {
+          inputVal = inputVal === '0' ? n : inputVal + n;
+        }
+        inputVal = inputVal.replace(/^0+(\d)/, '$1').slice(0, 6) || '0';
+        renderInput();
+      });
+    });
+    document.getElementById('backspaceBtn').addEventListener('click', () => {
+      inputVal = inputVal.slice(0, -1) || '0';
+      renderInput();
+    });
+
+    // Ron presets
+    document.querySelectorAll('.preset-btn[data-preset]').forEach(btn => {
+      btn.addEventListener('click', () => { inputVal = btn.dataset.preset; renderInput(); });
+    });
+
+    // Tsumo 子ツモ presets
+    document.querySelectorAll('.tsumo-p').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tsumoKoAmt  = parseInt(btn.dataset.ko,  10);
+        tsumoOyaAmt = parseInt(btn.dataset.oya, 10);
+        renderTsumoBreakdown();
+      });
+    });
+
+    // Tsumo 親ツモ presets
+    document.querySelectorAll('.tsumo-all').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tsumoKoAmt  = parseInt(btn.dataset.all, 10);
+        tsumoOyaAmt = parseInt(btn.dataset.all, 10);
+        renderTsumoBreakdown();
+      });
+    });
+
+    // Confirm / Cancel
+    document.getElementById('confirmBtn').addEventListener('click', () => {
+      const ok = currentMode === 'ron' ? doRon() : doTsumo();
+      if (ok) closeModal();
+    });
+    document.getElementById('cancelBtn').addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+    // Undo / Reset
+    document.getElementById('undoBtn').addEventListener('click', undo);
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
