@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -23,6 +23,39 @@
       --red:        #c84040;
     }
 
+    /* ── ① Light theme ───────────────────────────────── */
+    [data-theme="light"] {
+      --bg:         #f5f0e8;
+      --card:       #ffffff;
+      --card-act:   #f0ebe0;
+      --text:       #1a1a1a;
+      --muted:      #8a7a60;
+      --border:     rgba(0,0,0,0.08);
+      --gold:       #a07820;
+      --gold-dim:   rgba(160,120,32,0.12);
+      --gold-line:  #d4b87a;
+    }
+    [data-theme="light"] body {
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% -5%, rgba(45,140,80,0.05) 0%, transparent 55%);
+    }
+    [data-theme="light"] .modal-sheet,
+    [data-theme="light"] .gameover-sheet { background: #faf6ee; }
+    [data-theme="light"] .modal-overlay  { background: rgba(0,0,0,0.55); }
+    [data-theme="light"] .toast          { background: rgba(250,246,238,0.97); color: #1a1a1a; border-color: #d4b87a; }
+    [data-theme="light"] .numpad-btn     { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: #1a1a1a; }
+    [data-theme="light"] .numpad-btn:active { background: rgba(0,0,0,0.1); }
+    [data-theme="light"] .player-card    { border-color: rgba(0,0,0,0.12); }
+    [data-theme="light"] .btn            { border-color: rgba(0,0,0,0.35); color: #1a1a1a; }
+    [data-theme="light"] .btn:hover      { background: rgba(160,120,32,0.1); }
+    [data-theme="light"] .btn-hist,
+    [data-theme="light"] .btn-end        { border-color: rgba(160,120,32,0.6); color: var(--gold); }
+    [data-theme="light"] .btn-reset      { border-color: rgba(0,0,0,0.35); color: #1a1a1a; }
+    [data-theme="light"] .center-inner   { background: rgba(160,120,32,0.06); }
+    [data-theme="light"] .mode-toggle,
+    [data-theme="light"] .tsumo-type-toggle,
+    [data-theme="light"] .hist-tabs { background: rgba(0,0,0,0.05); }
+
     body {
       background: var(--bg);
       background-image: radial-gradient(ellipse at 50% -5%, rgba(45,140,80,0.07) 0%, transparent 55%);
@@ -33,10 +66,44 @@
       touch-action: pan-y;
     }
 
-    /* ── App ─────────────────────────────────────────────────── */
+    /* ── ① Theme toggle button ───────────────────────── */
+    .theme-toggle {
+      position: fixed; top: 16px; right: 16px;
+      width: 36px; height: 36px;
+      background: rgba(200,168,64,0.1);
+      border: 1px solid rgba(200,168,64,0.3);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; cursor: pointer; z-index: 900;
+      touch-action: manipulation;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .theme-toggle:active { background: rgba(200,168,64,0.25); }
+    [data-theme="light"] .theme-toggle {
+      background: rgba(160,120,32,0.1);
+      border-color: rgba(160,120,32,0.35);
+    }
+
+    /* ── ⑦ History fixed button ──────────────────────── */
+    .hist-fixed-btn {
+      position: fixed; top: 16px; left: 16px;
+      width: 36px; height: 36px;
+      background: rgba(200,168,64,0.1);
+      border: 1px solid rgba(200,168,64,0.3);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; cursor: pointer; z-index: 900;
+      touch-action: manipulation;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hist-fixed-btn:active { background: rgba(200,168,64,0.25); }
+
+    /* ── App ─────────────────────────────────────────── */
     .app { max-width: clamp(440px, 80vw, 720px); width: 100%; }
 
-    /* ── Header ──────────────────────────────────────────────── */
+    /* ── Header ──────────────────────────────────────── */
     .app-header {
       display: flex; align-items: center; gap: 16px;
       margin-bottom: clamp(20px, 4vw, 36px);
@@ -52,7 +119,7 @@
       white-space: nowrap;
     }
 
-    /* ── Grid ────────────────────────────────────────────────── */
+    /* ── Grid ────────────────────────────────────────── */
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -61,7 +128,7 @@
       margin-bottom: clamp(14px, 3vw, 24px);
     }
 
-    /* ── Player card ─────────────────────────────────────────── */
+    /* ── Player card ─────────────────────────────────── */
     .player-card {
       width: 100%;
       max-width: clamp(140px, 22vw, 220px);
@@ -81,12 +148,29 @@
       transition: transform 0.15s;
     }
     .player-card:active {
-      transform: scale(0.93);
       border-color: var(--green-line);
       box-shadow: 0 0 22px rgba(45,140,80,0.18);
       background: var(--card-act); cursor: grabbing;
     }
     .player-card:active::before { transform: scaleX(1); }
+    /* ② scale on swipe start */
+    .player-card.swiping { transform: scale(1.03); }
+
+    /* ── ② Swipe arrows ──────────────────────────────── */
+    .swipe-arrow {
+      position: absolute;
+      color: var(--gold);
+      opacity: 0.35;
+      font-size: 0.95rem; line-height: 1;
+      pointer-events: none;
+      transition: opacity 0.12s;
+      font-weight: 900;
+    }
+    .swipe-arrow.highlighted { opacity: 1; }
+    .arr-up    { top: 5px;    left: 50%; transform: translateX(-50%); }
+    .arr-down  { bottom: 5px; left: 50%; transform: translateX(-50%); }
+    .arr-left  { left: 5px;   top: 50%; transform: translateY(-50%); }
+    .arr-right { right: 5px;  top: 50%; transform: translateY(-50%); }
 
     .player-name {
       display: block; width: 100%;
@@ -111,6 +195,13 @@
     }
     .score.negative { color: var(--red); }
 
+    /* ── ③ Tsumo hint text ───────────────────────────── */
+    .tsumo-hint-text {
+      font-size: 0.62rem; opacity: 0.5;
+      color: var(--gold); margin-top: 5px;
+      pointer-events: none; letter-spacing: 0.3px;
+    }
+
     .pos-north { grid-column: 2/3; grid-row: 1/2; }
     .pos-west  { grid-column: 1/2; grid-row: 2/3; }
     .pos-east  { grid-column: 3/4; grid-row: 2/3; }
@@ -129,32 +220,37 @@
     }
     .center-kanji { font-size: clamp(1.2rem, 2.5vw, 2.2rem); font-weight: 800; color: var(--gold); opacity: 0.4; }
 
-    /* ── Action bar ──────────────────────────────────────────── */
+    /* ── ⑤⑥ Action bar ───────────────────────────────── */
     .action-bar { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
     .action-row { display: flex; gap: 7px; }
     .btn {
       flex: 1; background: transparent;
-      border: 1px solid rgba(255,255,255,0.08);
-      color: rgba(255,255,255,0.35);
+      border: 1px solid rgba(255,255,255,0.55);
+      color: rgba(255,255,255,1);
       font-size: clamp(0.7rem, 1.3vw, 0.85rem); font-weight: 700;
       padding: 10px 4px; border-radius: 12px;
       cursor: pointer; touch-action: manipulation;
-      transition: background 0.1s, color 0.1s, opacity 0.2s;
+      transition: background 0.1s, color 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      -webkit-tap-highlight-color: transparent;
     }
-    .btn:active { background: rgba(255,255,255,0.05); color: var(--text); }
-    .btn-hist   { border-color: rgba(200,168,64,0.2); color: rgba(200,168,64,0.5); }
-    .btn-hist:active { background: var(--gold-dim); color: var(--gold); }
-    .btn-end    { border-color: rgba(45,140,80,0.3); color: rgba(45,140,80,0.7); }
-    .btn-end:active { background: var(--green-dim); color: #7dc496; }
-    .btn-reset  { border-color: rgba(200,50,50,0.2); color: rgba(200,50,50,0.45); }
-    .btn-reset:active { background: rgba(200,50,50,0.07); color: var(--red); }
+    .btn:hover   { background: rgba(200,168,64,0.15); }
+    .btn:active  { background: rgba(255,255,255,0.05); }
+    /* ⑥ hist / end buttons: gold border */
+    .btn-hist  { border-color: rgba(200,168,64,0.55); color: var(--gold); }
+    .btn-hist:hover  { background: var(--gold-dim); }
+    .btn-hist:active { background: var(--gold-dim); }
+    .btn-end   { border-color: rgba(200,168,64,0.6); color: var(--gold); }
+    .btn-end:hover  { background: var(--gold-dim); }
+    .btn-end:active { background: var(--gold-dim); }
+    .btn-reset { border-color: rgba(255,255,255,0.55); color: rgba(255,255,255,1); }
 
     .footer-note {
       text-align: center; font-size: 0.6rem;
       color: var(--muted); letter-spacing: 1.5px; opacity: 0.45;
     }
 
-    /* ── Modal base ──────────────────────────────────────────── */
+    /* ── Modal base ──────────────────────────────────── */
     .modal-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.88);
@@ -176,6 +272,9 @@
       transition: transform 0.28s cubic-bezier(0.16,1,0.3,1);
     }
     .modal-overlay.show .modal-sheet { transform: translateY(0); }
+
+    /* ③ tsumo mode accent on sheet top border */
+    .modal-sheet.tsumo-mode { border-top-color: var(--gold); }
 
     .sheet-handle {
       width: 34px; height: 3px; background: rgba(255,255,255,0.1);
@@ -201,22 +300,28 @@
       color: var(--gold); opacity: 0.75; text-align: center;
       text-transform: uppercase; margin-bottom: 4px;
     }
+    /* ③ tsumo modal label style */
+    .modal-label.tsumo-label {
+      font-size: 0.78rem; letter-spacing: 4px; opacity: 1;
+      color: var(--gold); text-transform: none;
+    }
     .modal-transfer {
       font-size: 1.4rem; font-weight: 800; color: var(--text);
       text-align: center; margin-bottom: 14px; letter-spacing: 1px;
     }
 
-    /* Preset buttons */
+    /* ⑥ Preset buttons: gold border, full opacity text */
     .preset-row { display: flex; gap: 6px; margin-bottom: 12px; }
     .preset-btn {
-      flex: 1; background: var(--green-dim); border: 1px solid var(--green-line); color: #7dc496;
+      flex: 1; background: var(--gold-dim);
+      border: 1px solid rgba(200,168,64,0.35); color: var(--gold);
       font-size: 0.68rem; font-weight: 700; padding: 8px 2px; border-radius: 8px;
       cursor: pointer; touch-action: manipulation; transition: background 0.1s; line-height: 1.45;
     }
-    .preset-btn:active { background: rgba(45,140,80,0.26); }
+    .preset-btn:active { background: rgba(200,168,64,0.26); }
     .preset-btn small { font-size: 0.6rem; opacity: 0.8; }
 
-    /* ── Shared score display ── (Ron & Tsumo active field) ── */
+    /* Shared score display */
     .score-display { text-align: center; margin-bottom: 12px; line-height: 1; }
     .score-big {
       font-size: 3.2rem; font-weight: 800; font-feature-settings: "tnum";
@@ -224,7 +329,7 @@
     }
     .score-unit { font-size: 1rem; color: var(--muted); margin-left: 2px; }
 
-    /* ── Tsumo type toggle ────────────────────────────────── */
+    /* Tsumo type toggle */
     .tsumo-type-toggle {
       display: flex; gap: 5px;
       background: rgba(255,255,255,0.03);
@@ -238,7 +343,7 @@
     }
     .tsumo-type-btn.active { background: var(--gold-dim); color: var(--gold); }
 
-    /* Tsumo field tabs (below big score display) */
+    /* Tsumo field tabs */
     .tif-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
     .tif-tab {
       flex: 1; background: rgba(255,255,255,0.03);
@@ -296,7 +401,7 @@
     .tsumo-hint   { font-size: 0.62rem; color: var(--gold); opacity: 0.65; letter-spacing: 0.5px; margin-top: 2px; }
     .tsumo-total  { text-align: right; font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; margin-top: 3px; }
 
-    /* Modal actions */
+    /* ⑥ Modal actions */
     .modal-actions { display: flex; gap: 8px; }
     .modal-btn {
       flex: 1; border: none; padding: 15px;
@@ -306,14 +411,28 @@
       -webkit-tap-highlight-color: transparent;
     }
     .modal-btn:active { opacity: 0.7; }
-    .modal-btn.cancel  { background: rgba(255,255,255,0.06); color: var(--muted); }
-    .modal-btn.confirm { background: var(--green); color: #fff; }
+    .modal-btn.cancel  { background: rgba(255,255,255,0.12); color: var(--muted); }
+    .modal-btn.confirm { background: #c8a840; color: #080e08; }
     .modal-btn.danger  { background: rgba(200,64,64,0.15); color: var(--red); border: 1px solid rgba(200,64,64,0.3); }
 
-    /* ── History modal ────────────────────────────────────── */
+    /* ── ⑦ History drawer ────────────────────────────── */
+    .hist-tabs {
+      display: flex; gap: 4px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px; padding: 4px; margin-bottom: 12px;
+    }
+    .hist-tab-btn {
+      flex: 1; background: none; border: none; color: var(--muted);
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
+      padding: 8px; border-radius: 7px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .hist-tab-btn.active { background: var(--gold-dim); color: var(--gold); }
+    .hist-panel { display: none; }
+    .hist-panel.active { display: block; }
     .hist-list {
-      max-height: 52vh; overflow-y: auto;
-      margin-bottom: 14px;
+      max-height: 44vh; overflow-y: auto;
+      margin-bottom: 8px;
       scrollbar-width: thin; scrollbar-color: var(--muted) transparent;
     }
     .hist-entry {
@@ -322,14 +441,33 @@
       margin-bottom: 5px;
       background: rgba(255,255,255,0.03); border: 1px solid var(--border);
     }
-    .hist-entry.undone { opacity: 0.35; }
     .hist-icon { font-size: 0.9rem; flex-shrink: 0; }
     .hist-body { flex: 1; }
     .hist-desc { font-size: 0.82rem; font-weight: 600; color: var(--text); }
     .hist-time { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.5px; margin-top: 2px; }
     .hist-empty { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 32px 0; }
 
-    /* ── Game-end modal ───────────────────────────────────── */
+    /* Game history entry */
+    .game-hist-entry {
+      padding: 10px 14px; border-radius: 10px; margin-bottom: 8px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    }
+    .game-hist-date { font-size: 0.6rem; color: var(--muted); margin-bottom: 6px; letter-spacing: 1px; }
+    .game-hist-row {
+      display: flex; align-items: center; gap: 8px; padding: 3px 0;
+    }
+    .game-hist-name { flex: 1; color: var(--text); font-weight: 600; font-size: 0.8rem; }
+    .game-hist-pts { color: var(--gold); font-weight: 700; font-feature-settings: "tnum"; font-size: 0.82rem; }
+    .hist-clear-btn {
+      width: 100%; background: rgba(200,64,64,0.08);
+      border: 1px solid rgba(200,64,64,0.25);
+      color: var(--red); font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
+      padding: 9px; border-radius: 10px; cursor: pointer;
+      touch-action: manipulation; margin-bottom: 6px;
+    }
+    .hist-clear-btn:active { background: rgba(200,64,64,0.18); }
+
+    /* ── ④⑧ Game-end modal ───────────────────────────── */
     .gameover-overlay { align-items: center; padding: 20px; }
     .gameover-sheet {
       width: 100%; max-width: 420px;
@@ -342,9 +480,9 @@
     }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .gameover-title {
-      font-size: 0.62rem; font-weight: 800; letter-spacing: 8px;
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 7px;
       color: var(--gold); text-align: center; text-transform: uppercase;
-      margin-bottom: 24px; opacity: 0.8;
+      margin-bottom: 24px; opacity: 0.85;
     }
     .rank-row {
       display: flex; align-items: center; gap: 14px;
@@ -355,28 +493,35 @@
     }
     .rank-row.rank-1 { background: rgba(200,168,64,0.1); border-color: var(--gold-line); }
     .rank-row.rank-2 { background: rgba(180,180,180,0.07); border-color: rgba(180,180,180,0.2); }
+
+    /* ⑧ Rank badge circles */
     .rank-badge {
-      font-size: 1.1rem; font-weight: 800; min-width: 28px; text-align: center;
-      color: var(--muted);
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
     }
-    .rank-row.rank-1 .rank-badge { color: var(--gold); }
-    .rank-row.rank-2 .rank-badge { color: #b0b0b0; }
-    .rank-row.rank-3 .rank-badge { color: #c87840; }
+    .rank-badge.rank-1 { background: #FFD700; color: #1a1a1a; }
+    .rank-badge.rank-2 { background: #C0C0C0; color: #1a1a1a; }
+    .rank-badge.rank-3 { background: #CD7F32; color: #ffffff; }
+    .rank-badge.rank-4 { background: #3a3a3a; color: #cccccc; }
+
     .rank-pname { flex: 1; font-size: 0.9rem; font-weight: 700; color: var(--text); }
     .rank-scores { text-align: right; }
     .rank-score {
-      font-size: 1.2rem; font-weight: 800; font-feature-settings: "tnum";
+      font-size: 1.1rem; font-weight: 800; font-feature-settings: "tnum";
       color: var(--text); letter-spacing: -0.5px;
     }
-    .rank-diff {
-      font-size: 0.68rem; font-weight: 600; font-feature-settings: "tnum";
-      letter-spacing: 0px; margin-top: 1px;
+    .rank-detail {
+      font-size: 0.6rem; color: var(--muted); margin-top: 1px;
+      font-feature-settings: "tnum";
     }
-    .rank-diff.plus  { color: #5dbf7a; }
-    .rank-diff.minus { color: var(--red); }
+    .rank-total {
+      font-size: 0.8rem; font-weight: 800; font-feature-settings: "tnum";
+      color: var(--gold); letter-spacing: -0.3px; margin-top: 2px;
+    }
     .gameover-actions { display: flex; gap: 8px; margin-top: 20px; }
 
-    /* ── Toast ────────────────────────────────────────────── */
+    /* ── Toast ───────────────────────────────────────── */
     .toast {
       position: fixed;
       bottom: max(28px, env(safe-area-inset-bottom));
@@ -394,9 +539,19 @@
 
     @keyframes flash { 0%,100%{opacity:1} 40%{opacity:0.25} }
     .score.flash { animation: flash 0.3s ease; }
+
+    /* ③ double-tap pulse */
+    @keyframes dtap { 0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)} }
+    .player-card.dtap-pulse { animation: dtap 0.2s ease; }
   </style>
 </head>
 <body>
+
+<!-- ① Theme toggle (fixed top-right) -->
+<button class="theme-toggle" id="themeToggle" title="テーマ切替">🌙</button>
+
+<!-- ⑦ History fixed button (fixed top-left) -->
+<button class="hist-fixed-btn" id="histFixedBtn" title="対局履歴">📋</button>
 
 <div class="app">
   <div class="app-header">
@@ -406,44 +561,77 @@
   </div>
 
   <div class="grid">
+    <!-- North: neighbors = down, left, right -->
     <div class="player-card pos-north" data-player-id="north">
+      <span class="swipe-arrow arr-down">∨</span>
+      <span class="swipe-arrow arr-left">‹</span>
+      <span class="swipe-arrow arr-right">›</span>
       <input class="player-name" id="name-north" type="text" value="プレイヤー1" maxlength="8" placeholder="名前">
       <div class="score" id="score-north">25,000</div>
+      <div class="tsumo-hint-text">2× タップ = ツモ</div>
     </div>
+
+    <!-- West: neighbors = up, right, down -->
     <div class="player-card pos-west" data-player-id="west">
+      <span class="swipe-arrow arr-up">∧</span>
+      <span class="swipe-arrow arr-right">›</span>
+      <span class="swipe-arrow arr-down">∨</span>
       <input class="player-name" id="name-west" type="text" value="プレイヤー2" maxlength="8" placeholder="名前">
       <div class="score" id="score-west">25,000</div>
+      <div class="tsumo-hint-text">2× タップ = ツモ</div>
     </div>
+
     <div class="center">
       <div class="center-inner"><span class="center-kanji">中</span></div>
     </div>
+
+    <!-- East: neighbors = up, left, down -->
     <div class="player-card pos-east" data-player-id="east">
+      <span class="swipe-arrow arr-up">∧</span>
+      <span class="swipe-arrow arr-left">‹</span>
+      <span class="swipe-arrow arr-down">∨</span>
       <input class="player-name" id="name-east" type="text" value="プレイヤー3" maxlength="8" placeholder="名前">
       <div class="score" id="score-east">25,000</div>
+      <div class="tsumo-hint-text">2× タップ = ツモ</div>
     </div>
+
+    <!-- South: neighbors = up, left, right -->
     <div class="player-card pos-south" data-player-id="south">
+      <span class="swipe-arrow arr-up">∧</span>
+      <span class="swipe-arrow arr-left">‹</span>
+      <span class="swipe-arrow arr-right">›</span>
       <input class="player-name" id="name-south" type="text" value="プレイヤー4" maxlength="8" placeholder="名前">
       <div class="score" id="score-south">25,000</div>
+      <div class="tsumo-hint-text">2× タップ = ツモ</div>
     </div>
   </div>
 
+  <!-- ⑤⑥ Action bar -->
   <div class="action-bar">
     <div class="action-row">
-      <button class="btn" id="undoBtn">↩ 取り消し</button>
+      <!-- ⑤ rotate-ccw SVG for undo -->
+      <button class="btn" id="undoBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+        取消
+      </button>
       <button class="btn" id="redoBtn">↪ やり直し</button>
     </div>
     <div class="action-row">
       <button class="btn btn-hist" id="histBtn">📋 履歴</button>
       <button class="btn btn-end"  id="endBtn">🏁 試合終了</button>
-      <button class="btn btn-reset" id="resetBtn">リセット</button>
+      <!-- ⑤ refresh-cw SVG for reset -->
+      <button class="btn btn-reset" id="resetBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        リセット
+      </button>
     </div>
   </div>
   <div class="footer-note">スワイプ: ロン ／ ダブルタップ: ツモ</div>
 </div>
 
-<!-- ── Score input modal ──────────────────────────────── -->
+<!-- ── Score input modal ─────────────────────────── -->
 <div class="modal-overlay" id="modal">
-  <div class="modal-sheet">
+  <div class="modal-sheet" id="modalSheet">
     <div class="sheet-handle"></div>
 
     <div class="mode-toggle">
@@ -454,7 +642,7 @@
     <div class="modal-label"    id="modalLabel">点数移動</div>
     <div class="modal-transfer" id="transferInfo"></div>
 
-    <!-- Ron presets (ron only) -->
+    <!-- Ron presets -->
     <div id="ronPresets">
       <div class="preset-row">
         <button class="preset-btn" data-preset="1000">1,000</button>
@@ -464,7 +652,7 @@
       </div>
     </div>
 
-    <!-- Tsumo top controls (tsumo only) -->
+    <!-- Tsumo top controls -->
     <div id="tsumoTop" style="display:none">
       <div class="tsumo-type-toggle">
         <button class="tsumo-type-btn active" id="btnKo">子ツモ</button>
@@ -493,8 +681,8 @@
       <span class="score-big" id="scoreDisplay">0</span><span class="score-unit">点</span>
     </div>
 
-    <!-- Tsumo field tabs (tsumo only, below big display) -->
-    <div id="tsumoTabs" style="display:none"></div>
+    <!-- Tsumo field tabs -->
+    <div class="tif-tabs" id="tsumoTabs" style="display:none"></div>
 
     <!-- Shared numpad -->
     <div class="numpad">
@@ -512,7 +700,7 @@
       <button class="numpad-btn sp" id="numBS">⌫</button>
     </div>
 
-    <!-- Tsumo breakdown (tsumo only) -->
+    <!-- Tsumo breakdown -->
     <div class="tsumo-breakdown" id="tsumoBreakdown"></div>
 
     <div class="modal-actions">
@@ -522,27 +710,43 @@
   </div>
 </div>
 
-<!-- ── History modal ──────────────────────────────────── -->
+<!-- ── ⑦ History drawer ──────────────────────────── -->
 <div class="modal-overlay" id="histModal">
-  <div class="modal-sheet">
+  <div class="modal-sheet" style="border-radius:26px 26px 0 0;">
     <div class="sheet-handle"></div>
     <div class="modal-label">対局履歴</div>
-    <div class="hist-list" id="histList"></div>
-    <div class="modal-actions">
-      <button class="modal-btn cancel"  id="histClose">閉じる</button>
-      <button class="modal-btn danger"  id="histClear">履歴クリア</button>
+
+    <div class="hist-tabs">
+      <button class="hist-tab-btn active" id="tabTransferBtn">点数ログ</button>
+      <button class="hist-tab-btn"        id="tabGameBtn">試合履歴</button>
+    </div>
+
+    <!-- Transfer log panel -->
+    <div class="hist-panel active" id="panelTransfer">
+      <div class="hist-list" id="transferList"></div>
+      <button class="hist-clear-btn" id="clearTransferBtn">点数ログをクリア</button>
+    </div>
+
+    <!-- Game history panel -->
+    <div class="hist-panel" id="panelGame">
+      <div class="hist-list" id="gameHistList"></div>
+      <button class="hist-clear-btn" id="clearGameBtn">試合履歴をクリア</button>
+    </div>
+
+    <div class="modal-actions" style="margin-top:4px;">
+      <button class="modal-btn cancel" id="histClose">閉じる</button>
     </div>
   </div>
 </div>
 
-<!-- ── Game-end modal ──────────────────────────────────── -->
+<!-- ── ④⑧ Game-end modal ──────────────────────────── -->
 <div class="modal-overlay gameover-overlay" id="gameEndModal">
   <div class="gameover-sheet">
-    <div class="gameover-title">試合終了</div>
+    <div class="gameover-title">🏁 試合終了</div>
     <div id="rankingList"></div>
     <div class="gameover-actions">
       <button class="modal-btn cancel"  id="closeEndBtn">閉じる</button>
-      <button class="modal-btn confirm" id="newGameBtn">新しいゲーム</button>
+      <button class="modal-btn confirm" id="newGameBtn">もう1局</button>
     </div>
   </div>
 </div>
@@ -553,11 +757,13 @@
 (function () {
   "use strict";
 
-  const IDS = ['north', 'west', 'east', 'south'];
+  const IDS        = ['north', 'west', 'east', 'south'];
   const START_SCORE = 25000;
+  const UMA        = [30, 10, -10, -30]; /* ④ Mリーグ方式 */
 
   const players = { north:{score:25000}, west:{score:25000}, east:{score:25000}, south:{score:25000} };
 
+  /* ── neighborMap (unchanged) ────────────────────── */
   const neighbors = {
     north: { down:'south', left:'west',  right:'east'  },
     west:  { up:'north',  right:'east', down:'south'  },
@@ -565,9 +771,14 @@
     south: { up:'north',  left:'west',  right:'east'  },
   };
 
-  /* ── History stacks ────────────────────────────────── */
+  /* ── localStorage keys ──────────────────────────── */
+  const LS_THEME    = 'mahjong_theme';
+  const LS_TUTORIAL = 'mahjong_tutorial_shown';
+  const LS_TRANSFER = 'mahjong_transfer_log';
+  const LS_GAME     = 'mahjong_game_history';
+
+  /* ── Undo / Redo stacks ─────────────────────────── */
   const undoStack = [], redoStack = [];
-  const gameLog   = [];  // [{ts, icon, desc, undone}]
 
   function snapshot() { return Object.fromEntries(IDS.map(id => [id, players[id].score])); }
   function saveState() {
@@ -581,15 +792,18 @@
     redoBtn.style.opacity = redoStack.length ? '1' : '0.3';
   }
 
-  function addLog(icon, desc) {
-    gameLog.push({ ts: Date.now(), icon, desc, undone: false });
+  /* ── localStorage helpers ───────────────────────── */
+  function lsGet(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
   }
-  function markLastUndone() {
-    for (let i = gameLog.length - 1; i >= 0; i--) {
-      if (!gameLog[i].undone && gameLog[i].icon !== '↩' && gameLog[i].icon !== '↪') {
-        gameLog[i].undone = true; return;
-      }
-    }
+  function lsSet(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+  }
+  function lsPush(key, entry, limit) {
+    const arr = lsGet(key);
+    arr.push(entry);
+    if (arr.length > limit) arr.splice(0, arr.length - limit);
+    lsSet(key, arr);
   }
 
   /* ── Mode / Tsumo state ─────────────────────────── */
@@ -599,32 +813,32 @@
   let tsumoOyaIn = '0', tsumoKoIn = '0';
   let tsumoFocus = 'oya';
 
-  /* ── Swipe ──────────────────────────────────────── */
+  /* ── Swipe state ────────────────────────────────── */
   let swipeOrigin = null, swiping = false;
   const SWIPE_MIN = 30;
   let lastTapTime = 0, lastTapPid = null;
-  const DTAP_MS = 320;
+  const DTAP_MS = 300;
 
-  /* ── DOM ────────────────────────────────────────── */
-  const scoreEls  = Object.fromEntries(IDS.map(id => [id, document.getElementById('score-'+id)]));
-  const nameEls   = Object.fromEntries(IDS.map(id => [id, document.getElementById('name-'+id)]));
-  const modal         = document.getElementById('modal');
-  const modalLabel    = document.getElementById('modalLabel');
-  const transferInfo  = document.getElementById('transferInfo');
-  const scoreDisplay  = document.getElementById('scoreDisplay');
-  const toast         = document.getElementById('toast');
-  const ronPresetsEl  = document.getElementById('ronPresets');
-  const tsumoTopEl    = document.getElementById('tsumoTop');
-  const tsumoBreakdown= document.getElementById('tsumoBreakdown');
-  const tsumoTabsEl   = document.getElementById('tsumoTabs');
-  const tsumoKoPresets= document.getElementById('tsumoKoPresets');
-  const tsumoOyaPresets=document.getElementById('tsumoOyaPresets');
-  const undoBtn       = document.getElementById('undoBtn');
-  const redoBtn       = document.getElementById('redoBtn');
-  const histModal     = document.getElementById('histModal');
-  const histList      = document.getElementById('histList');
-  const gameEndModal  = document.getElementById('gameEndModal');
-  const rankingList   = document.getElementById('rankingList');
+  /* ── DOM refs ───────────────────────────────────── */
+  const scoreEls     = Object.fromEntries(IDS.map(id => [id, document.getElementById('score-'+id)]));
+  const nameEls      = Object.fromEntries(IDS.map(id => [id, document.getElementById('name-'+id)]));
+  const modal        = document.getElementById('modal');
+  const modalSheet   = document.getElementById('modalSheet');
+  const modalLabel   = document.getElementById('modalLabel');
+  const transferInfo = document.getElementById('transferInfo');
+  const scoreDisplay = document.getElementById('scoreDisplay');
+  const toast        = document.getElementById('toast');
+  const ronPresetsEl = document.getElementById('ronPresets');
+  const tsumoTopEl   = document.getElementById('tsumoTop');
+  const tsumoBreakdown = document.getElementById('tsumoBreakdown');
+  const tsumoTabsEl  = document.getElementById('tsumoTabs');
+  const tsumoKoPresets  = document.getElementById('tsumoKoPresets');
+  const tsumoOyaPresets = document.getElementById('tsumoOyaPresets');
+  const undoBtn      = document.getElementById('undoBtn');
+  const redoBtn      = document.getElementById('redoBtn');
+  const histModal    = document.getElementById('histModal');
+  const gameEndModal = document.getElementById('gameEndModal');
+  const rankingList  = document.getElementById('rankingList');
 
   function getName(id) { return nameEls[id].value.trim() || `P${IDS.indexOf(id)+1}`; }
 
@@ -642,12 +856,36 @@
 
   /* ── Toast ──────────────────────────────────────── */
   let toastTimer;
-  function showToast(msg, err = false) {
+  function showToast(msg, err = false, dur = 2600) {
     clearTimeout(toastTimer);
     toast.textContent = msg;
     toast.classList.toggle('error', err);
     toast.classList.add('show');
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), dur);
+  }
+
+  /* ── ① Theme ────────────────────────────────────── */
+  const themeToggle = document.getElementById('themeToggle');
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeToggle.textContent = theme === 'dark' ? '🌙' : '☀️';
+    localStorage.setItem(LS_THEME, theme);
+  }
+  function initTheme() {
+    applyTheme(localStorage.getItem(LS_THEME) || 'dark');
+  }
+  themeToggle.addEventListener('click', () => {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+
+  /* ── ② Tutorial toast ───────────────────────────── */
+  function showTutorialIfNeeded() {
+    if (!localStorage.getItem(LS_TUTORIAL)) {
+      setTimeout(() => {
+        showToast('カードを隣のプレイヤーの方向へスワイプ → 点数移動', false, 3000);
+        localStorage.setItem(LS_TUTORIAL, '1');
+      }, 900);
+    }
   }
 
   /* ── Numpad helpers ─────────────────────────────── */
@@ -659,7 +897,7 @@
   function backspace(cur) { return cur.slice(0,-1) || '0'; }
   function fmt(s) { return parseInt(s,10).toLocaleString(); }
 
-  /* ── Shared numpad handler ──────────────────────── */
+  /* ── Shared numpad ──────────────────────────────── */
   function handleNum(n) {
     if (mode === 'ron') {
       ronInput = appendNum(ronInput, n);
@@ -696,7 +934,6 @@
   }
 
   function refreshTsumoDisplay() {
-    // Update big score display to active field
     const val = tsumoType === 'oya' ? tsumoKoIn
               : tsumoFocus === 'oya' ? tsumoOyaIn : tsumoKoIn;
     scoreDisplay.textContent = fmt(val);
@@ -707,9 +944,7 @@
   function renderTsumoTabs() {
     tsumoTabsEl.innerHTML = '';
     if (tsumoType === 'oya') {
-      // Single tab
-      const tab = makeTifTab('子から（各）', tsumoKoIn, 'ko', true);
-      tsumoTabsEl.appendChild(tab);
+      tsumoTabsEl.appendChild(makeTifTab('子から（各）', tsumoKoIn, 'ko', true));
     } else {
       tsumoTabsEl.appendChild(makeTifTab('親から', tsumoOyaIn, 'oya', tsumoFocus === 'oya'));
       tsumoTabsEl.appendChild(makeTifTab('子から', tsumoKoIn,  'ko',  tsumoFocus === 'ko'));
@@ -720,9 +955,7 @@
     tab.className = 'tif-tab' + (active ? ' active' : '');
     tab.innerHTML = `<span class="tif-tab-label">${label}</span><span class="tif-tab-val">${fmt(val)} 点</span>`;
     tab.addEventListener('click', () => {
-      tsumoFocus = key;
-      scoreDisplay.textContent = fmt(val);
-      renderTsumoTabs();
+      tsumoFocus = key; scoreDisplay.textContent = fmt(val); renderTsumoTabs();
     });
     return tab;
   }
@@ -737,17 +970,19 @@
       const isOya = tsumoType === 'ko' && id === tsumoDealerId;
       const amt   = isOya ? oyaAmt : koAmt;
       total += amt;
-      const row = document.createElement('div');
+      const row   = document.createElement('div');
       row.className = 'tsumo-row' + (isOya ? ' oya-row' : '');
       const badge = document.createElement('span');
       badge.className = 'tsumo-badge ' + (isOya ? 'oya' : 'ko');
       badge.textContent = isOya ? '親' : '子';
       if (tsumoType === 'ko') {
-        badge.addEventListener('click', e => { e.stopPropagation(); tsumoDealerId = isOya ? null : id; renderTsumoBreakdown(); });
+        badge.addEventListener('click', e => {
+          e.stopPropagation(); tsumoDealerId = isOya ? null : id; renderTsumoBreakdown();
+        });
       }
       const nameEl = document.createElement('span'); nameEl.className = 'tsumo-pname'; nameEl.textContent = getName(id);
-      const left = document.createElement('div'); left.className = 'tsumo-left'; left.appendChild(badge); left.appendChild(nameEl);
-      const amtEl = document.createElement('span'); amtEl.className = 'tsumo-amount'; amtEl.textContent = amt > 0 ? `-${amt.toLocaleString()}` : '—';
+      const left   = document.createElement('div');  left.className   = 'tsumo-left';  left.appendChild(badge); left.appendChild(nameEl);
+      const amtEl  = document.createElement('span'); amtEl.className  = 'tsumo-amount'; amtEl.textContent = amt > 0 ? `-${amt.toLocaleString()}` : '—';
       row.appendChild(left); row.appendChild(amtEl); tsumoBreakdown.appendChild(row);
     }
     if (tsumoType === 'ko' && !tsumoDealerId && (koAmt > 0 || oyaAmt > 0)) {
@@ -776,20 +1011,23 @@
     renderTsumoTabs();
   }
 
-  /* ── Modal open/close ───────────────────────────── */
+  /* ── ③ Modal open/close ─────────────────────────── */
   function setMode(m) {
     mode = m;
     document.getElementById('modeRon').classList.toggle('active', m === 'ron');
     document.getElementById('modeTsumo').classList.toggle('active', m === 'tsumo');
-    ronPresetsEl.style.display  = m === 'ron'   ? '' : 'none';
-    tsumoTopEl.style.display    = m === 'tsumo' ? '' : 'none';
-    tsumoTabsEl.style.display   = m === 'tsumo' ? '' : 'none';
-    tsumoBreakdown.style.display= m === 'tsumo' ? '' : 'none';
+    ronPresetsEl.style.display   = m === 'ron'   ? '' : 'none';
+    tsumoTopEl.style.display     = m === 'tsumo' ? '' : 'none';
+    tsumoTabsEl.style.display    = m === 'tsumo' ? '' : 'none';
+    tsumoBreakdown.style.display = m === 'tsumo' ? '' : 'none';
+    modalSheet.classList.toggle('tsumo-mode', m === 'tsumo');
     if (m === 'ron') {
-      modalLabel.textContent   = 'ロン';
+      modalLabel.textContent = 'ロン';
+      modalLabel.className   = 'modal-label';
       transferInfo.textContent = ronSrc && ronTgt ? `${getName(ronSrc)}　→　${getName(ronTgt)}` : '';
     } else {
-      modalLabel.textContent   = 'ツモ';
+      modalLabel.textContent = '🀄 ツモ';        /* ③ */
+      modalLabel.className   = 'modal-label tsumo-label';
       transferInfo.textContent = tsumoWinner ? `${getName(tsumoWinner)}　ツモ和了` : '';
     }
   }
@@ -814,7 +1052,8 @@
     players[ronSrc].score -= amt; players[ronTgt].score += amt;
     renderScores();
     const desc = `${getName(ronSrc)} → ${getName(ronTgt)}　${amt.toLocaleString()}点`;
-    addLog('🀄', desc); showToast(desc);
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: ronSrc, to: ronTgt, amount: amt, type: 'ron' }, 200);
+    showToast(desc);
     return true;
   }
 
@@ -834,7 +1073,8 @@
     players[tsumoWinner].score += total;
     renderScores();
     const desc = `${getName(tsumoWinner)} ツモ +${total.toLocaleString()}点`;
-    addLog('🀅', desc); showToast(desc);
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: tsumoWinner, amount: total, type: 'tsumo' }, 200);
+    showToast(desc);
     return true;
   }
 
@@ -842,77 +1082,154 @@
   function undo() {
     if (!undoStack.length) { showToast('これ以上戻れません', true); return; }
     redoStack.push(snapshot()); applySnapshot(undoStack.pop());
-    markLastUndone(); addLog('↩', '取り消し');
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'undo' }, 200);
     syncBtns(); showToast('↩ 取り消し');
   }
   function redo() {
     if (!redoStack.length) { showToast('これ以上進めません', true); return; }
     undoStack.push(snapshot()); applySnapshot(redoStack.pop());
-    addLog('↪', 'やり直し');
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'redo' }, 200);
     syncBtns(); showToast('↪ やり直し');
   }
   function resetAll() {
     if (!confirm('全員を 25,000点 にリセットしますか？')) return;
     saveState();
     for (const id of IDS) players[id].score = START_SCORE;
-    addLog('🔄', '全員リセット 25,000点');
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'reset' }, 200);
     renderScores(); showToast('全員 25,000点にリセットしました');
   }
 
-  /* ── History modal ──────────────────────────────── */
-  function openHistModal() {
-    histList.innerHTML = '';
-    if (!gameLog.length) {
-      histList.innerHTML = '<div class="hist-empty">対局履歴はありません</div>';
-    } else {
-      [...gameLog].reverse().forEach(e => {
-        const div = document.createElement('div');
-        div.className = 'hist-entry' + (e.undone ? ' undone' : '');
-        const d = new Date(e.ts);
-        const t = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
-        div.innerHTML = `<span class="hist-icon">${e.icon}</span><div class="hist-body"><div class="hist-desc">${e.desc}</div><div class="hist-time">${t}</div></div>`;
-        histList.appendChild(div);
-      });
-    }
-    histModal.classList.add('show');
-  }
-
-  /* ── Game-end modal ─────────────────────────────── */
+  /* ── ④ Game-end modal (Mリーグ Uma) ─────────────── */
   function openGameEndModal() {
+    const total = IDS.reduce((s, id) => s + players[id].score, 0);
+    if (total !== 100000) {
+      showToast(`合計 ${total.toLocaleString()}点 — 100,000点でないと計算できません`, true, 3500);
+      return;
+    }
     const sorted = IDS
       .map(id => ({ id, name: getName(id), score: players[id].score }))
       .sort((a, b) => b.score - a.score);
+
+    const results = sorted.map((p, i) => {
+      const rank       = i + 1;
+      const rawPoint   = Math.round((p.score - 30000) / 1000);
+      const uma        = UMA[i];
+      const totalPoint = rawPoint + uma;
+      return { wind: p.id, name: p.name, finalScore: p.score, rawPoint, uma, totalPoint, rank };
+    });
+
     rankingList.innerHTML = '';
-    sorted.forEach((p, i) => {
-      const rank = i + 1;
-      const diff = p.score - START_SCORE;
-      const row = document.createElement('div');
-      row.className = `rank-row rank-${rank}`;
-      const diffClass = diff >= 0 ? 'plus' : 'minus';
-      const diffStr   = (diff >= 0 ? '+' : '') + diff.toLocaleString();
-      const medal = ['🥇','🥈','🥉',''][i];
+    results.forEach(r => {
+      const row    = document.createElement('div');
+      row.className = `rank-row rank-${r.rank}`;
+      const rawStr = (r.rawPoint >= 0 ? '+' : '') + r.rawPoint;
+      const umaStr = (r.uma       >= 0 ? '+' : '') + r.uma;
+      const totStr = (r.totalPoint >= 0 ? '+' : '') + r.totalPoint;
       row.innerHTML = `
-        <span class="rank-badge">${medal || rank+'位'}</span>
-        <span class="rank-pname">${p.name}</span>
+        <span class="rank-badge rank-${r.rank}">${r.rank}</span>
+        <span class="rank-pname">${r.name}</span>
         <div class="rank-scores">
-          <div class="rank-score">${p.score.toLocaleString()}</div>
-          <div class="rank-diff ${diffClass}">${diffStr} 点</div>
+          <div class="rank-score">${r.finalScore.toLocaleString()}</div>
+          <div class="rank-detail">素点 ${rawStr}　ウマ ${umaStr}</div>
+          <div class="rank-total">計 ${totStr}</div>
         </div>`;
       rankingList.appendChild(row);
     });
+
+    /* ⑦ save to game history */
+    lsPush(LS_GAME, { date: new Date().toISOString(), results }, 50);
     gameEndModal.classList.add('show');
   }
 
   function newGame() {
-    if (!confirm('新しいゲームを始めますか？\n点数と履歴がリセットされます。')) return;
+    if (!confirm('もう1局ですか？\n全員 25,000点にリセットします。')) return;
     for (const id of IDS) players[id].score = START_SCORE;
-    undoStack.length = 0; redoStack.length = 0; gameLog.length = 0;
+    undoStack.length = 0; redoStack.length = 0;
     syncBtns(); renderScores();
     gameEndModal.classList.remove('show');
-    showToast('新しいゲームを開始しました');
+    showToast('全員 25,000点でスタート！');
   }
 
-  /* ── Smart swipe direction ──────────────────────── */
+  /* ── ⑦ History drawer ───────────────────────────── */
+  let histActiveTab = 'transfer';
+
+  function openHistModal() { renderHistPanel(); histModal.classList.add('show'); }
+
+  function setHistTab(tab) {
+    histActiveTab = tab;
+    document.getElementById('tabTransferBtn').classList.toggle('active', tab === 'transfer');
+    document.getElementById('tabGameBtn').classList.toggle('active', tab === 'game');
+    document.getElementById('panelTransfer').classList.toggle('active', tab === 'transfer');
+    document.getElementById('panelGame').classList.toggle('active', tab === 'game');
+    renderHistPanel();
+  }
+  function renderHistPanel() {
+    if (histActiveTab === 'transfer') renderTransferLog();
+    else renderGameHist();
+  }
+
+  function fmtDateTime(ts) {
+    const d = new Date(ts);
+    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function renderTransferLog() {
+    const list = document.getElementById('transferList');
+    const log  = lsGet(LS_TRANSFER);
+    list.innerHTML = '';
+    if (!log.length) { list.innerHTML = '<div class="hist-empty">点数ログはありません</div>'; return; }
+    const iconMap = { ron:'🀄', tsumo:'🀅', undo:'↩', redo:'↪', reset:'🔄' };
+    const descMap = {
+      ron:   e => `${e.from} → ${e.to}　${(e.amount||0).toLocaleString()}点`,
+      tsumo: e => `${e.to} ツモ +${(e.amount||0).toLocaleString()}点`,
+      undo:  ()  => '取り消し',
+      redo:  ()  => 'やり直し',
+      reset: ()  => '全員リセット 25,000点',
+    };
+    [...log].reverse().forEach(e => {
+      const div = document.createElement('div');
+      div.className = 'hist-entry';
+      const icon = iconMap[e.type] || '•';
+      const desc = descMap[e.type] ? descMap[e.type](e) : e.type;
+      div.innerHTML = `<span class="hist-icon">${icon}</span><div class="hist-body"><div class="hist-desc">${desc}</div><div class="hist-time">${fmtDateTime(e.timestamp)}</div></div>`;
+      list.appendChild(div);
+    });
+  }
+
+  function renderGameHist() {
+    const list = document.getElementById('gameHistList');
+    const hist = lsGet(LS_GAME);
+    list.innerHTML = '';
+    if (!hist.length) { list.innerHTML = '<div class="hist-empty">試合履歴はありません</div>'; return; }
+    [...hist].reverse().forEach(g => {
+      const div = document.createElement('div');
+      div.className = 'game-hist-entry';
+      const dateStr = new Date(g.date).toLocaleDateString('ja-JP', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      let rows = '';
+      (g.results || []).forEach(r => {
+        const sign = r.totalPoint >= 0 ? '+' : '';
+        const smBadge = `<span class="rank-badge rank-${r.rank}" style="width:20px;height:20px;font-size:0.68rem;">${r.rank}</span>`;
+        rows += `<div class="game-hist-row">${smBadge}<span class="game-hist-name">${r.name || r.wind}</span><span class="game-hist-pts">${sign}${r.totalPoint}</span></div>`;
+      });
+      div.innerHTML = `<div class="game-hist-date">${dateStr}</div>${rows}`;
+      list.appendChild(div);
+    });
+  }
+
+  /* ── ② Swipe arrow helpers ──────────────────────── */
+  const dirClass = { up:'arr-up', down:'arr-down', left:'arr-left', right:'arr-right' };
+
+  function clearArrowHighlights(pid) {
+    document.querySelectorAll(`[data-player-id="${pid}"] .swipe-arrow`)
+      .forEach(a => a.classList.remove('highlighted'));
+  }
+  function highlightArrow(pid, dir) {
+    clearArrowHighlights(pid);
+    const arrow = document.querySelector(`[data-player-id="${pid}"] .${dirClass[dir]}`);
+    if (arrow) arrow.classList.add('highlighted');
+  }
+
+  /* ── Smart swipe direction (unchanged logic) ────── */
   function getSwipeDir(dx, dy, pid) {
     const ax = Math.abs(dx), ay = Math.abs(dy);
     if (ax > ay * 1.5) return dx > 0 ? 'right' : 'left';
@@ -924,16 +1241,28 @@
     return ax > ay ? hDir : vDir;
   }
 
+  function getCard(pid) { return document.querySelector(`[data-player-id="${pid}"]`); }
+
   function swipeStart(e, pid) {
     swiping = true;
     const p = e.touches ? e.touches[0] : e;
     swipeOrigin = { pid, x: p.clientX, y: p.clientY };
+    const card = getCard(pid);
+    if (card) card.classList.add('swiping');   /* ② scale(1.03) */
     if (e.cancelable) e.preventDefault();
   }
-  function swipeMove(e) { if (swiping && e.cancelable) e.preventDefault(); }
+  function swipeMove(e) {
+    if (!swiping || !swipeOrigin) return;
+    if (e.cancelable) e.preventDefault();
+    const p  = e.touches ? e.touches[0] : e;
+    const dx = p.clientX - swipeOrigin.x, dy = p.clientY - swipeOrigin.y;
+    if (Math.hypot(dx, dy) >= SWIPE_MIN) {
+      highlightArrow(swipeOrigin.pid, getSwipeDir(dx, dy, swipeOrigin.pid)); /* ② highlight arrow */
+    }
+  }
   function swipeEnd(e) {
     if (!swiping || !swipeOrigin) { resetSwipe(); return; }
-    const p = e.changedTouches ? e.changedTouches[0] : e;
+    const p  = e.changedTouches ? e.changedTouches[0] : e;
     const dx = p.clientX - swipeOrigin.x, dy = p.clientY - swipeOrigin.y;
     const pid = swipeOrigin.pid;
     if (Math.hypot(dx, dy) >= SWIPE_MIN) {
@@ -943,33 +1272,51 @@
     } else { handleTap(pid); }
     resetSwipe();
   }
-  function resetSwipe() { swiping = false; swipeOrigin = null; }
+  function resetSwipe() {
+    if (swipeOrigin) {
+      const card = getCard(swipeOrigin.pid);
+      if (card) { card.classList.remove('swiping'); clearArrowHighlights(swipeOrigin.pid); }
+    }
+    swiping = false; swipeOrigin = null;
+  }
 
+  /* ── ③ Double-tap with pulse animation ──────────── */
   function handleTap(pid) {
     const now = Date.now();
     if (lastTapPid === pid && now - lastTapTime < DTAP_MS) {
-      openTsumoModal(pid); lastTapTime = 0; lastTapPid = null;
-    } else { lastTapTime = now; lastTapPid = pid; }
+      const card = getCard(pid);
+      if (card) {
+        card.classList.add('dtap-pulse');
+        card.addEventListener('animationend', () => card.classList.remove('dtap-pulse'), { once: true });
+      }
+      openTsumoModal(pid);
+      lastTapTime = 0; lastTapPid = null;
+    } else {
+      lastTapTime = now; lastTapPid = pid;
+    }
   }
 
   /* ── Init ───────────────────────────────────────── */
   function init() {
-    renderScores(); syncBtns();
+    initTheme();
+    renderScores();
+    syncBtns();
+    showTutorialIfNeeded();
 
     document.querySelectorAll('.player-card').forEach(card => {
       const pid = card.dataset.playerId;
-      const g = e => e.target.tagName === 'INPUT';
-      card.addEventListener('touchstart',  e => { if (!g(e)) swipeStart(e, pid); }, { passive: false });
-      card.addEventListener('touchmove',   e => { if (!g(e)) swipeMove(e); },       { passive: false });
-      card.addEventListener('touchend',    e => { if (!g(e)) swipeEnd(e); });
-      card.addEventListener('touchcancel', e => { if (!g(e)) resetSwipe(); });
-      card.addEventListener('mousedown',   e => { if (!g(e) && e.button===0) { swipeStart(e,pid); e.preventDefault(); } });
+      const isInput = e => e.target.tagName === 'INPUT';
+      card.addEventListener('touchstart',  e => { if (!isInput(e)) swipeStart(e, pid); }, { passive: false });
+      card.addEventListener('touchmove',   e => { if (!isInput(e)) swipeMove(e); },       { passive: false });
+      card.addEventListener('touchend',    e => { if (!isInput(e)) swipeEnd(e); });
+      card.addEventListener('touchcancel', e => { if (!isInput(e)) resetSwipe(); });
+      card.addEventListener('mousedown',   e => { if (!isInput(e) && e.button === 0) { swipeStart(e, pid); e.preventDefault(); } });
     });
     window.addEventListener('mousemove',  e => { if (swiping) { swipeMove(e); e.preventDefault(); } });
     window.addEventListener('mouseup',    e => { if (swipeOrigin) swipeEnd(e); });
-    window.addEventListener('mouseleave', ()  => { if (swiping) resetSwipe(); });
+    window.addEventListener('mouseleave', () => { if (swiping) resetSwipe(); });
 
-    // Mode buttons
+    /* Mode buttons */
     document.getElementById('modeRon').addEventListener('click', () => {
       if (mode !== 'ron') { if (ronSrc && ronTgt) setMode('ron'); else showToast('ロンはカードをスワイプして開始', true); }
     });
@@ -977,62 +1324,65 @@
       if (mode !== 'tsumo') { if (!tsumoWinner) tsumoWinner = ronSrc; setMode('tsumo'); setTsumoType('ko'); }
     });
 
-    // Tsumo type
+    /* Tsumo type */
     document.getElementById('btnKo').addEventListener('click',  () => setTsumoType('ko'));
     document.getElementById('btnOya').addEventListener('click', () => setTsumoType('oya'));
 
-    // Shared numpad
+    /* Numpad */
     document.querySelectorAll('.numpad-btn[data-num]').forEach(btn => {
       btn.addEventListener('click', () => handleNum(btn.dataset.num));
     });
     document.getElementById('numBS').addEventListener('click', handleBS);
 
-    // Ron presets
+    /* Ron presets */
     document.querySelectorAll('.preset-btn[data-preset]').forEach(btn => {
       btn.addEventListener('click', () => { ronInput = btn.dataset.preset; scoreDisplay.textContent = fmt(ronInput); });
     });
 
-    // Tsumo 子ツモ presets
+    /* Tsumo 子ツモ presets */
     document.querySelectorAll('.tp').forEach(btn => {
       btn.addEventListener('click', () => {
         tsumoKoIn = btn.dataset.ko; tsumoOyaIn = btn.dataset.oya;
-        tsumoFocus = 'oya';
-        refreshTsumoDisplay();
+        tsumoFocus = 'oya'; refreshTsumoDisplay();
       });
     });
 
-    // Tsumo 親ツモ presets
+    /* Tsumo 親ツモ presets */
     document.querySelectorAll('.ta').forEach(btn => {
-      btn.addEventListener('click', () => {
-        tsumoKoIn = btn.dataset.all;
-        refreshTsumoDisplay();
-      });
+      btn.addEventListener('click', () => { tsumoKoIn = btn.dataset.all; refreshTsumoDisplay(); });
     });
 
-    // Confirm / Cancel
-    document.getElementById('confirmBtn').addEventListener('click', () => { if ((mode==='ron'?doRon():doTsumo())) closeModal(); });
+    /* Confirm / Cancel */
+    document.getElementById('confirmBtn').addEventListener('click', () => { if ((mode === 'ron' ? doRon() : doTsumo())) closeModal(); });
     document.getElementById('cancelBtn').addEventListener('click', closeModal);
-    modal.addEventListener('click', e => { if (e.target===modal) closeModal(); });
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-    // Action bar
+    /* Action bar */
     undoBtn.addEventListener('click', undo);
     redoBtn.addEventListener('click', redo);
     document.getElementById('resetBtn').addEventListener('click', resetAll);
     document.getElementById('histBtn').addEventListener('click', openHistModal);
+    document.getElementById('histFixedBtn').addEventListener('click', openHistModal);
     document.getElementById('endBtn').addEventListener('click', openGameEndModal);
 
-    // History modal
+    /* History drawer */
     document.getElementById('histClose').addEventListener('click', () => histModal.classList.remove('show'));
-    document.getElementById('histClear').addEventListener('click', () => {
-      if (!confirm('履歴をクリアしますか？')) return;
-      gameLog.length = 0; histModal.classList.remove('show'); showToast('履歴をクリアしました');
+    document.getElementById('tabTransferBtn').addEventListener('click', () => setHistTab('transfer'));
+    document.getElementById('tabGameBtn').addEventListener('click',     () => setHistTab('game'));
+    document.getElementById('clearTransferBtn').addEventListener('click', () => {
+      if (!confirm('点数ログをクリアしますか？')) return;
+      lsSet(LS_TRANSFER, []); renderTransferLog(); showToast('点数ログをクリアしました');
     });
-    histModal.addEventListener('click', e => { if (e.target===histModal) histModal.classList.remove('show'); });
+    document.getElementById('clearGameBtn').addEventListener('click', () => {
+      if (!confirm('試合履歴をクリアしますか？')) return;
+      lsSet(LS_GAME, []); renderGameHist(); showToast('試合履歴をクリアしました');
+    });
+    histModal.addEventListener('click', e => { if (e.target === histModal) histModal.classList.remove('show'); });
 
-    // Game-end modal
+    /* Game-end modal */
     document.getElementById('closeEndBtn').addEventListener('click', () => gameEndModal.classList.remove('show'));
     document.getElementById('newGameBtn').addEventListener('click', newGame);
-    gameEndModal.addEventListener('click', e => { if (e.target===gameEndModal) gameEndModal.classList.remove('show'); });
+    gameEndModal.addEventListener('click', e => { if (e.target === gameEndModal) gameEndModal.classList.remove('show'); });
   }
 
   init();
