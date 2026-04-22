@@ -903,11 +903,11 @@
       <div class="help-section-title">ロン（点数渡し）</div>
       <div class="help-row">
         <span class="help-op">スワイプ</span>
-        <span class="help-desc">カードをホールドして相手の方向へ指を動かす</span>
+        <span class="help-desc">プレイヤーをホールドして相手の方向へ指を動かす</span>
       </div>
       <div class="help-row">
         <span class="help-op">長押し</span>
-        <span class="help-desc">カードを長押しして離す方向で相手を選択</span>
+        <span class="help-desc">プレイヤーを長押しして離す方向で相手を選択</span>
       </div>
     </div>
 
@@ -915,7 +915,7 @@
       <div class="help-section-title">ツモ（自摸）</div>
       <div class="help-row">
         <span class="help-op">2タップ</span>
-        <span class="help-desc">カードを2回素早くタップしてツモ点数を入力</span>
+        <span class="help-desc">プレイヤーを2回素早くタップしてツモ点数を入力</span>
       </div>
     </div>
 
@@ -923,7 +923,7 @@
       <div class="help-section-title">点数調整</div>
       <div class="help-row">
         <span class="help-op">タップ</span>
-        <span class="help-desc">カードをタップして任意の点数を加算 / 減算</span>
+        <span class="help-desc">プレイヤーをタップして任意の点数を加算 / 減算</span>
       </div>
     </div>
 
@@ -1418,12 +1418,14 @@
       .map(id => ({ id, name: getName(id), score: players[id].score }))
       .sort((a, b) => b.score - a.score);
 
+    const okaTotal = Math.round((BASE_SCORE - START_SCORE) * IDS.length / 1000);
     const results = sorted.map((p, i) => {
       const rank       = i + 1;
       const rawPoint   = Math.round((p.score - BASE_SCORE) / 1000);
       const uma        = UMA[i];
-      const totalPoint = rawPoint + uma;
-      return { wind: p.id, name: p.name, finalScore: p.score, rawPoint, uma, totalPoint, rank };
+      const oka        = i === 0 ? okaTotal : 0;
+      const totalPoint = rawPoint + uma + oka;
+      return { wind: p.id, name: p.name, finalScore: p.score, rawPoint, uma, oka, totalPoint, rank };
     });
 
     rankingList.innerHTML = '';
@@ -1433,12 +1435,16 @@
       const rawStr = (r.rawPoint >= 0 ? '+' : '') + r.rawPoint;
       const umaStr = (r.uma       >= 0 ? '+' : '') + r.uma;
       const totStr = (r.totalPoint >= 0 ? '+' : '') + r.totalPoint;
+      const okaStr = (r.oka        >= 0 ? '+' : '') + r.oka;
+      const detail = r.oka !== 0
+        ? `素点 ${rawStr}　ウマ ${umaStr}　オカ ${okaStr}`
+        : `素点 ${rawStr}　ウマ ${umaStr}`;
       row.innerHTML = `
         <span class="rank-badge rank-${r.rank}">${r.rank}</span>
         <span class="rank-pname">${r.name}</span>
         <div class="rank-scores">
           <div class="rank-score">${r.finalScore.toLocaleString()}</div>
-          <div class="rank-detail">素点 ${rawStr}　ウマ ${umaStr}</div>
+          <div class="rank-detail">${detail}</div>
           <div class="rank-total">計 ${totStr}</div>
         </div>`;
       rankingList.appendChild(row);
@@ -1745,7 +1751,7 @@
 
     /* Mode buttons */
     document.getElementById('modeRon').addEventListener('click', () => {
-      if (mode !== 'ron') { if (ronSrc && ronTgt) setMode('ron'); else showToast('ロンはカードをスワイプして開始', true); }
+      if (mode !== 'ron') { if (ronSrc && ronTgt) setMode('ron'); else showToast('ロンはプレイヤーをスワイプして開始', true); }
     });
     document.getElementById('modeTsumo').addEventListener('click', () => {
       if (mode !== 'tsumo') { if (!tsumoWinner) tsumoWinner = ronSrc; setMode('tsumo'); setTsumoType('ko'); }
