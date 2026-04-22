@@ -600,6 +600,45 @@
     [data-theme="light"] #swipeArrowHeadShape {
       fill: rgba(110,82,0,0.5);
     }
+
+    /* ── Help modal ──────────────────────────────────── */
+    #helpModal .modal-sheet {
+      max-height: 82vh; overflow-y: auto; padding-bottom: 24px;
+    }
+    .help-title {
+      text-align: center; font-size: 0.62rem; font-weight: 800;
+      letter-spacing: 6px; color: var(--gold); opacity: 0.85;
+      text-transform: uppercase; margin-bottom: 16px;
+    }
+    .help-section { margin-bottom: 18px; }
+    .help-section-title {
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 3px;
+      color: var(--muted); text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding-bottom: 4px; margin-bottom: 10px;
+    }
+    [data-theme="light"] .help-section-title {
+      border-bottom-color: rgba(0,0,0,0.1);
+    }
+    .help-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .help-op {
+      flex-shrink: 0; min-width: 72px;
+      background: rgba(200,168,64,0.12);
+      border: 1px solid rgba(200,168,64,0.28);
+      border-radius: 6px; padding: 3px 8px;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--gold); text-align: center;
+    }
+    .help-desc {
+      font-size: 0.82rem; color: var(--muted); line-height: 1.55;
+    }
+    .help-note {
+      font-size: 0.75rem; color: var(--muted); opacity: 0.7;
+      text-align: center; margin-top: 6px;
+    }
   </style>
 </head>
 <body>
@@ -607,8 +646,8 @@
 <!-- ① Theme toggle (fixed top-right) -->
 <button class="theme-toggle" id="themeToggle" title="テーマ切替">🌙</button>
 
-<!-- ⑦ History fixed button (fixed top-left) -->
-<button class="hist-fixed-btn" id="histFixedBtn" title="対局履歴">📋</button>
+<!-- ⑦ Help button (fixed top-left) -->
+<button class="hist-fixed-btn" id="helpBtn" title="使い方">？</button>
 
 <!-- ④ Long press radial arrows overlay -->
 <div id="longPressOverlay">
@@ -680,7 +719,7 @@
       <button class="btn btn-reset" id="resetBtn">↺ リセット</button>
     </div>
   </div>
-  <div class="footer-note">長押し: ロン方向選択　／　スワイプ: ロン　／　2タップ: ツモ</div>
+  <div class="footer-note">スワイプ: ロン　／　2タップ: ツモ</div>
 </div>
 
 <!-- ── Score input modal ─────────────────────────── -->
@@ -854,6 +893,74 @@
   </div>
 </div>
 
+<!-- ── 使い方モーダル ──────────────────────────────── -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="help-title">使 い 方</div>
+
+    <div class="help-section">
+      <div class="help-section-title">ロン（点数渡し）</div>
+      <div class="help-row">
+        <span class="help-op">スワイプ</span>
+        <span class="help-desc">カードをホールドして相手の方向へ指を動かす</span>
+      </div>
+      <div class="help-row">
+        <span class="help-op">長押し</span>
+        <span class="help-desc">カードを長押しして離す方向で相手を選択</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">ツモ（自摸）</div>
+      <div class="help-row">
+        <span class="help-op">2タップ</span>
+        <span class="help-desc">カードを2回素早くタップしてツモ点数を入力</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">点数調整</div>
+      <div class="help-row">
+        <span class="help-op">タップ</span>
+        <span class="help-desc">カードをタップして任意の点数を加算 / 減算</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">電卓入力</div>
+      <div class="help-row">
+        <span class="help-op">百の位〜</span>
+        <span class="help-desc">キーは百の位からスタート<br>例）3 → 300点 ／ 39 → 3,900点</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">試合終了・精算</div>
+      <div class="help-row">
+        <span class="help-op">試合終了</span>
+        <span class="help-desc">「試合終了」ボタンで素点・ウマを自動計算</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">四麻 / 三麻</div>
+      <div class="help-row">
+        <span class="help-op">四 麻</span>
+        <span class="help-desc">4人・25,000点スタート／ウマ [30, 10, -10, -30]</span>
+      </div>
+      <div class="help-row">
+        <span class="help-op">三 麻</span>
+        <span class="help-desc">3人・35,000点スタート（西家なし）／ウマ [20, 0, -20]</span>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn confirm" id="helpCloseBtn">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1010,12 +1117,12 @@
   });
 
   /* ── Tutorial toast ─────────────────────────────── */
+  function openHelpModal()  { document.getElementById('helpModal').classList.add('show'); }
+  function closeHelpModal() { document.getElementById('helpModal').classList.remove('show'); }
+
   function showTutorialIfNeeded() {
     if (!localStorage.getItem(LS_TUTORIAL)) {
-      setTimeout(() => {
-        showToast('カードをタップ/スワイプ/長押しで点数操作', false, 3000);
-        localStorage.setItem(LS_TUTORIAL, '1');
-      }, 900);
+      setTimeout(() => { openHelpModal(); localStorage.setItem(LS_TUTORIAL, '1'); }, 600);
     }
   }
 
@@ -1543,8 +1650,9 @@
     const p  = e.touches ? e.touches[0] : e;
     const dx = p.clientX - swipeOrigin.x, dy = p.clientY - swipeOrigin.y;
     if (lpActive) {
-      /* long press active: track finger direction for highlight */
+      /* long press active: track finger direction for highlight and show arrow */
       updateLpHighlight(p.clientX, p.clientY);
+      showSwipeArrow(p.clientX, p.clientY);
     } else if (Math.hypot(dx, dy) >= SWIPE_MIN) {
       cancelLongPress();
       showSwipeArrow(p.clientX, p.clientY);
@@ -1712,7 +1820,11 @@
     redoBtn.addEventListener('click', redo);
     document.getElementById('resetBtn').addEventListener('click', resetAll);
     document.getElementById('histBtn').addEventListener('click', openHistModal);
-    document.getElementById('histFixedBtn').addEventListener('click', openHistModal);
+    document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+    document.getElementById('helpCloseBtn').addEventListener('click', closeHelpModal);
+    document.getElementById('helpModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('helpModal')) closeHelpModal();
+    });
     document.getElementById('endBtn').addEventListener('click', openGameEndModal);
 
     /* History drawer */
