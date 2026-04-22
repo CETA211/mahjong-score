@@ -552,6 +552,25 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* ── 三麻/四麻 rule toggle ──────────────────────── */
+    .rule-toggle {
+      display: flex; gap: 5px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px; padding: 4px;
+      max-width: 160px; width: 100%;
+    }
+    .rule-toggle .mode-btn {
+      font-size: 0.78rem; letter-spacing: 2px; padding: 7px;
+    }
+    .rule-toggle .mode-btn.active {
+      background: rgba(200,168,64,0.22); color: var(--gold);
+    }
+    [data-theme="light"] .rule-toggle .mode-btn.active {
+      background: rgba(200,168,64,0.18); color: #8a6000;
+    }
+    /* 三麻時に西家カードを非表示 */
+    .grid.sanma .pos-west { display: none; }
+
     /* ── ③ Adjust score modal extras ─────────────────── */
     .adj-current-row {
       text-align: center; margin-bottom: 10px;
@@ -645,6 +664,12 @@
 
   <!-- Action bar -->
   <div class="action-bar">
+    <div class="action-row" style="justify-content:center;">
+      <div class="rule-toggle" id="ruleToggle">
+        <button class="mode-btn active" id="btnYonma">四 麻</button>
+        <button class="mode-btn"        id="btnSanma">三 麻</button>
+      </div>
+    </div>
     <div class="action-row">
       <button class="btn" id="undoBtn">← 戻る</button>
       <button class="btn" id="redoBtn">→ 進む</button>
@@ -835,28 +860,43 @@
 (function () {
   "use strict";
 
-  const IDS        = ['north', 'west', 'east', 'south'];
-  const START_SCORE = 25000;
-  const UMA        = [30, 10, -10, -30];
+  /* ── 四麻 / 三麻 ルール定数 ─────────────────────── */
+  const YONMA_IDS   = ['north', 'west', 'east', 'south'];
+  const SANMA_IDS   = ['north', 'east', 'south'];
+  const YONMA_START = 25000, YONMA_BASE = 30000, YONMA_UMA = [30, 10, -10, -30];
+  const SANMA_START = 35000, SANMA_BASE = 35000, SANMA_UMA = [20, 0, -20];
+  const NEIGHBORS_YONMA = {
+    north: { down:'south', left:'west',  right:'east' },
+    west:  { up:'north',  right:'east', down:'south' },
+    east:  { up:'north',  left:'west',  down:'south' },
+    south: { up:'north',  left:'west',  right:'east' },
+  };
+  const NEIGHBORS_SANMA = {
+    north: { right:'east', down:'south' },
+    east:  { up:'north',   down:'south' },
+    south: { up:'north',   left:'east'  },
+  };
+
+  let IDS        = YONMA_IDS.slice();
+  let START_SCORE = YONMA_START;
+  let BASE_SCORE  = YONMA_BASE;
+  let UMA        = YONMA_UMA.slice();
+  let sanmaMode  = false;
 
   /* ── ① Wind JP name map ─────────────────────────── */
   const WIND_JP = { north:'北', south:'南', east:'東', west:'西' };
 
   const players = { north:{score:25000}, west:{score:25000}, east:{score:25000}, south:{score:25000} };
 
-  /* ── neighborMap (unchanged) ────────────────────── */
-  const neighbors = {
-    north: { down:'south', left:'west',  right:'east'  },
-    west:  { up:'north',  right:'east', down:'south'  },
-    east:  { up:'north',  left:'west',  down:'south'  },
-    south: { up:'north',  left:'west',  right:'east'  },
-  };
+  /* ── neighborMap ────────────────────────────────── */
+  let neighbors = NEIGHBORS_YONMA;
 
   /* ── localStorage keys ──────────────────────────── */
   const LS_THEME    = 'mahjong_theme';
   const LS_TUTORIAL = 'mahjong_tutorial_shown';
   const LS_TRANSFER = 'mahjong_transfer_log';
   const LS_GAME     = 'mahjong_game_history';
+  const LS_MODE     = 'mahjong_rule_mode';
 
   /* ── Undo / Redo stacks ─────────────────────────── */
   const undoStack = [], redoStack = [];
@@ -1230,18 +1270,41 @@
     syncBtns(); showToast('↪ やり直し');
   }
   function resetAll() {
-    if (!confirm('全員を 25,000点 にリセットしますか？')) return;
+    const s = START_SCORE.toLocaleString();
+    if (!confirm(`全員を ${s}点 にリセットしますか？`)) return;
     saveState();
     for (const id of IDS) players[id].score = START_SCORE;
-    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'reset' }, 200);
-    renderScores(); showToast('全員 25,000点にリセットしました');
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'reset', startScore: START_SCORE }, 200);
+    renderScores(); showToast(`全員 ${s}点にリセットしました`);
   }
 
-  /* ── Game-end modal (Mリーグ Uma) ───────────────── */
+  /* ── 三麻/四麻 モード切替 ──────────────────────── */
+  function setSanmaMode(enabled, skipConfirm) {
+    if (!skipConfirm) {
+      const dirty = IDS.some(id => players[id].score !== START_SCORE) || undoStack.length > 0;
+      if (dirty && !confirm(`${enabled ? '三麻' : '四麻'}に切り替えます。\n現在のゲームをリセットしますか？`)) return;
+    }
+    sanmaMode   = enabled;
+    IDS         = enabled ? SANMA_IDS.slice()   : YONMA_IDS.slice();
+    START_SCORE = enabled ? SANMA_START : YONMA_START;
+    BASE_SCORE  = enabled ? SANMA_BASE  : YONMA_BASE;
+    UMA         = enabled ? SANMA_UMA.slice()   : YONMA_UMA.slice();
+    neighbors   = enabled ? NEIGHBORS_SANMA : NEIGHBORS_YONMA;
+    for (const id of YONMA_IDS) players[id].score = START_SCORE;
+    undoStack.length = 0; redoStack.length = 0;
+    syncBtns(); renderScores();
+    document.querySelector('.grid').classList.toggle('sanma', enabled);
+    document.getElementById('btnYonma').classList.toggle('active', !enabled);
+    document.getElementById('btnSanma').classList.toggle('active',  enabled);
+    localStorage.setItem(LS_MODE, enabled ? 'sanma' : 'yonma');
+  }
+
+  /* ── Game-end modal ─────────────────────────────── */
   function openGameEndModal() {
-    const total = IDS.reduce((s, id) => s + players[id].score, 0);
-    if (total !== 100000) {
-      showToast(`合計 ${total.toLocaleString()}点 — 100,000点でないと計算できません`, true, 3500);
+    const total        = IDS.reduce((s, id) => s + players[id].score, 0);
+    const expectedTotal = IDS.length * START_SCORE;
+    if (total !== expectedTotal) {
+      showToast(`合計 ${total.toLocaleString()}点 — ${expectedTotal.toLocaleString()}点でないと計算できません`, true, 3500);
       return;
     }
     const sorted = IDS
@@ -1250,7 +1313,7 @@
 
     const results = sorted.map((p, i) => {
       const rank       = i + 1;
-      const rawPoint   = Math.round((p.score - 30000) / 1000);
+      const rawPoint   = Math.round((p.score - BASE_SCORE) / 1000);
       const uma        = UMA[i];
       const totalPoint = rawPoint + uma;
       return { wind: p.id, name: p.name, finalScore: p.score, rawPoint, uma, totalPoint, rank };
@@ -1278,14 +1341,15 @@
     gameEndModal.classList.add('show');
   }
 
-  /* ── ② newGame: text updated ────────────────────── */
+  /* ── newGame ────────────────────────────────────── */
   function newGame() {
-    if (!confirm('もう1試合ですか？\n全員 25,000点にリセットします。')) return;
+    const s = START_SCORE.toLocaleString();
+    if (!confirm(`もう1試合ですか？\n全員 ${s}点にリセットします。`)) return;
     for (const id of IDS) players[id].score = START_SCORE;
     undoStack.length = 0; redoStack.length = 0;
     syncBtns(); renderScores();
     gameEndModal.classList.remove('show');
-    showToast('全員 25,000点でスタート！');
+    showToast(`全員 ${s}点でスタート！`);
   }
 
   /* ── History drawer ─────────────────────────────── */
@@ -1323,7 +1387,7 @@
       tsumo:  e => `${e.toName||(e.to?getName(e.to):'-')} ツモ +${(e.amount||0).toLocaleString()}点`,
       undo:   ()  => '取り消し',
       redo:   ()  => 'やり直し',
-      reset:  ()  => '全員リセット 25,000点',
+      reset:  e   => `全員リセット ${(e.startScore||25000).toLocaleString()}点`,
       adjust: e   => {
         const sign = e.sign === '+' ? '+' : '-';
         return `${e.playerName||(e.pid?getName(e.pid):e.pid)} ${sign}${(e.amount||0).toLocaleString()}点 調整`;
@@ -1639,6 +1703,10 @@
       if (e.target === document.getElementById('adjustModal')) closeAdjustModal();
     });
 
+    /* 四麻/三麻 rule toggle */
+    document.getElementById('btnYonma').addEventListener('click', () => setSanmaMode(false));
+    document.getElementById('btnSanma').addEventListener('click', () => setSanmaMode(true));
+
     /* Action bar */
     undoBtn.addEventListener('click', undo);
     redoBtn.addEventListener('click', redo);
@@ -1665,6 +1733,9 @@
     document.getElementById('closeEndBtn').addEventListener('click', () => gameEndModal.classList.remove('show'));
     document.getElementById('newGameBtn').addEventListener('click', newGame);
     gameEndModal.addEventListener('click', e => { if (e.target === gameEndModal) gameEndModal.classList.remove('show'); });
+
+    /* 保存されたモードを復元 */
+    if (localStorage.getItem(LS_MODE) === 'sanma') setSanmaMode(true, true);
   }
 
   init();
