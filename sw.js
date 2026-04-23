@@ -1,15 +1,8 @@
 const CACHE = 'mahjong-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icons/icon.svg'
-];
+const ASSETS = ['./index.html', './manifest.json', './icons/icon.svg'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
   self.skipWaiting();
 });
 
@@ -23,7 +16,19 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
-  );
+  const isNav = e.request.mode === 'navigate';
+  if (isNav) {
+    /* index.html: ネットワーク優先 → オフライン時はキャッシュで代替 */
+    e.respondWith(
+      fetch(e.request)
+        .then(r => {
+          caches.open(CACHE).then(c => c.put(e.request, r.clone()));
+          return r;
+        })
+        .catch(() => caches.match(e.request))
+    );
+  } else {
+    /* アイコン等: キャッシュ優先 */
+    e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+  }
 });
