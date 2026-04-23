@@ -72,39 +72,13 @@
       touch-action: pan-y;
     }
 
-    /* ── ① Theme toggle button ───────────────────────── */
-    .theme-toggle {
-      position: fixed; top: 16px; right: 16px;
-      width: 36px; height: 36px;
-      background: rgba(200,168,64,0.1);
-      border: 1px solid rgba(200,168,64,0.3);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; cursor: pointer; z-index: 900;
-      touch-action: manipulation;
-      transition: background 0.15s;
-      -webkit-tap-highlight-color: transparent;
+    /* ── ① Theme toggle / Help: action bar内ボタン ──── */
+    .btn-sub {
+      border-color: rgba(200,168,64,0.4); color: var(--gold);
     }
-    .theme-toggle:active { background: rgba(200,168,64,0.25); }
-    [data-theme="light"] .theme-toggle {
-      background: rgba(160,120,32,0.1);
-      border-color: rgba(160,120,32,0.35);
-    }
-
-    /* ── ⑦ History fixed button ──────────────────────── */
-    .hist-fixed-btn {
-      position: fixed; top: 16px; left: 16px;
-      width: 36px; height: 36px;
-      background: rgba(200,168,64,0.1);
-      border: 1px solid rgba(200,168,64,0.3);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; cursor: pointer; z-index: 900;
-      touch-action: manipulation;
-      transition: background 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .hist-fixed-btn:active { background: rgba(200,168,64,0.25); }
+    .btn-sub:hover  { background: var(--gold-dim); }
+    .btn-sub:active { background: var(--gold-dim); }
+    [data-theme="light"] .btn-sub { border-color: rgba(160,120,32,0.5); color: var(--gold); }
 
     /* ── App ─────────────────────────────────────────── */
     .app { max-width: clamp(440px, 80vw, 720px); width: 100%; }
@@ -646,12 +620,6 @@
 </head>
 <body>
 
-<!-- ① Theme toggle (fixed top-right) -->
-<button class="theme-toggle" id="themeToggle" title="テーマ切替">🌙</button>
-
-<!-- ⑦ Help button (fixed top-left) -->
-<button class="hist-fixed-btn" id="helpBtn" title="使い方">？</button>
-
 <!-- ④ Long press radial arrows overlay -->
 <div id="longPressOverlay">
   <div id="longPressArrows"></div>
@@ -722,6 +690,10 @@
       <button class="btn btn-hist" id="histBtn">📋 履歴</button>
       <button class="btn btn-end"  id="endBtn">🏁 試合終了</button>
       <button class="btn btn-reset" id="resetBtn">↺ リセット</button>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-sub" id="helpBtn">？ 使い方</button>
+      <button class="btn btn-sub" id="themeToggle">🌙 テーマ</button>
     </div>
   </div>
   <div class="footer-note">スワイプ: ロン　／　2タップ: ツモ</div>
@@ -1111,7 +1083,7 @@
   const themeToggle = document.getElementById('themeToggle');
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    themeToggle.textContent = theme === 'dark' ? '🌙' : '☀️';
+    themeToggle.textContent = theme === 'dark' ? '🌙 テーマ' : '☀️ テーマ';
     localStorage.setItem(LS_THEME, theme);
   }
   function initTheme() {
