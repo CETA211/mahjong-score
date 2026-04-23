@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#060e06"/>
+  <!-- Tile body -->
+  <rect x="56" y="56" width="400" height="400" rx="52" fill="#0b170b"/>
+  <!-- Gold border -->
+  <rect x="56" y="56" width="400" height="400" rx="52" fill="none" stroke="#c8a840" stroke-width="7"/>
+  <!-- Top accent line -->
+  <rect x="56" y="56" width="400" height="10" rx="5" fill="#c8a840" opacity="0.4"/>
+  <!-- 中 character -->
+  <text x="256" y="338"
+    font-family="'Hiragino Mincho ProN','Yu Mincho','MS Mincho',Georgia,serif"
+    font-size="240" font-weight="700"
+    fill="#c8a840" text-anchor="middle">中</text>
+</svg>
