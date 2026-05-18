@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>麻雀点数管理</title>
+  <title>点棒いらず</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060e06">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="点棒いらず">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -66,9 +72,10 @@
       touch-action: pan-y;
     }
 
-    /* ── ① Theme toggle button ───────────────────────── */
-    .theme-toggle {
-      position: fixed; top: 16px; right: 16px;
+    /* ── Theme toggle / Help: fixed top ─────────────── */
+    .theme-toggle, .hist-fixed-btn {
+      position: fixed;
+      top: calc(env(safe-area-inset-top) + 12px);
       width: 36px; height: 36px;
       background: rgba(200,168,64,0.1);
       border: 1px solid rgba(200,168,64,0.3);
@@ -79,26 +86,14 @@
       transition: background 0.15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .theme-toggle:active { background: rgba(200,168,64,0.25); }
-    [data-theme="light"] .theme-toggle {
+    .theme-toggle  { right: 16px; }
+    .hist-fixed-btn { left: 16px; }
+    .theme-toggle:active, .hist-fixed-btn:active { background: rgba(200,168,64,0.25); }
+    [data-theme="light"] .theme-toggle,
+    [data-theme="light"] .hist-fixed-btn {
       background: rgba(160,120,32,0.1);
       border-color: rgba(160,120,32,0.35);
     }
-
-    /* ── ⑦ History fixed button ──────────────────────── */
-    .hist-fixed-btn {
-      position: fixed; top: 16px; left: 16px;
-      width: 36px; height: 36px;
-      background: rgba(200,168,64,0.1);
-      border: 1px solid rgba(200,168,64,0.3);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; cursor: pointer; z-index: 900;
-      touch-action: manipulation;
-      transition: background 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .hist-fixed-btn:active { background: rgba(200,168,64,0.25); }
 
     /* ── App ─────────────────────────────────────────── */
     .app { max-width: clamp(440px, 80vw, 720px); width: 100%; }
@@ -112,11 +107,16 @@
     .header-line:first-child { background: linear-gradient(90deg, transparent, var(--gold-line)); }
     .header-line:last-child  { background: linear-gradient(90deg, var(--gold-line), transparent); }
     .app-title {
+      font-family: 'Hiragino Mincho ProN', 'Hiragino Mincho Pro', 'Yu Mincho', 'YuMincho', 'MS Mincho', serif;
       font-size: clamp(0.9rem, 2.2vw, 1.6rem);
-      font-weight: 800;
+      font-weight: 600;
       letter-spacing: clamp(6px, 1.4vw, 14px);
       color: var(--gold);
       white-space: nowrap;
+      text-shadow: 0 0 24px rgba(200,168,64,0.45), 0 1px 2px rgba(0,0,0,0.25);
+    }
+    [data-theme="light"] .app-title {
+      text-shadow: 0 0 16px rgba(160,120,32,0.35), 0 1px 1px rgba(0,0,0,0.1);
     }
 
     /* ── Grid ────────────────────────────────────────── */
@@ -156,6 +156,44 @@
     /* scale on swipe start */
     .player-card.swiping { transform: scale(1.03); }
 
+    /* ── 親インジケーター（カード上部に表示） ── */
+    .player-cell {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 3px;
+      width: 100%;
+    }
+    .dealer-indicator {
+      font-size: 0.6rem; font-weight: 800; letter-spacing: 3px;
+      background: none; border: none;
+      padding: 2px 10px; border-radius: 4px;
+      cursor: pointer; touch-action: manipulation;
+      transition: color 0.2s, text-shadow 0.2s, opacity 0.2s;
+      color: var(--muted); opacity: 0.38;
+      min-width: 32px; line-height: 1.4;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .dealer-indicator.is-dealer {
+      opacity: 1; color: var(--gold);
+      text-shadow: 0 0 10px rgba(200,168,64,0.65);
+    }
+    .dealer-indicator:active { opacity: 0.6; }
+    /* カードの親アウトライン */
+    .player-card.is-dealer {
+      border-color: rgba(200,168,64,0.48);
+      box-shadow: 0 0 0 1px rgba(200,168,64,0.16), 0 0 18px rgba(200,168,64,0.16);
+    }
+    [data-theme="light"] .dealer-indicator {
+      color: var(--muted); opacity: 0.45;
+    }
+    [data-theme="light"] .dealer-indicator.is-dealer {
+      color: var(--gold); text-shadow: 0 0 8px rgba(160,120,32,0.5);
+    }
+    [data-theme="light"] .player-card.is-dealer {
+      border-color: rgba(160,120,32,0.55);
+      box-shadow: 0 0 0 1px rgba(160,120,32,0.18), 0 0 14px rgba(160,120,32,0.14);
+    }
+
     .player-name {
       display: block; width: 100%;
       background: none; border: none;
@@ -186,10 +224,11 @@
       transition: border-color 0.1s, box-shadow 0.1s !important;
     }
 
-    .pos-north { grid-column: 2/3; grid-row: 1/2; }
+    .pos-north { grid-column: 2/3; grid-row: 1/2; justify-items: center; }
     .pos-west  { grid-column: 1/2; grid-row: 2/3; }
     .pos-east  { grid-column: 3/4; grid-row: 2/3; }
     .pos-south { grid-column: 2/3; grid-row: 3/4; }
+    .grid.sanma .pos-west { display: none; }
 
     .center {
       grid-column: 2/3; grid-row: 2/3;
@@ -251,6 +290,9 @@
 
     .modal-sheet {
       width: 100%; max-width: 520px;
+      max-height: 92dvh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       background: #0a160a;
       border-radius: 24px 24px 0 0;
       border-top: 2px solid var(--gold-line);
@@ -307,6 +349,76 @@
     }
     .preset-btn:active { background: rgba(200,168,64,0.26); }
     .preset-btn small { font-size: 0.6rem; opacity: 0.8; }
+
+    /* ── 点数チップレール ──────────────────────── */
+    .score-cat-toggle {
+      display: flex; gap: 4px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px; padding: 3px; margin-bottom: 8px;
+    }
+    .score-cat-btn {
+      flex: 1; background: none; border: none; color: var(--muted);
+      font-size: 0.74rem; font-weight: 800; letter-spacing: 2px;
+      padding: 6px; border-radius: 6px; cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+    .score-cat-btn.active { background: var(--gold-dim); color: var(--gold); }
+
+    .score-rail {
+      display: flex; gap: 6px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding: 4px 2px 6px; margin: 0 -2px 8px;
+      scrollbar-width: none;
+    }
+    .score-rail::-webkit-scrollbar { display: none; }
+    .score-chip {
+      flex-shrink: 0; scroll-snap-align: center;
+      min-width: 70px;
+      padding: 7px 7px;
+      border-radius: 9px;
+      background: var(--gold-dim);
+      border: 1px solid rgba(200,168,64,0.3);
+      cursor: pointer; touch-action: manipulation;
+      text-align: center;
+      transition: background 0.12s, border-color 0.12s, box-shadow 0.18s;
+    }
+    .score-chip:active { background: rgba(200,168,64,0.26); }
+    .score-chip.selected {
+      background: rgba(200,168,64,0.38);
+      border-color: var(--gold);
+      box-shadow: 0 0 10px rgba(200,168,64,0.3);
+    }
+    .score-chip-val {
+      font-size: 0.82rem; font-weight: 800; color: var(--gold);
+      line-height: 1.15; font-feature-settings: "tnum";
+    }
+    .score-chip-lbl {
+      font-size: 0.54rem; color: var(--muted);
+      margin-top: 3px; line-height: 1.2; white-space: pre-line;
+    }
+    [data-theme="light"] .score-chip.selected { background: rgba(200,168,64,0.3); }
+
+    /* ── 本場ボタン ────────────────────────────── */
+    .honba-row {
+      display: flex; gap: 6px; align-items: center;
+      margin-bottom: 12px;
+    }
+    .honba-btn {
+      flex: 1; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.14); color: var(--text);
+      padding: 8px; border-radius: 8px;
+      font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; touch-action: manipulation;
+      transition: background 0.12s;
+    }
+    .honba-btn:active { background: rgba(255,255,255,0.12); }
+    .honba-btn.dec { flex: 0 0 38px; opacity: 0.7; font-size: 0.95rem; }
+    [data-theme="light"] .honba-btn {
+      background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a1a;
+    }
+    [data-theme="light"] .honba-btn:active { background: rgba(0,0,0,0.08); }
 
     /* Shared score display */
     .score-display { text-align: center; margin-bottom: 12px; line-height: 1; }
@@ -552,6 +664,22 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* ── 三麻/四麻 rule toggle ──────────────────────── */
+    .rule-toggle {
+      display: flex; gap: 5px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px; padding: 4px;
+      max-width: 160px; width: 100%;
+    }
+    .rule-toggle .mode-btn {
+      font-size: 0.78rem; letter-spacing: 2px; padding: 7px;
+    }
+    .rule-toggle .mode-btn.active {
+      background: rgba(200,168,64,0.22); color: var(--gold);
+    }
+    [data-theme="light"] .rule-toggle .mode-btn.active {
+      background: rgba(200,168,64,0.18); color: #8a6000;
+    }
     /* ── ③ Adjust score modal extras ─────────────────── */
     .adj-current-row {
       text-align: center; margin-bottom: 10px;
@@ -567,29 +695,65 @@
       z-index: 500;
       display: none;
     }
+    /* グループに opacity を一括適用して棒と三角の重なり二重化を防ぐ */
+    #swipeArrowGroup { opacity: 0.52; }
     #swipeArrowLine {
-      stroke: rgba(200,168,64,0.52);
+      stroke: rgb(200,168,64);
       stroke-width: 5;
       stroke-linecap: round;
     }
-    #swipeArrowHeadShape {
-      fill: rgba(200,168,64,0.65);
+    #swipeArrowHeadShape { fill: rgb(200,168,64); }
+    [data-theme="light"] #swipeArrowGroup { opacity: 0.48; }
+    [data-theme="light"] #swipeArrowLine  { stroke: rgb(110,82,0); }
+    [data-theme="light"] #swipeArrowHeadShape { fill: rgb(110,82,0); }
+
+    /* ── Help modal ──────────────────────────────────── */
+    #helpModal .modal-sheet {
+      max-height: 82vh; overflow-y: auto; padding-bottom: 24px;
     }
-    [data-theme="light"] #swipeArrowLine {
-      stroke: rgba(110,82,0,0.48);
+    .help-title {
+      text-align: center; font-size: 0.62rem; font-weight: 800;
+      letter-spacing: 6px; color: var(--gold); opacity: 0.85;
+      text-transform: uppercase; margin-bottom: 16px;
     }
-    [data-theme="light"] #swipeArrowHeadShape {
-      fill: rgba(110,82,0,0.62);
+    .help-section { margin-bottom: 18px; }
+    .help-section-title {
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 3px;
+      color: var(--muted); text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding-bottom: 4px; margin-bottom: 10px;
+    }
+    [data-theme="light"] .help-section-title {
+      border-bottom-color: rgba(0,0,0,0.1);
+    }
+    .help-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .help-op {
+      flex-shrink: 0; min-width: 72px;
+      background: rgba(200,168,64,0.12);
+      border: 1px solid rgba(200,168,64,0.28);
+      border-radius: 6px; padding: 3px 8px;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--gold); text-align: center;
+    }
+    .help-desc {
+      font-size: 0.82rem; color: var(--muted); line-height: 1.55;
+    }
+    .help-note {
+      font-size: 0.75rem; color: var(--muted); opacity: 0.7;
+      text-align: center; margin-top: 6px;
     }
   </style>
 </head>
 <body>
 
-<!-- ① Theme toggle (fixed top-right) -->
+<!-- Theme toggle (fixed top-right) -->
 <button class="theme-toggle" id="themeToggle" title="テーマ切替">🌙</button>
 
-<!-- ⑦ History fixed button (fixed top-left) -->
-<button class="hist-fixed-btn" id="histFixedBtn" title="対局履歴">📋</button>
+<!-- Help button (fixed top-left) -->
+<button class="hist-fixed-btn" id="helpBtn" title="使い方">？</button>
 
 <!-- ④ Long press radial arrows overlay -->
 <div id="longPressOverlay">
@@ -599,52 +763,72 @@
 <!-- Swipe direction arrow overlay -->
 <svg id="swipeArrowSvg" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <marker id="swipeArrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-      <polygon id="swipeArrowHeadShape" points="0 0, 10 4, 0 8" />
+    <marker id="swipeArrowHead" markerWidth="5" markerHeight="4" refX="4.5" refY="2" orient="auto">
+      <polygon id="swipeArrowHeadShape" points="0 0, 5 2, 0 4" />
     </marker>
   </defs>
-  <line id="swipeArrowLine" marker-end="url(#swipeArrowHead)" x1="0" y1="0" x2="0" y2="0" />
+  <g id="swipeArrowGroup">
+    <line id="swipeArrowLine" marker-end="url(#swipeArrowHead)" x1="0" y1="0" x2="0" y2="0" />
+  </g>
 </svg>
 
 <div class="app">
   <div class="app-header">
     <div class="header-line"></div>
-    <div class="app-title">麻雀点数管理</div>
+    <div class="app-title">点棒いらず</div>
     <div class="header-line"></div>
   </div>
 
   <div class="grid">
-    <!-- North: neighbors = down, left, right -->
-    <div class="player-card pos-north" data-player-id="north">
-      <input class="player-name" id="name-north" type="text" value="プレイヤー1" maxlength="8" placeholder="名前">
-      <div class="score" id="score-north">25,000</div>
+    <!-- North -->
+    <div class="player-cell pos-north">
+      <button class="dealer-indicator" data-dealer-for="north">親</button>
+      <div class="player-card" data-player-id="north">
+        <input class="player-name" id="name-north" type="text" value="プレイヤー1" maxlength="8" placeholder="名前">
+        <div class="score" id="score-north">25,000</div>
+      </div>
     </div>
 
-    <!-- West: neighbors = up, right, down -->
-    <div class="player-card pos-west" data-player-id="west">
-      <input class="player-name" id="name-west" type="text" value="プレイヤー2" maxlength="8" placeholder="名前">
-      <div class="score" id="score-west">25,000</div>
+    <!-- West -->
+    <div class="player-cell pos-west">
+      <button class="dealer-indicator" data-dealer-for="west">親</button>
+      <div class="player-card" data-player-id="west">
+        <input class="player-name" id="name-west" type="text" value="プレイヤー2" maxlength="8" placeholder="名前">
+        <div class="score" id="score-west">25,000</div>
+      </div>
     </div>
 
     <div class="center">
       <div class="center-inner"><span class="center-kanji">中</span></div>
     </div>
 
-    <!-- East: neighbors = up, left, down -->
-    <div class="player-card pos-east" data-player-id="east">
-      <input class="player-name" id="name-east" type="text" value="プレイヤー3" maxlength="8" placeholder="名前">
-      <div class="score" id="score-east">25,000</div>
+    <!-- East -->
+    <div class="player-cell pos-east">
+      <button class="dealer-indicator" data-dealer-for="east">親</button>
+      <div class="player-card" data-player-id="east">
+        <input class="player-name" id="name-east" type="text" value="プレイヤー3" maxlength="8" placeholder="名前">
+        <div class="score" id="score-east">25,000</div>
+      </div>
     </div>
 
-    <!-- South: neighbors = up, left, right -->
-    <div class="player-card pos-south" data-player-id="south">
-      <input class="player-name" id="name-south" type="text" value="プレイヤー4" maxlength="8" placeholder="名前">
-      <div class="score" id="score-south">25,000</div>
+    <!-- South -->
+    <div class="player-cell pos-south">
+      <button class="dealer-indicator" data-dealer-for="south">親</button>
+      <div class="player-card" data-player-id="south">
+        <input class="player-name" id="name-south" type="text" value="プレイヤー4" maxlength="8" placeholder="名前">
+        <div class="score" id="score-south">25,000</div>
+      </div>
     </div>
   </div>
 
   <!-- Action bar -->
   <div class="action-bar">
+    <div class="action-row" style="justify-content:center;">
+      <div class="rule-toggle" id="ruleToggle">
+        <button class="mode-btn active" id="btnYonma">四 麻</button>
+        <button class="mode-btn"        id="btnSanma">三 麻</button>
+      </div>
+    </div>
     <div class="action-row">
       <button class="btn" id="undoBtn">← 戻る</button>
       <button class="btn" id="redoBtn">→ 進む</button>
@@ -655,7 +839,7 @@
       <button class="btn btn-reset" id="resetBtn">↺ リセット</button>
     </div>
   </div>
-  <div class="footer-note">長押し: ロン方向選択　／　スワイプ: ロン　／　2タップ: ツモ</div>
+  <div class="footer-note">スワイプ: ロン　／　2タップ: ツモ</div>
 </div>
 
 <!-- ── Score input modal ─────────────────────────── -->
@@ -668,41 +852,30 @@
       <button class="mode-btn"        id="modeTsumo">ツモ</button>
     </div>
 
-    <div class="modal-label"    id="modalLabel">点数移動</div>
     <div class="modal-transfer" id="transferInfo"></div>
 
-    <!-- Ron presets -->
+    <!-- Ron presets (score table chips) -->
     <div id="ronPresets">
-      <div class="preset-row">
-        <button class="preset-btn" data-preset="1000">1,000</button>
-        <button class="preset-btn" data-preset="2000">2,000</button>
-        <button class="preset-btn" data-preset="3900">3,900</button>
-        <button class="preset-btn" data-preset="8000">8,000</button>
+      <div class="score-cat-toggle">
+        <button class="score-cat-btn active" id="ronCatKo">子の上がり</button>
+        <button class="score-cat-btn"        id="ronCatOya">親の上がり</button>
       </div>
+      <div class="score-rail" id="ronScoreRail"></div>
     </div>
 
     <!-- Tsumo top controls -->
     <div id="tsumoTop" style="display:none">
-      <div class="tsumo-type-toggle">
-        <button class="tsumo-type-btn active" id="btnKo">子ツモ</button>
-        <button class="tsumo-type-btn"        id="btnOya">親ツモ</button>
+      <div class="score-cat-toggle">
+        <button class="score-cat-btn active" id="btnKo">子ツモ</button>
+        <button class="score-cat-btn"        id="btnOya">親ツモ</button>
       </div>
-      <div id="tsumoKoPresets">
-        <div class="preset-row">
-          <button class="preset-btn tp" data-ko="2000" data-oya="4000">満貫<br><small>2000/4000</small></button>
-          <button class="preset-btn tp" data-ko="3000" data-oya="6000">跳満<br><small>3000/6000</small></button>
-          <button class="preset-btn tp" data-ko="4000" data-oya="8000">倍満<br><small>4000/8000</small></button>
-          <button class="preset-btn tp" data-ko="8000" data-oya="16000">役満<br><small>8000/16000</small></button>
-        </div>
-      </div>
-      <div id="tsumoOyaPresets" style="display:none">
-        <div class="preset-row">
-          <button class="preset-btn ta" data-all="4000">満貫<br><small>4000 all</small></button>
-          <button class="preset-btn ta" data-all="6000">跳満<br><small>6000 all</small></button>
-          <button class="preset-btn ta" data-all="8000">倍満<br><small>8000 all</small></button>
-          <button class="preset-btn ta" data-all="16000">役満<br><small>16000 all</small></button>
-        </div>
-      </div>
+      <div class="score-rail" id="tsumoScoreRail"></div>
+    </div>
+
+    <!-- Honba row (shared between ron and tsumo) -->
+    <div class="honba-row" id="honbaRow">
+      <button class="honba-btn dec" id="honbaDecBtn" title="本場を減らす">−</button>
+      <button class="honba-btn" id="honbaIncBtn">＋ 本場 <span id="honbaCountDisp">0</span></button>
     </div>
 
     <!-- Shared score display -->
@@ -830,34 +1003,230 @@
   </div>
 </div>
 
+<!-- ── 使い方モーダル ──────────────────────────────── -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="help-title">使 い 方</div>
+
+    <div class="help-section">
+      <div class="help-section-title">ロン（点数渡し）</div>
+      <div class="help-row">
+        <span class="help-op">スワイプ</span>
+        <span class="help-desc">プレイヤーをホールドして相手の方向へ指を動かす</span>
+      </div>
+      <div class="help-row">
+        <span class="help-op">長押し</span>
+        <span class="help-desc">プレイヤーを長押しして離す方向で相手を選択</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">ツモ（自摸）</div>
+      <div class="help-row">
+        <span class="help-op">2タップ</span>
+        <span class="help-desc">プレイヤーを2回素早くタップしてツモ点数を入力</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">点数調整</div>
+      <div class="help-row">
+        <span class="help-op">タップ</span>
+        <span class="help-desc">プレイヤーをタップして任意の点数を加算 / 減算</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">親（東家）の設定</div>
+      <div class="help-row">
+        <span class="help-op">親バッジ</span>
+        <span class="help-desc">各プレイヤー右上の「親」をタップで親に設定<br>ロン/ツモ時に自動で子/親の点数表が選択される</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">点数表 / 本場</div>
+      <div class="help-row">
+        <span class="help-op">点数表</span>
+        <span class="help-desc">モーダル内で横スクロール、タップで選択<br>1飜30符 〜 役満まで網羅</span>
+      </div>
+      <div class="help-row">
+        <span class="help-op">+ 本場</span>
+        <span class="help-desc">ロン +300 / ツモは各支払者から +100<br>1本場ごとに加算</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">電卓入力</div>
+      <div class="help-row">
+        <span class="help-op">百の位〜</span>
+        <span class="help-desc">キーは百の位からスタート<br>例）3 → 300点 ／ 39 → 3,900点</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">試合終了・精算</div>
+      <div class="help-row">
+        <span class="help-op">試合終了</span>
+        <span class="help-desc">「試合終了」ボタンで素点・ウマを自動計算</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">四麻 / 三麻</div>
+      <div class="help-row">
+        <span class="help-op">四 麻</span>
+        <span class="help-desc">4人・25,000点スタート／ウマ [30, 10, -10, -30]</span>
+      </div>
+      <div class="help-row">
+        <span class="help-op">三 麻</span>
+        <span class="help-desc">3人・35,000点スタート（西家なし）／ウマ [20, 0, -20]</span>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn confirm" id="helpCloseBtn">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 (function () {
   "use strict";
 
-  const IDS        = ['north', 'west', 'east', 'south'];
-  const START_SCORE = 25000;
-  const UMA        = [30, 10, -10, -30];
+  /* ── 四麻 / 三麻 ルール定数 ─────────────────────── */
+  const YONMA_IDS   = ['north', 'west', 'east', 'south'];
+  const SANMA_IDS   = ['north', 'east', 'south'];
+  const YONMA_START = 25000, YONMA_BASE = 30000, YONMA_UMA = [30, 10, -10, -30];
+  const SANMA_START = 35000, SANMA_BASE = 35000, SANMA_UMA = [20, 0, -20];
+  const NEIGHBORS_YONMA = {
+    north: { down:'south', left:'west',  right:'east' },
+    west:  { up:'north',  right:'east', down:'south' },
+    east:  { up:'north',  left:'west',  down:'south' },
+    south: { up:'north',  left:'west',  right:'east' },
+  };
+  const NEIGHBORS_SANMA = {
+    north: { right:'east', down:'south' },
+    east:  { up:'north',   down:'south' },
+    south: { up:'north',   left:'east'  },
+  };
+
+  let IDS        = YONMA_IDS.slice();
+  let START_SCORE = YONMA_START;
+  let BASE_SCORE  = YONMA_BASE;
+  let UMA        = YONMA_UMA.slice();
+  let sanmaMode  = false;
+
+  /* ── 点数表 ────────────────────────────────────── */
+  const RON_KO_SCORES = [
+    { score: 1000,  label: '1飜30符' },
+    { score: 1300,  label: '1飜40符' },
+    { score: 1600,  label: '1飜50符\n2飜25符' },
+    { score: 2000,  label: '1飜60符\n2飜30符' },
+    { score: 2300,  label: '1飜70符' },
+    { score: 2600,  label: '1飜80符\n2飜40符' },
+    { score: 2900,  label: '1飜90符' },
+    { score: 3200,  label: '1飜100符\n2飜50符\n3飜25符' },
+    { score: 3600,  label: '1飜110符' },
+    { score: 3900,  label: '2飜60符\n3飜30符' },
+    { score: 4500,  label: '2飜70符' },
+    { score: 5200,  label: '2飜80符\n3飜40符' },
+    { score: 5800,  label: '2飜90符' },
+    { score: 6400,  label: '2飜100符\n3飜50符\n4飜25符' },
+    { score: 7100,  label: '2飜110符' },
+    { score: 7700,  label: '3飜60符\n4飜30符' },
+    { score: 8000,  label: '満貫' },
+    { score: 12000, label: '跳満' },
+    { score: 16000, label: '倍満' },
+    { score: 24000, label: '三倍満' },
+    { score: 32000, label: '役満' },
+  ];
+  const RON_OYA_SCORES = [
+    { score: 1500,  label: '1飜30符' },
+    { score: 2000,  label: '1飜40符' },
+    { score: 2400,  label: '1飜50符\n2飜25符' },
+    { score: 2900,  label: '1飜60符\n2飜30符' },
+    { score: 3400,  label: '1飜70符' },
+    { score: 3900,  label: '1飜80符\n2飜40符' },
+    { score: 4400,  label: '1飜90符' },
+    { score: 4800,  label: '1飜100符\n2飜50符\n3飜25符' },
+    { score: 5300,  label: '1飜110符' },
+    { score: 5800,  label: '2飜60符\n3飜30符' },
+    { score: 6800,  label: '2飜70符' },
+    { score: 7700,  label: '2飜80符\n3飜40符' },
+    { score: 9600,  label: '3飜50符\n4飜25符' },
+    { score: 11600, label: '3飜60符\n4飜30符' },
+    { score: 12000, label: '満貫' },
+    { score: 18000, label: '跳満' },
+    { score: 24000, label: '倍満' },
+    { score: 36000, label: '三倍満' },
+    { score: 48000, label: '役満' },
+  ];
+  const TSUMO_KO_SCORES = [
+    { ko: 300,  oya: 500,   label: '1飜30符' },
+    { ko: 400,  oya: 700,   label: '1飜40符\n2飜20符' },
+    { ko: 400,  oya: 800,   label: '1飜50符' },
+    { ko: 500,  oya: 1000,  label: '1飜60符\n2飜30符' },
+    { ko: 600,  oya: 1200,  label: '1飜70符' },
+    { ko: 700,  oya: 1300,  label: '1飜80符\n2飜40符\n3飜20符' },
+    { ko: 800,  oya: 1500,  label: '1飜90符' },
+    { ko: 800,  oya: 1600,  label: '2飜50符\n3飜25符' },
+    { ko: 900,  oya: 1800,  label: '1飜110符' },
+    { ko: 1000, oya: 2000,  label: '2飜60符\n3飜30符\n4飜20符' },
+    { ko: 1200, oya: 2300,  label: '2飜70符' },
+    { ko: 1300, oya: 2600,  label: '2飜80符\n3飜40符\n4飜25符' },
+    { ko: 1500, oya: 2900,  label: '2飜90符' },
+    { ko: 1600, oya: 3200,  label: '2飜100符\n3飜50符' },
+    { ko: 1800, oya: 3600,  label: '2飜110符' },
+    { ko: 2000, oya: 3900,  label: '3飜60符\n4飜30符' },
+    { ko: 2000, oya: 4000,  label: '満貫' },
+    { ko: 3000, oya: 6000,  label: '跳満' },
+    { ko: 4000, oya: 8000,  label: '倍満' },
+    { ko: 6000, oya: 12000, label: '三倍満' },
+    { ko: 8000, oya: 16000, label: '役満' },
+  ];
+  const TSUMO_OYA_SCORES = [
+    { all: 500,   label: '1飜30符' },
+    { all: 700,   label: '1飜40符\n2飜20符' },
+    { all: 800,   label: '1飜50符' },
+    { all: 1000,  label: '1飜60符\n2飜30符' },
+    { all: 1200,  label: '1飜70符' },
+    { all: 1300,  label: '1飜80符\n2飜40符\n3飜20符' },
+    { all: 1500,  label: '1飜90符' },
+    { all: 1600,  label: '2飜50符\n3飜25符' },
+    { all: 1800,  label: '1飜110符' },
+    { all: 2000,  label: '2飜60符\n3飜30符\n4飜20符' },
+    { all: 2300,  label: '2飜70符' },
+    { all: 2600,  label: '2飜80符\n3飜40符\n4飜25符' },
+    { all: 2900,  label: '2飜90符' },
+    { all: 3200,  label: '2飜100符\n3飜50符' },
+    { all: 3600,  label: '2飜110符' },
+    { all: 3900,  label: '3飜60符\n4飜30符' },
+    { all: 4000,  label: '満貫' },
+    { all: 6000,  label: '跳満' },
+    { all: 8000,  label: '倍満' },
+    { all: 12000, label: '三倍満' },
+    { all: 16000, label: '役満' },
+  ];
 
   /* ── ① Wind JP name map ─────────────────────────── */
   const WIND_JP = { north:'北', south:'南', east:'東', west:'西' };
 
   const players = { north:{score:25000}, west:{score:25000}, east:{score:25000}, south:{score:25000} };
 
-  /* ── neighborMap (unchanged) ────────────────────── */
-  const neighbors = {
-    north: { down:'south', left:'west',  right:'east'  },
-    west:  { up:'north',  right:'east', down:'south'  },
-    east:  { up:'north',  left:'west',  down:'south'  },
-    south: { up:'north',  left:'west',  right:'east'  },
-  };
+  /* ── neighborMap ────────────────────────────────── */
+  let neighbors = NEIGHBORS_YONMA;
 
   /* ── localStorage keys ──────────────────────────── */
   const LS_THEME    = 'mahjong_theme';
   const LS_TUTORIAL = 'mahjong_tutorial_shown';
   const LS_TRANSFER = 'mahjong_transfer_log';
   const LS_GAME     = 'mahjong_game_history';
+  const LS_MODE     = 'mahjong_rule_mode';
+  const LS_DEALER   = 'mahjong_dealer';
 
   /* ── Undo / Redo stacks ─────────────────────────── */
   const undoStack = [], redoStack = [];
@@ -889,6 +1258,9 @@
   }
 
   /* ── Mode / Tsumo state ─────────────────────────── */
+  let dealerId = 'east';   // 初期親 = 東家
+  let ronCat = 'ko';       // 'ko' | 'oya'（ロン点数表のカテゴリ）
+  let honba = 0;           // 本場カウンタ（モーダル内のみ）
   let mode = 'ron', tsumoType = 'ko';
   let ronSrc = null, ronTgt = null, ronInput = '0';
   let tsumoWinner = null, tsumoDealerId = null;
@@ -917,7 +1289,6 @@
   const nameEls      = Object.fromEntries(IDS.map(id => [id, document.getElementById('name-'+id)]));
   const modal        = document.getElementById('modal');
   const modalSheet   = document.getElementById('modalSheet');
-  const modalLabel   = document.getElementById('modalLabel');
   const transferInfo = document.getElementById('transferInfo');
   const scoreDisplay = document.getElementById('scoreDisplay');
   const toast        = document.getElementById('toast');
@@ -925,8 +1296,9 @@
   const tsumoTopEl   = document.getElementById('tsumoTop');
   const tsumoBreakdown = document.getElementById('tsumoBreakdown');
   const tsumoTabsEl  = document.getElementById('tsumoTabs');
-  const tsumoKoPresets  = document.getElementById('tsumoKoPresets');
-  const tsumoOyaPresets = document.getElementById('tsumoOyaPresets');
+  const ronScoreRail    = document.getElementById('ronScoreRail');
+  const tsumoScoreRail  = document.getElementById('tsumoScoreRail');
+  const honbaCountDisp  = document.getElementById('honbaCountDisp');
   const undoBtn      = document.getElementById('undoBtn');
   const redoBtn      = document.getElementById('redoBtn');
   const histModal    = document.getElementById('histModal');
@@ -972,22 +1344,29 @@
   });
 
   /* ── Tutorial toast ─────────────────────────────── */
+  function openHelpModal()  { document.getElementById('helpModal').classList.add('show'); }
+  function closeHelpModal() { document.getElementById('helpModal').classList.remove('show'); }
+
   function showTutorialIfNeeded() {
     if (!localStorage.getItem(LS_TUTORIAL)) {
-      setTimeout(() => {
-        showToast('カードをタップ/スワイプ/長押しで点数操作', false, 3000);
-        localStorage.setItem(LS_TUTORIAL, '1');
-      }, 900);
+      setTimeout(() => { openHelpModal(); localStorage.setItem(LS_TUTORIAL, '1'); }, 600);
     }
   }
 
   /* ── Numpad helpers ─────────────────────────────── */
   function appendNum(cur, n) {
-    cur = n === '00' ? (cur === '0' ? '0' : cur + '00')
-                     : (cur === '0' ? n  : cur + n);
-    return cur.replace(/^0+(\d)/,'$1').slice(0,6) || '0';
+    const h = cur === '0' ? '' : String(Math.round(parseInt(cur, 10) / 100));
+    let nh = n === '00' ? (h ? h + '00' : '') : (h ? h + n : n);
+    if (!nh) return '0';
+    nh = nh.replace(/^0+(\d)/, '$1').slice(0, 4); // max 9999 * 100 = 999,900
+    return String(parseInt(nh, 10) * 100) || '0';
   }
-  function backspace(cur) { return cur.slice(0,-1) || '0'; }
+  function backspace(cur) {
+    if (cur === '0') return '0';
+    const h = String(Math.round(parseInt(cur, 10) / 100));
+    const nh = h.slice(0, -1);
+    return nh ? String(parseInt(nh, 10) * 100) : '0';
+  }
   function fmt(s) { return parseInt(s,10).toLocaleString(); }
 
   /* ── Shared numpad (main modal) ─────────────────── */
@@ -1004,6 +1383,8 @@
       }
       refreshTsumoDisplay();
     }
+    honba = 0; updateHonbaDisplay();
+    syncChipSelection();
   }
   function handleBS() {
     if (mode === 'ron') {
@@ -1018,6 +1399,8 @@
       }
       refreshTsumoDisplay();
     }
+    honba = 0; updateHonbaDisplay();
+    syncChipSelection();
   }
 
   /* ── Adjust modal numpad ────────────────────────── */
@@ -1104,14 +1487,166 @@
   /* ── Tsumo type toggle ──────────────────────────── */
   function setTsumoType(type) {
     tsumoType = type; tsumoKoIn = '0'; tsumoOyaIn = '0';
-    tsumoDealerId = null; tsumoFocus = 'oya';
+    /* 子ツモ時は dealer を 親プレイヤーに自動セット（勝者でない場合のみ） */
+    tsumoDealerId = (type === 'ko' && dealerId !== tsumoWinner) ? dealerId : null;
+    tsumoFocus = 'oya';
     document.getElementById('btnKo').classList.toggle('active', type === 'ko');
     document.getElementById('btnOya').classList.toggle('active', type === 'oya');
-    tsumoKoPresets.style.display  = type === 'ko'  ? '' : 'none';
-    tsumoOyaPresets.style.display = type === 'oya' ? '' : 'none';
     scoreDisplay.textContent = '0';
     tsumoBreakdown.innerHTML = ''; tsumoBreakdown.classList.remove('visible');
     renderTsumoTabs();
+    renderTsumoChips();
+  }
+
+  /* ── 親（dealer）管理 ─────────────────────────── */
+  function renderDealerBadges() {
+    document.querySelectorAll('.dealer-indicator').forEach(b => {
+      b.classList.toggle('is-dealer', b.dataset.dealerFor === dealerId);
+    });
+    document.querySelectorAll('.player-card').forEach(card => {
+      card.classList.toggle('is-dealer', card.dataset.playerId === dealerId);
+    });
+  }
+  function setDealer(id) {
+    if (!YONMA_IDS.includes(id)) return;
+    dealerId = id;
+    localStorage.setItem(LS_DEALER, id);
+    renderDealerBadges();
+    if (modal.classList.contains('show')) {
+      if (mode === 'ron') {
+        setRonCat((ronTgt === dealerId) ? 'oya' : 'ko');
+      } else {
+        setTsumoType((tsumoWinner === dealerId) ? 'oya' : 'ko');
+      }
+    }
+  }
+
+  /* ── 点数チップ ──────────────────────────────── */
+  function setRonCat(cat) {
+    ronCat = cat;
+    document.getElementById('ronCatKo').classList.toggle('active',  cat === 'ko');
+    document.getElementById('ronCatOya').classList.toggle('active', cat === 'oya');
+    renderRonChips();
+  }
+  function renderRonChips() {
+    const table = ronCat === 'oya' ? RON_OYA_SCORES : RON_KO_SCORES;
+    const currentScore = parseInt(ronInput, 10) || 0;
+    ronScoreRail.innerHTML = '';
+    let mangaChip = null;
+    table.forEach(e => {
+      const chip = document.createElement('div');
+      chip.className = 'score-chip' + (e.score === currentScore ? ' selected' : '');
+      chip.dataset.score = e.score;
+      chip.innerHTML = `<div class="score-chip-val">${e.score.toLocaleString()}</div><div class="score-chip-lbl">${e.label}</div>`;
+      chip.addEventListener('click', () => selectRonChip(e.score));
+      ronScoreRail.appendChild(chip);
+      if (e.label === '満貫') mangaChip = chip;
+    });
+    /* 初期表示位置を満貫に（モーダル表示完了後に実行） */
+    if (currentScore === 0 && mangaChip) {
+      setTimeout(() => { centerChip(ronScoreRail, mangaChip); }, 60);
+    }
+  }
+  function centerChip(rail, chip) {
+    if (!rail || !chip) return;
+    rail.scrollLeft = chip.offsetLeft - (rail.clientWidth - chip.offsetWidth) / 2;
+  }
+  function syncChipSelection() {
+    if (mode === 'ron') {
+      const cur = parseInt(ronInput, 10) || 0;
+      [...ronScoreRail.children].forEach(c => {
+        c.classList.toggle('selected', parseInt(c.dataset.score, 10) === cur);
+      });
+    } else if (tsumoScoreRail) {
+      if (tsumoType === 'oya') {
+        const cur = parseInt(tsumoKoIn, 10) || 0;
+        [...tsumoScoreRail.children].forEach(c => {
+          c.classList.toggle('selected', parseInt(c.dataset.all, 10) === cur);
+        });
+      } else {
+        const ko = parseInt(tsumoKoIn, 10) || 0, oya = parseInt(tsumoOyaIn, 10) || 0;
+        [...tsumoScoreRail.children].forEach(c => {
+          c.classList.toggle('selected',
+            parseInt(c.dataset.ko, 10) === ko && parseInt(c.dataset.oya, 10) === oya);
+        });
+      }
+    }
+  }
+  function selectRonChip(score) {
+    ronInput = String(score);
+    honba = 0; updateHonbaDisplay();
+    scoreDisplay.textContent = fmt(ronInput);
+    [...ronScoreRail.children].forEach(c => {
+      c.classList.toggle('selected', parseInt(c.dataset.score, 10) === score);
+    });
+  }
+  function renderTsumoChips() {
+    const isOya = tsumoType === 'oya';
+    const table = isOya ? TSUMO_OYA_SCORES : TSUMO_KO_SCORES;
+    tsumoScoreRail.innerHTML = '';
+    let mangaChip = null;
+    table.forEach(e => {
+      const chip = document.createElement('div');
+      chip.className = 'score-chip';
+      let valHtml;
+      if (isOya) {
+        valHtml = `<div class="score-chip-val">${e.all.toLocaleString()}</div><div class="score-chip-lbl">オール\n${e.label}</div>`;
+        chip.dataset.all = e.all;
+      } else {
+        valHtml = `<div class="score-chip-val">${e.ko.toLocaleString()}/${e.oya.toLocaleString()}</div><div class="score-chip-lbl">${e.label}</div>`;
+        chip.dataset.ko = e.ko; chip.dataset.oya = e.oya;
+      }
+      chip.innerHTML = valHtml;
+      chip.addEventListener('click', () => selectTsumoChip(e));
+      tsumoScoreRail.appendChild(chip);
+      if (e.label === '満貫') mangaChip = chip;
+    });
+    if (mangaChip) {
+      setTimeout(() => { centerChip(tsumoScoreRail, mangaChip); }, 60);
+    }
+  }
+  function selectTsumoChip(e) {
+    if (tsumoType === 'oya') {
+      tsumoKoIn = String(e.all);
+    } else {
+      tsumoKoIn = String(e.ko); tsumoOyaIn = String(e.oya);
+    }
+    honba = 0; updateHonbaDisplay();
+    tsumoFocus = 'oya';
+    refreshTsumoDisplay();
+    [...tsumoScoreRail.children].forEach(c => {
+      const matches = tsumoType === 'oya'
+        ? parseInt(c.dataset.all, 10) === e.all
+        : (parseInt(c.dataset.ko, 10) === e.ko && parseInt(c.dataset.oya, 10) === e.oya);
+      c.classList.toggle('selected', matches);
+    });
+  }
+
+  /* ── 本場 ──────────────────────────────────────── */
+  function updateHonbaDisplay() {
+    if (honbaCountDisp) honbaCountDisp.textContent = honba;
+  }
+  function addHonba(delta) {
+    const next = honba + delta;
+    if (next < 0) return;
+    if (mode === 'ron') {
+      const cur = parseInt(ronInput, 10) || 0;
+      const newVal = cur + delta * 300;
+      if (newVal < 0) return;
+      ronInput = String(newVal);
+      scoreDisplay.textContent = fmt(ronInput);
+    } else {
+      const koCur = parseInt(tsumoKoIn, 10) || 0;
+      const oyaCur = parseInt(tsumoOyaIn, 10) || 0;
+      const newKo = koCur + delta * 100;
+      const newOya = oyaCur + delta * 100;
+      if (newKo < 0 || (tsumoType === 'ko' && newOya < 0)) return;
+      tsumoKoIn = String(newKo);
+      if (tsumoType === 'ko') tsumoOyaIn = String(newOya);
+      refreshTsumoDisplay();
+    }
+    honba = next;
+    updateHonbaDisplay();
   }
 
   /* ── Modal open/close ───────────────────────────── */
@@ -1125,12 +1660,8 @@
     tsumoBreakdown.style.display = m === 'tsumo' ? '' : 'none';
     modalSheet.classList.toggle('tsumo-mode', m === 'tsumo');
     if (m === 'ron') {
-      modalLabel.textContent = 'ロン';
-      modalLabel.className   = 'modal-label';
       transferInfo.textContent = ronSrc && ronTgt ? `${getName(ronSrc)}　→　${getName(ronTgt)}` : '';
     } else {
-      modalLabel.textContent = '🀄 ツモ';
-      modalLabel.className   = 'modal-label tsumo-label';
       transferInfo.textContent = tsumoWinner ? `${getName(tsumoWinner)}　ツモ和了` : '';
     }
   }
@@ -1138,11 +1669,17 @@
   function openRonModal(src, tgt) {
     ronSrc = src; ronTgt = tgt; tsumoWinner = src;
     ronInput = '0'; scoreDisplay.textContent = '0';
-    setMode('ron'); modal.classList.add('show');
+    honba = 0; updateHonbaDisplay();
+    setMode('ron');
+    setRonCat((tgt === dealerId) ? 'oya' : 'ko');
+    modal.classList.add('show');
   }
   function openTsumoModal(winnerId) {
     tsumoWinner = winnerId; ronSrc = null; ronTgt = null;
-    setMode('tsumo'); setTsumoType('ko'); modal.classList.add('show');
+    honba = 0; updateHonbaDisplay();
+    setMode('tsumo');
+    setTsumoType((winnerId === dealerId) ? 'oya' : 'ko');
+    modal.classList.add('show');
   }
   function closeModal() { modal.classList.remove('show'); }
 
@@ -1150,8 +1687,7 @@
   function openAdjustModal(pid) {
     adjustPid = pid;
     adjInput = '0'; adjSign = '+';
-    const windName = WIND_JP[pid] || pid;
-    document.getElementById('adjLabel').textContent = `${windName}の点数を調整`;
+    document.getElementById('adjLabel').textContent = `${getName(pid)}の点数を調整`;
     document.getElementById('adjCurrentScore').textContent = players[pid].score.toLocaleString();
     document.getElementById('adjDisplay').textContent = '0';
     document.getElementById('adjPlusBtn').classList.add('active');
@@ -1220,40 +1756,69 @@
   function undo() {
     if (!undoStack.length) { showToast('これ以上戻れません', true); return; }
     redoStack.push(snapshot()); applySnapshot(undoStack.pop());
-    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'undo' }, 200);
     syncBtns(); showToast('↩ 取り消し');
   }
   function redo() {
     if (!redoStack.length) { showToast('これ以上進めません', true); return; }
     undoStack.push(snapshot()); applySnapshot(redoStack.pop());
-    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'redo' }, 200);
     syncBtns(); showToast('↪ やり直し');
   }
   function resetAll() {
-    if (!confirm('全員を 25,000点 にリセットしますか？')) return;
+    const s = START_SCORE.toLocaleString();
+    if (!confirm(`全員を ${s}点 にリセットしますか？`)) return;
     saveState();
     for (const id of IDS) players[id].score = START_SCORE;
-    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'reset' }, 200);
-    renderScores(); showToast('全員 25,000点にリセットしました');
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'reset', startScore: START_SCORE }, 200);
+    renderScores(); showToast(`全員 ${s}点にリセットしました`);
   }
 
-  /* ── Game-end modal (Mリーグ Uma) ───────────────── */
+  /* ── 三麻/四麻 モード切替 ──────────────────────── */
+  function setSanmaMode(enabled, skipConfirm) {
+    if (!skipConfirm) {
+      const dirty = IDS.some(id => players[id].score !== START_SCORE) || undoStack.length > 0;
+      if (dirty && !confirm(`${enabled ? '三麻' : '四麻'}に切り替えます。\n現在のゲームをリセットしますか？`)) return;
+    }
+    sanmaMode   = enabled;
+    IDS         = enabled ? SANMA_IDS.slice()   : YONMA_IDS.slice();
+    START_SCORE = enabled ? SANMA_START : YONMA_START;
+    BASE_SCORE  = enabled ? SANMA_BASE  : YONMA_BASE;
+    UMA         = enabled ? SANMA_UMA.slice()   : YONMA_UMA.slice();
+    neighbors   = enabled ? NEIGHBORS_SANMA : NEIGHBORS_YONMA;
+    /* 三麻で親が west になっていたら east に補正 */
+    if (!IDS.includes(dealerId)) {
+      dealerId = 'east';
+      localStorage.setItem(LS_DEALER, 'east');
+      if (typeof renderDealerBadges === 'function') renderDealerBadges();
+    }
+    for (const id of YONMA_IDS) players[id].score = START_SCORE;
+    undoStack.length = 0; redoStack.length = 0;
+    syncBtns(); renderScores();
+    document.querySelector('.grid').classList.toggle('sanma', enabled);
+    document.getElementById('btnYonma').classList.toggle('active', !enabled);
+    document.getElementById('btnSanma').classList.toggle('active',  enabled);
+    localStorage.setItem(LS_MODE, enabled ? 'sanma' : 'yonma');
+  }
+
+  /* ── Game-end modal ─────────────────────────────── */
   function openGameEndModal() {
-    const total = IDS.reduce((s, id) => s + players[id].score, 0);
-    if (total !== 100000) {
-      showToast(`合計 ${total.toLocaleString()}点 — 100,000点でないと計算できません`, true, 3500);
+    const total        = IDS.reduce((s, id) => s + players[id].score, 0);
+    const expectedTotal = IDS.length * START_SCORE;
+    if (total !== expectedTotal) {
+      showToast(`合計 ${total.toLocaleString()}点 — ${expectedTotal.toLocaleString()}点でないと計算できません`, true, 3500);
       return;
     }
     const sorted = IDS
       .map(id => ({ id, name: getName(id), score: players[id].score }))
       .sort((a, b) => b.score - a.score);
 
+    const okaTotal = Math.round((BASE_SCORE - START_SCORE) * IDS.length / 1000);
     const results = sorted.map((p, i) => {
       const rank       = i + 1;
-      const rawPoint   = Math.round((p.score - 30000) / 1000);
+      const rawPoint   = Math.round((p.score - BASE_SCORE) / 1000);
       const uma        = UMA[i];
-      const totalPoint = rawPoint + uma;
-      return { wind: p.id, name: p.name, finalScore: p.score, rawPoint, uma, totalPoint, rank };
+      const oka        = i === 0 ? okaTotal : 0;
+      const totalPoint = rawPoint + uma + oka;
+      return { wind: p.id, name: p.name, finalScore: p.score, rawPoint, uma, oka, totalPoint, rank };
     });
 
     rankingList.innerHTML = '';
@@ -1263,12 +1828,16 @@
       const rawStr = (r.rawPoint >= 0 ? '+' : '') + r.rawPoint;
       const umaStr = (r.uma       >= 0 ? '+' : '') + r.uma;
       const totStr = (r.totalPoint >= 0 ? '+' : '') + r.totalPoint;
+      const okaStr = (r.oka        >= 0 ? '+' : '') + r.oka;
+      const detail = r.oka !== 0
+        ? `素点 ${rawStr}　ウマ ${umaStr}　オカ ${okaStr}`
+        : `素点 ${rawStr}　ウマ ${umaStr}`;
       row.innerHTML = `
         <span class="rank-badge rank-${r.rank}">${r.rank}</span>
         <span class="rank-pname">${r.name}</span>
         <div class="rank-scores">
           <div class="rank-score">${r.finalScore.toLocaleString()}</div>
-          <div class="rank-detail">素点 ${rawStr}　ウマ ${umaStr}</div>
+          <div class="rank-detail">${detail}</div>
           <div class="rank-total">計 ${totStr}</div>
         </div>`;
       rankingList.appendChild(row);
@@ -1278,14 +1847,15 @@
     gameEndModal.classList.add('show');
   }
 
-  /* ── ② newGame: text updated ────────────────────── */
+  /* ── newGame ────────────────────────────────────── */
   function newGame() {
-    if (!confirm('もう1試合ですか？\n全員 25,000点にリセットします。')) return;
+    const s = START_SCORE.toLocaleString();
+    if (!confirm(`もう1試合ですか？\n全員 ${s}点にリセットします。`)) return;
     for (const id of IDS) players[id].score = START_SCORE;
     undoStack.length = 0; redoStack.length = 0;
     syncBtns(); renderScores();
     gameEndModal.classList.remove('show');
-    showToast('全員 25,000点でスタート！');
+    showToast(`全員 ${s}点でスタート！`);
   }
 
   /* ── History drawer ─────────────────────────────── */
@@ -1317,16 +1887,14 @@
     const log  = lsGet(LS_TRANSFER);
     list.innerHTML = '';
     if (!log.length) { list.innerHTML = '<div class="hist-empty">点数ログはありません</div>'; return; }
-    const iconMap = { ron:'🀄', tsumo:'🀅', undo:'↩', redo:'↪', reset:'🔄', adjust:'⚖' };
+    const iconMap = { ron:'🀄', tsumo:'🀅', reset:'🔄', adjust:'⚖' };
     const descMap = {
-      ron:    e => `${e.fromName||e.from} → ${e.toName||e.to}　${(e.amount||0).toLocaleString()}点`,
-      tsumo:  e => `${e.toName||e.to} ツモ +${(e.amount||0).toLocaleString()}点`,
-      undo:   ()  => '取り消し',
-      redo:   ()  => 'やり直し',
-      reset:  ()  => '全員リセット 25,000点',
+      ron:    e => `${e.fromName||(e.from?getName(e.from):'-')} → ${e.toName||(e.to?getName(e.to):'-')}　${(e.amount||0).toLocaleString()}点`,
+      tsumo:  e => `${e.toName||(e.to?getName(e.to):'-')} ツモ +${(e.amount||0).toLocaleString()}点`,
+      reset:  e   => `全員リセット ${(e.startScore||25000).toLocaleString()}点`,
       adjust: e   => {
         const sign = e.sign === '+' ? '+' : '-';
-        return `${e.playerName||e.pid} ${sign}${(e.amount||0).toLocaleString()}点 調整`;
+        return `${e.playerName||(e.pid?getName(e.pid):e.pid)} ${sign}${(e.amount||0).toLocaleString()}点 調整`;
       },
     };
     [...log].reverse().forEach(e => {
@@ -1479,11 +2047,13 @@
     const p  = e.touches ? e.touches[0] : e;
     const dx = p.clientX - swipeOrigin.x, dy = p.clientY - swipeOrigin.y;
     if (lpActive) {
-      /* long press active: track finger direction for highlight */
+      /* long press active: track finger direction for highlight and show arrow */
       updateLpHighlight(p.clientX, p.clientY);
+      showSwipeArrow(p.clientX, p.clientY);
     } else if (Math.hypot(dx, dy) >= SWIPE_MIN) {
       cancelLongPress();
       showSwipeArrow(p.clientX, p.clientY);
+      highlightLpTarget(getNearestNeighborByAngle(dx, dy, swipeOrigin.pid));
     }
   }
 
@@ -1513,6 +2083,7 @@
   function resetSwipe() {
     cancelLongPress();
     hideSwipeArrow();
+    highlightLpTarget(null);
     if (swipeOrigin) {
       const card = getCard(swipeOrigin.pid);
       if (card) { card.classList.remove('swiping'); clearArrowHighlights(swipeOrigin.pid); }
@@ -1571,7 +2142,7 @@
 
     /* Mode buttons */
     document.getElementById('modeRon').addEventListener('click', () => {
-      if (mode !== 'ron') { if (ronSrc && ronTgt) setMode('ron'); else showToast('ロンはカードをスワイプして開始', true); }
+      if (mode !== 'ron') { if (ronSrc && ronTgt) setMode('ron'); else showToast('ロンはプレイヤーをスワイプして開始', true); }
     });
     document.getElementById('modeTsumo').addEventListener('click', () => {
       if (mode !== 'tsumo') { if (!tsumoWinner) tsumoWinner = ronSrc; setMode('tsumo'); setTsumoType('ko'); }
@@ -1587,22 +2158,17 @@
     });
     document.getElementById('numBS').addEventListener('click', handleBS);
 
-    /* Ron presets */
-    document.querySelectorAll('.preset-btn[data-preset]').forEach(btn => {
-      btn.addEventListener('click', () => { ronInput = btn.dataset.preset; scoreDisplay.textContent = fmt(ronInput); });
-    });
+    /* ロン子/親トグル */
+    document.getElementById('ronCatKo').addEventListener('click',  () => setRonCat('ko'));
+    document.getElementById('ronCatOya').addEventListener('click', () => setRonCat('oya'));
 
-    /* Tsumo 子ツモ presets */
-    document.querySelectorAll('.tp').forEach(btn => {
-      btn.addEventListener('click', () => {
-        tsumoKoIn = btn.dataset.ko; tsumoOyaIn = btn.dataset.oya;
-        tsumoFocus = 'oya'; refreshTsumoDisplay();
-      });
-    });
+    /* 本場 +/- */
+    document.getElementById('honbaIncBtn').addEventListener('click', () => addHonba(+1));
+    document.getElementById('honbaDecBtn').addEventListener('click', () => addHonba(-1));
 
-    /* Tsumo 親ツモ presets */
-    document.querySelectorAll('.ta').forEach(btn => {
-      btn.addEventListener('click', () => { tsumoKoIn = btn.dataset.all; refreshTsumoDisplay(); });
+    /* 親インジケーター（カード外なのでスワイプ干渉なし） */
+    document.querySelectorAll('.dealer-indicator').forEach(badge => {
+      badge.addEventListener('click', () => setDealer(badge.dataset.dealerFor));
     });
 
     /* Main modal confirm / cancel */
@@ -1637,12 +2203,20 @@
       if (e.target === document.getElementById('adjustModal')) closeAdjustModal();
     });
 
+    /* 四麻/三麻 rule toggle */
+    document.getElementById('btnYonma').addEventListener('click', () => setSanmaMode(false));
+    document.getElementById('btnSanma').addEventListener('click', () => setSanmaMode(true));
+
     /* Action bar */
     undoBtn.addEventListener('click', undo);
     redoBtn.addEventListener('click', redo);
     document.getElementById('resetBtn').addEventListener('click', resetAll);
     document.getElementById('histBtn').addEventListener('click', openHistModal);
-    document.getElementById('histFixedBtn').addEventListener('click', openHistModal);
+    document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+    document.getElementById('helpCloseBtn').addEventListener('click', closeHelpModal);
+    document.getElementById('helpModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('helpModal')) closeHelpModal();
+    });
     document.getElementById('endBtn').addEventListener('click', openGameEndModal);
 
     /* History drawer */
@@ -1663,10 +2237,33 @@
     document.getElementById('closeEndBtn').addEventListener('click', () => gameEndModal.classList.remove('show'));
     document.getElementById('newGameBtn').addEventListener('click', newGame);
     gameEndModal.addEventListener('click', e => { if (e.target === gameEndModal) gameEndModal.classList.remove('show'); });
+
+    /* 保存されたモードを復元 */
+    if (localStorage.getItem(LS_MODE) === 'sanma') setSanmaMode(true, true);
+
+    /* 保存された親を復元（無効な値ならデフォルトの東家） */
+    const savedDealer = localStorage.getItem(LS_DEALER);
+    if (savedDealer && YONMA_IDS.includes(savedDealer)) dealerId = savedDealer;
+    /* 三麻モードで親が west なら east にフォールバック */
+    if (!IDS.includes(dealerId)) dealerId = 'east';
+    renderDealerBadges();
   }
 
   init();
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+      .then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'activated') window.location.reload();
+          });
+        });
+      });
+  }
 </script>
 </body>
 </html>
