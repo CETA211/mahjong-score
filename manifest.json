@@ -1,6 +1,6 @@
 {
-  "name": "麻雀点数管理",
-  "short_name": "麻雀",
+  "name": "点棒いらず",
+  "short_name": "点棒いらず",
   "description": "麻雀の点数をスマホで管理",
   "start_url": "./",
   "display": "standalone",
