@@ -151,6 +151,38 @@
     /* scale on swipe start */
     .player-card.swiping { transform: scale(1.03); }
 
+    /* ── 親バッジ ──────────────────────────── */
+    .dealer-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,168,64,0.22);
+      background: rgba(255,255,255,0.03);
+      color: rgba(200,168,64,0.42);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.68rem; font-weight: 800;
+      cursor: pointer; z-index: 8;
+      transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.12s, box-shadow 0.18s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none; touch-action: manipulation;
+      pointer-events: auto;
+    }
+    .dealer-badge:active { transform: scale(0.88); }
+    .dealer-badge.is-dealer {
+      background: rgba(200,168,64,0.4);
+      border-color: var(--gold);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(200,168,64,0.55);
+    }
+    [data-theme="light"] .dealer-badge {
+      background: rgba(0,0,0,0.02); border-color: rgba(160,120,32,0.3); color: rgba(120,90,0,0.55);
+    }
+    [data-theme="light"] .dealer-badge.is-dealer {
+      background: rgba(200,168,64,0.85); border-color: rgba(160,120,32,0.95);
+      color: #fff; box-shadow: 0 0 12px rgba(200,168,64,0.5);
+    }
+
     .player-name {
       display: block; width: 100%;
       background: none; border: none;
@@ -302,6 +334,76 @@
     }
     .preset-btn:active { background: rgba(200,168,64,0.26); }
     .preset-btn small { font-size: 0.6rem; opacity: 0.8; }
+
+    /* ── 点数チップレール ──────────────────────── */
+    .score-cat-toggle {
+      display: flex; gap: 4px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px; padding: 3px; margin-bottom: 8px;
+    }
+    .score-cat-btn {
+      flex: 1; background: none; border: none; color: var(--muted);
+      font-size: 0.74rem; font-weight: 800; letter-spacing: 2px;
+      padding: 6px; border-radius: 6px; cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+    .score-cat-btn.active { background: var(--gold-dim); color: var(--gold); }
+
+    .score-rail {
+      display: flex; gap: 6px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding: 4px 2px 6px; margin: 0 -2px 8px;
+      scrollbar-width: none;
+    }
+    .score-rail::-webkit-scrollbar { display: none; }
+    .score-chip {
+      flex-shrink: 0; scroll-snap-align: center;
+      min-width: 70px;
+      padding: 7px 7px;
+      border-radius: 9px;
+      background: var(--gold-dim);
+      border: 1px solid rgba(200,168,64,0.3);
+      cursor: pointer; touch-action: manipulation;
+      text-align: center;
+      transition: background 0.12s, border-color 0.12s, box-shadow 0.18s;
+    }
+    .score-chip:active { background: rgba(200,168,64,0.26); }
+    .score-chip.selected {
+      background: rgba(200,168,64,0.38);
+      border-color: var(--gold);
+      box-shadow: 0 0 10px rgba(200,168,64,0.3);
+    }
+    .score-chip-val {
+      font-size: 0.82rem; font-weight: 800; color: var(--gold);
+      line-height: 1.15; font-feature-settings: "tnum";
+    }
+    .score-chip-lbl {
+      font-size: 0.54rem; color: var(--muted);
+      margin-top: 3px; line-height: 1.2; white-space: pre-line;
+    }
+    [data-theme="light"] .score-chip.selected { background: rgba(200,168,64,0.3); }
+
+    /* ── 本場ボタン ────────────────────────────── */
+    .honba-row {
+      display: flex; gap: 6px; align-items: center;
+      margin-bottom: 12px;
+    }
+    .honba-btn {
+      flex: 1; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.14); color: var(--text);
+      padding: 8px; border-radius: 8px;
+      font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; touch-action: manipulation;
+      transition: background 0.12s;
+    }
+    .honba-btn:active { background: rgba(255,255,255,0.12); }
+    .honba-btn.dec { flex: 0 0 38px; opacity: 0.7; font-size: 0.95rem; }
+    [data-theme="light"] .honba-btn {
+      background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a1a;
+    }
+    [data-theme="light"] .honba-btn:active { background: rgba(0,0,0,0.08); }
 
     /* Shared score display */
     .score-display { text-align: center; margin-bottom: 12px; line-height: 1; }
@@ -668,12 +770,14 @@
   <div class="grid">
     <!-- North: neighbors = down, left, right -->
     <div class="player-card pos-north" data-player-id="north">
+      <button class="dealer-badge" data-dealer-for="north" title="親に設定">親</button>
       <input class="player-name" id="name-north" type="text" value="プレイヤー1" maxlength="8" placeholder="名前">
       <div class="score" id="score-north">25,000</div>
     </div>
 
     <!-- West: neighbors = up, right, down -->
     <div class="player-card pos-west" data-player-id="west">
+      <button class="dealer-badge" data-dealer-for="west" title="親に設定">親</button>
       <input class="player-name" id="name-west" type="text" value="プレイヤー2" maxlength="8" placeholder="名前">
       <div class="score" id="score-west">25,000</div>
     </div>
@@ -684,12 +788,14 @@
 
     <!-- East: neighbors = up, left, down -->
     <div class="player-card pos-east" data-player-id="east">
+      <button class="dealer-badge is-dealer" data-dealer-for="east" title="親">親</button>
       <input class="player-name" id="name-east" type="text" value="プレイヤー3" maxlength="8" placeholder="名前">
       <div class="score" id="score-east">25,000</div>
     </div>
 
     <!-- South: neighbors = up, left, right -->
     <div class="player-card pos-south" data-player-id="south">
+      <button class="dealer-badge" data-dealer-for="south" title="親に設定">親</button>
       <input class="player-name" id="name-south" type="text" value="プレイヤー4" maxlength="8" placeholder="名前">
       <div class="score" id="score-south">25,000</div>
     </div>
@@ -728,38 +834,28 @@
 
     <div class="modal-transfer" id="transferInfo"></div>
 
-    <!-- Ron presets -->
+    <!-- Ron presets (score table chips) -->
     <div id="ronPresets">
-      <div class="preset-row">
-        <button class="preset-btn" data-preset="1000">1,000</button>
-        <button class="preset-btn" data-preset="2000">2,000</button>
-        <button class="preset-btn" data-preset="3900">3,900</button>
-        <button class="preset-btn" data-preset="8000">8,000</button>
+      <div class="score-cat-toggle">
+        <button class="score-cat-btn active" id="ronCatKo">子の上がり</button>
+        <button class="score-cat-btn"        id="ronCatOya">親の上がり</button>
       </div>
+      <div class="score-rail" id="ronScoreRail"></div>
     </div>
 
     <!-- Tsumo top controls -->
     <div id="tsumoTop" style="display:none">
-      <div class="tsumo-type-toggle">
-        <button class="tsumo-type-btn active" id="btnKo">子ツモ</button>
-        <button class="tsumo-type-btn"        id="btnOya">親ツモ</button>
+      <div class="score-cat-toggle">
+        <button class="score-cat-btn active" id="btnKo">子ツモ</button>
+        <button class="score-cat-btn"        id="btnOya">親ツモ</button>
       </div>
-      <div id="tsumoKoPresets">
-        <div class="preset-row">
-          <button class="preset-btn tp" data-ko="2000" data-oya="4000">満貫<br><small>2000/4000</small></button>
-          <button class="preset-btn tp" data-ko="3000" data-oya="6000">跳満<br><small>3000/6000</small></button>
-          <button class="preset-btn tp" data-ko="4000" data-oya="8000">倍満<br><small>4000/8000</small></button>
-          <button class="preset-btn tp" data-ko="8000" data-oya="16000">役満<br><small>8000/16000</small></button>
-        </div>
-      </div>
-      <div id="tsumoOyaPresets" style="display:none">
-        <div class="preset-row">
-          <button class="preset-btn ta" data-all="4000">満貫<br><small>4000 all</small></button>
-          <button class="preset-btn ta" data-all="6000">跳満<br><small>6000 all</small></button>
-          <button class="preset-btn ta" data-all="8000">倍満<br><small>8000 all</small></button>
-          <button class="preset-btn ta" data-all="16000">役満<br><small>16000 all</small></button>
-        </div>
-      </div>
+      <div class="score-rail" id="tsumoScoreRail"></div>
+    </div>
+
+    <!-- Honba row (shared between ron and tsumo) -->
+    <div class="honba-row" id="honbaRow">
+      <button class="honba-btn dec" id="honbaDecBtn" title="本場を減らす">−</button>
+      <button class="honba-btn" id="honbaIncBtn">＋ 本場 <span id="honbaCountDisp">0</span></button>
     </div>
 
     <!-- Shared score display -->
@@ -922,6 +1018,26 @@
     </div>
 
     <div class="help-section">
+      <div class="help-section-title">親（東家）の設定</div>
+      <div class="help-row">
+        <span class="help-op">親バッジ</span>
+        <span class="help-desc">各プレイヤー右上の「親」をタップで親に設定<br>ロン/ツモ時に自動で子/親の点数表が選択される</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">点数表 / 本場</div>
+      <div class="help-row">
+        <span class="help-op">点数表</span>
+        <span class="help-desc">モーダル内で横スクロール、タップで選択<br>1飜30符 〜 役満まで網羅</span>
+      </div>
+      <div class="help-row">
+        <span class="help-op">+ 本場</span>
+        <span class="help-desc">ロン +300 / ツモは各支払者から +100<br>1本場ごとに加算</span>
+      </div>
+    </div>
+
+    <div class="help-section">
       <div class="help-section-title">電卓入力</div>
       <div class="help-row">
         <span class="help-op">百の位〜</span>
@@ -984,6 +1100,98 @@
   let UMA        = YONMA_UMA.slice();
   let sanmaMode  = false;
 
+  /* ── 点数表 ────────────────────────────────────── */
+  const RON_KO_SCORES = [
+    { score: 1000,  label: '1飜30符' },
+    { score: 1300,  label: '1飜40符' },
+    { score: 1600,  label: '1飜50符\n2飜25符' },
+    { score: 2000,  label: '1飜60符\n2飜30符' },
+    { score: 2300,  label: '1飜70符' },
+    { score: 2600,  label: '1飜80符\n2飜40符' },
+    { score: 2900,  label: '1飜90符' },
+    { score: 3200,  label: '1飜100符\n2飜50符\n3飜25符' },
+    { score: 3600,  label: '1飜110符' },
+    { score: 3900,  label: '2飜60符\n3飜30符' },
+    { score: 4500,  label: '2飜70符' },
+    { score: 5200,  label: '2飜80符\n3飜40符' },
+    { score: 5800,  label: '2飜90符' },
+    { score: 6400,  label: '2飜100符\n3飜50符\n4飜25符' },
+    { score: 7100,  label: '2飜110符' },
+    { score: 7700,  label: '3飜60符\n4飜30符' },
+    { score: 8000,  label: '満貫' },
+    { score: 12000, label: '跳満' },
+    { score: 16000, label: '倍満' },
+    { score: 24000, label: '三倍満' },
+    { score: 32000, label: '役満' },
+  ];
+  const RON_OYA_SCORES = [
+    { score: 1500,  label: '1飜30符' },
+    { score: 2000,  label: '1飜40符' },
+    { score: 2400,  label: '1飜50符\n2飜25符' },
+    { score: 2900,  label: '1飜60符\n2飜30符' },
+    { score: 3400,  label: '1飜70符' },
+    { score: 3900,  label: '1飜80符\n2飜40符' },
+    { score: 4400,  label: '1飜90符' },
+    { score: 4800,  label: '1飜100符\n2飜50符\n3飜25符' },
+    { score: 5300,  label: '1飜110符' },
+    { score: 5800,  label: '2飜60符\n3飜30符' },
+    { score: 6800,  label: '2飜70符' },
+    { score: 7700,  label: '2飜80符\n3飜40符' },
+    { score: 9600,  label: '3飜50符\n4飜25符' },
+    { score: 11600, label: '3飜60符\n4飜30符' },
+    { score: 12000, label: '満貫' },
+    { score: 18000, label: '跳満' },
+    { score: 24000, label: '倍満' },
+    { score: 36000, label: '三倍満' },
+    { score: 48000, label: '役満' },
+  ];
+  const TSUMO_KO_SCORES = [
+    { ko: 300,  oya: 500,   label: '1飜30符' },
+    { ko: 400,  oya: 700,   label: '1飜40符\n2飜20符' },
+    { ko: 400,  oya: 800,   label: '1飜50符' },
+    { ko: 500,  oya: 1000,  label: '1飜60符\n2飜30符' },
+    { ko: 600,  oya: 1200,  label: '1飜70符' },
+    { ko: 700,  oya: 1300,  label: '1飜80符\n2飜40符\n3飜20符' },
+    { ko: 800,  oya: 1500,  label: '1飜90符' },
+    { ko: 800,  oya: 1600,  label: '2飜50符\n3飜25符' },
+    { ko: 900,  oya: 1800,  label: '1飜110符' },
+    { ko: 1000, oya: 2000,  label: '2飜60符\n3飜30符\n4飜20符' },
+    { ko: 1200, oya: 2300,  label: '2飜70符' },
+    { ko: 1300, oya: 2600,  label: '2飜80符\n3飜40符\n4飜25符' },
+    { ko: 1500, oya: 2900,  label: '2飜90符' },
+    { ko: 1600, oya: 3200,  label: '2飜100符\n3飜50符' },
+    { ko: 1800, oya: 3600,  label: '2飜110符' },
+    { ko: 2000, oya: 3900,  label: '3飜60符\n4飜30符' },
+    { ko: 2000, oya: 4000,  label: '満貫' },
+    { ko: 3000, oya: 6000,  label: '跳満' },
+    { ko: 4000, oya: 8000,  label: '倍満' },
+    { ko: 6000, oya: 12000, label: '三倍満' },
+    { ko: 8000, oya: 16000, label: '役満' },
+  ];
+  const TSUMO_OYA_SCORES = [
+    { all: 500,   label: '1飜30符' },
+    { all: 700,   label: '1飜40符\n2飜20符' },
+    { all: 800,   label: '1飜50符' },
+    { all: 1000,  label: '1飜60符\n2飜30符' },
+    { all: 1200,  label: '1飜70符' },
+    { all: 1300,  label: '1飜80符\n2飜40符\n3飜20符' },
+    { all: 1500,  label: '1飜90符' },
+    { all: 1600,  label: '2飜50符\n3飜25符' },
+    { all: 1800,  label: '1飜110符' },
+    { all: 2000,  label: '2飜60符\n3飜30符\n4飜20符' },
+    { all: 2300,  label: '2飜70符' },
+    { all: 2600,  label: '2飜80符\n3飜40符\n4飜25符' },
+    { all: 2900,  label: '2飜90符' },
+    { all: 3200,  label: '2飜100符\n3飜50符' },
+    { all: 3600,  label: '2飜110符' },
+    { all: 3900,  label: '3飜60符\n4飜30符' },
+    { all: 4000,  label: '満貫' },
+    { all: 6000,  label: '跳満' },
+    { all: 8000,  label: '倍満' },
+    { all: 12000, label: '三倍満' },
+    { all: 16000, label: '役満' },
+  ];
+
   /* ── ① Wind JP name map ─────────────────────────── */
   const WIND_JP = { north:'北', south:'南', east:'東', west:'西' };
 
@@ -998,6 +1206,7 @@
   const LS_TRANSFER = 'mahjong_transfer_log';
   const LS_GAME     = 'mahjong_game_history';
   const LS_MODE     = 'mahjong_rule_mode';
+  const LS_DEALER   = 'mahjong_dealer';
 
   /* ── Undo / Redo stacks ─────────────────────────── */
   const undoStack = [], redoStack = [];
@@ -1029,6 +1238,9 @@
   }
 
   /* ── Mode / Tsumo state ─────────────────────────── */
+  let dealerId = 'east';   // 初期親 = 東家
+  let ronCat = 'ko';       // 'ko' | 'oya'（ロン点数表のカテゴリ）
+  let honba = 0;           // 本場カウンタ（モーダル内のみ）
   let mode = 'ron', tsumoType = 'ko';
   let ronSrc = null, ronTgt = null, ronInput = '0';
   let tsumoWinner = null, tsumoDealerId = null;
@@ -1064,8 +1276,9 @@
   const tsumoTopEl   = document.getElementById('tsumoTop');
   const tsumoBreakdown = document.getElementById('tsumoBreakdown');
   const tsumoTabsEl  = document.getElementById('tsumoTabs');
-  const tsumoKoPresets  = document.getElementById('tsumoKoPresets');
-  const tsumoOyaPresets = document.getElementById('tsumoOyaPresets');
+  const ronScoreRail    = document.getElementById('ronScoreRail');
+  const tsumoScoreRail  = document.getElementById('tsumoScoreRail');
+  const honbaCountDisp  = document.getElementById('honbaCountDisp');
   const undoBtn      = document.getElementById('undoBtn');
   const redoBtn      = document.getElementById('redoBtn');
   const histModal    = document.getElementById('histModal');
@@ -1150,6 +1363,8 @@
       }
       refreshTsumoDisplay();
     }
+    honba = 0; updateHonbaDisplay();
+    syncChipSelection();
   }
   function handleBS() {
     if (mode === 'ron') {
@@ -1164,6 +1379,8 @@
       }
       refreshTsumoDisplay();
     }
+    honba = 0; updateHonbaDisplay();
+    syncChipSelection();
   }
 
   /* ── Adjust modal numpad ────────────────────────── */
@@ -1250,14 +1467,164 @@
   /* ── Tsumo type toggle ──────────────────────────── */
   function setTsumoType(type) {
     tsumoType = type; tsumoKoIn = '0'; tsumoOyaIn = '0';
-    tsumoDealerId = null; tsumoFocus = 'oya';
+    /* 子ツモ時は dealer を 親プレイヤーに自動セット（勝者でない場合のみ） */
+    tsumoDealerId = (type === 'ko' && dealerId !== tsumoWinner) ? dealerId : null;
+    tsumoFocus = 'oya';
     document.getElementById('btnKo').classList.toggle('active', type === 'ko');
     document.getElementById('btnOya').classList.toggle('active', type === 'oya');
-    tsumoKoPresets.style.display  = type === 'ko'  ? '' : 'none';
-    tsumoOyaPresets.style.display = type === 'oya' ? '' : 'none';
     scoreDisplay.textContent = '0';
     tsumoBreakdown.innerHTML = ''; tsumoBreakdown.classList.remove('visible');
     renderTsumoTabs();
+    renderTsumoChips();
+  }
+
+  /* ── 親（dealer）管理 ─────────────────────────── */
+  function renderDealerBadges() {
+    document.querySelectorAll('.dealer-badge').forEach(b => {
+      b.classList.toggle('is-dealer', b.dataset.dealerFor === dealerId);
+      b.title = b.dataset.dealerFor === dealerId ? '親' : '親に設定';
+    });
+  }
+  function setDealer(id) {
+    if (!YONMA_IDS.includes(id)) return;
+    dealerId = id;
+    localStorage.setItem(LS_DEALER, id);
+    renderDealerBadges();
+    if (modal.classList.contains('show')) {
+      if (mode === 'ron') {
+        setRonCat((ronTgt === dealerId) ? 'oya' : 'ko');
+      } else {
+        setTsumoType((tsumoWinner === dealerId) ? 'oya' : 'ko');
+      }
+    }
+  }
+
+  /* ── 点数チップ ──────────────────────────────── */
+  function setRonCat(cat) {
+    ronCat = cat;
+    document.getElementById('ronCatKo').classList.toggle('active',  cat === 'ko');
+    document.getElementById('ronCatOya').classList.toggle('active', cat === 'oya');
+    renderRonChips();
+  }
+  function renderRonChips() {
+    const table = ronCat === 'oya' ? RON_OYA_SCORES : RON_KO_SCORES;
+    const currentScore = parseInt(ronInput, 10) || 0;
+    ronScoreRail.innerHTML = '';
+    let mangaChip = null;
+    table.forEach(e => {
+      const chip = document.createElement('div');
+      chip.className = 'score-chip' + (e.score === currentScore ? ' selected' : '');
+      chip.dataset.score = e.score;
+      chip.innerHTML = `<div class="score-chip-val">${e.score.toLocaleString()}</div><div class="score-chip-lbl">${e.label}</div>`;
+      chip.addEventListener('click', () => selectRonChip(e.score));
+      ronScoreRail.appendChild(chip);
+      if (e.label === '満貫') mangaChip = chip;
+    });
+    /* 初期表示位置を満貫に（モーダル表示完了後に実行） */
+    if (currentScore === 0 && mangaChip) {
+      setTimeout(() => { centerChip(ronScoreRail, mangaChip); }, 60);
+    }
+  }
+  function centerChip(rail, chip) {
+    if (!rail || !chip) return;
+    rail.scrollLeft = chip.offsetLeft - (rail.clientWidth - chip.offsetWidth) / 2;
+  }
+  function syncChipSelection() {
+    if (mode === 'ron') {
+      const cur = parseInt(ronInput, 10) || 0;
+      [...ronScoreRail.children].forEach(c => {
+        c.classList.toggle('selected', parseInt(c.dataset.score, 10) === cur);
+      });
+    } else if (tsumoScoreRail) {
+      if (tsumoType === 'oya') {
+        const cur = parseInt(tsumoKoIn, 10) || 0;
+        [...tsumoScoreRail.children].forEach(c => {
+          c.classList.toggle('selected', parseInt(c.dataset.all, 10) === cur);
+        });
+      } else {
+        const ko = parseInt(tsumoKoIn, 10) || 0, oya = parseInt(tsumoOyaIn, 10) || 0;
+        [...tsumoScoreRail.children].forEach(c => {
+          c.classList.toggle('selected',
+            parseInt(c.dataset.ko, 10) === ko && parseInt(c.dataset.oya, 10) === oya);
+        });
+      }
+    }
+  }
+  function selectRonChip(score) {
+    ronInput = String(score);
+    honba = 0; updateHonbaDisplay();
+    scoreDisplay.textContent = fmt(ronInput);
+    [...ronScoreRail.children].forEach(c => {
+      c.classList.toggle('selected', parseInt(c.dataset.score, 10) === score);
+    });
+  }
+  function renderTsumoChips() {
+    const isOya = tsumoType === 'oya';
+    const table = isOya ? TSUMO_OYA_SCORES : TSUMO_KO_SCORES;
+    tsumoScoreRail.innerHTML = '';
+    let mangaChip = null;
+    table.forEach(e => {
+      const chip = document.createElement('div');
+      chip.className = 'score-chip';
+      let valHtml;
+      if (isOya) {
+        valHtml = `<div class="score-chip-val">${e.all.toLocaleString()}</div><div class="score-chip-lbl">オール\n${e.label}</div>`;
+        chip.dataset.all = e.all;
+      } else {
+        valHtml = `<div class="score-chip-val">${e.ko.toLocaleString()}/${e.oya.toLocaleString()}</div><div class="score-chip-lbl">${e.label}</div>`;
+        chip.dataset.ko = e.ko; chip.dataset.oya = e.oya;
+      }
+      chip.innerHTML = valHtml;
+      chip.addEventListener('click', () => selectTsumoChip(e));
+      tsumoScoreRail.appendChild(chip);
+      if (e.label === '満貫') mangaChip = chip;
+    });
+    if (mangaChip) {
+      setTimeout(() => { centerChip(tsumoScoreRail, mangaChip); }, 60);
+    }
+  }
+  function selectTsumoChip(e) {
+    if (tsumoType === 'oya') {
+      tsumoKoIn = String(e.all);
+    } else {
+      tsumoKoIn = String(e.ko); tsumoOyaIn = String(e.oya);
+    }
+    honba = 0; updateHonbaDisplay();
+    tsumoFocus = 'oya';
+    refreshTsumoDisplay();
+    [...tsumoScoreRail.children].forEach(c => {
+      const matches = tsumoType === 'oya'
+        ? parseInt(c.dataset.all, 10) === e.all
+        : (parseInt(c.dataset.ko, 10) === e.ko && parseInt(c.dataset.oya, 10) === e.oya);
+      c.classList.toggle('selected', matches);
+    });
+  }
+
+  /* ── 本場 ──────────────────────────────────────── */
+  function updateHonbaDisplay() {
+    if (honbaCountDisp) honbaCountDisp.textContent = honba;
+  }
+  function addHonba(delta) {
+    const next = honba + delta;
+    if (next < 0) return;
+    if (mode === 'ron') {
+      const cur = parseInt(ronInput, 10) || 0;
+      const newVal = cur + delta * 300;
+      if (newVal < 0) return;
+      ronInput = String(newVal);
+      scoreDisplay.textContent = fmt(ronInput);
+    } else {
+      const koCur = parseInt(tsumoKoIn, 10) || 0;
+      const oyaCur = parseInt(tsumoOyaIn, 10) || 0;
+      const newKo = koCur + delta * 100;
+      const newOya = oyaCur + delta * 100;
+      if (newKo < 0 || (tsumoType === 'ko' && newOya < 0)) return;
+      tsumoKoIn = String(newKo);
+      if (tsumoType === 'ko') tsumoOyaIn = String(newOya);
+      refreshTsumoDisplay();
+    }
+    honba = next;
+    updateHonbaDisplay();
   }
 
   /* ── Modal open/close ───────────────────────────── */
@@ -1280,11 +1647,17 @@
   function openRonModal(src, tgt) {
     ronSrc = src; ronTgt = tgt; tsumoWinner = src;
     ronInput = '0'; scoreDisplay.textContent = '0';
-    setMode('ron'); modal.classList.add('show');
+    honba = 0; updateHonbaDisplay();
+    setMode('ron');
+    setRonCat((tgt === dealerId) ? 'oya' : 'ko');
+    modal.classList.add('show');
   }
   function openTsumoModal(winnerId) {
     tsumoWinner = winnerId; ronSrc = null; ronTgt = null;
-    setMode('tsumo'); setTsumoType('ko'); modal.classList.add('show');
+    honba = 0; updateHonbaDisplay();
+    setMode('tsumo');
+    setTsumoType((winnerId === dealerId) ? 'oya' : 'ko');
+    modal.classList.add('show');
   }
   function closeModal() { modal.classList.remove('show'); }
 
@@ -1391,6 +1764,12 @@
     BASE_SCORE  = enabled ? SANMA_BASE  : YONMA_BASE;
     UMA         = enabled ? SANMA_UMA.slice()   : YONMA_UMA.slice();
     neighbors   = enabled ? NEIGHBORS_SANMA : NEIGHBORS_YONMA;
+    /* 三麻で親が west になっていたら east に補正 */
+    if (!IDS.includes(dealerId)) {
+      dealerId = 'east';
+      localStorage.setItem(LS_DEALER, 'east');
+      if (typeof renderDealerBadges === 'function') renderDealerBadges();
+    }
     for (const id of YONMA_IDS) players[id].score = START_SCORE;
     undoStack.length = 0; redoStack.length = 0;
     syncBtns(); renderScores();
@@ -1761,22 +2140,24 @@
     });
     document.getElementById('numBS').addEventListener('click', handleBS);
 
-    /* Ron presets */
-    document.querySelectorAll('.preset-btn[data-preset]').forEach(btn => {
-      btn.addEventListener('click', () => { ronInput = btn.dataset.preset; scoreDisplay.textContent = fmt(ronInput); });
-    });
+    /* ロン子/親トグル */
+    document.getElementById('ronCatKo').addEventListener('click',  () => setRonCat('ko'));
+    document.getElementById('ronCatOya').addEventListener('click', () => setRonCat('oya'));
 
-    /* Tsumo 子ツモ presets */
-    document.querySelectorAll('.tp').forEach(btn => {
-      btn.addEventListener('click', () => {
-        tsumoKoIn = btn.dataset.ko; tsumoOyaIn = btn.dataset.oya;
-        tsumoFocus = 'oya'; refreshTsumoDisplay();
+    /* 本場 +/- */
+    document.getElementById('honbaIncBtn').addEventListener('click', () => addHonba(+1));
+    document.getElementById('honbaDecBtn').addEventListener('click', () => addHonba(-1));
+
+    /* 親バッジ（カードのスワイプ/タップ判定と干渉させない） */
+    document.querySelectorAll('.dealer-badge').forEach(badge => {
+      const stop = e => e.stopPropagation();
+      ['touchstart','touchmove','touchend','mousedown','pointerdown'].forEach(ev =>
+        badge.addEventListener(ev, stop, { passive: false })
+      );
+      badge.addEventListener('click', e => {
+        e.stopPropagation();
+        setDealer(badge.dataset.dealerFor);
       });
-    });
-
-    /* Tsumo 親ツモ presets */
-    document.querySelectorAll('.ta').forEach(btn => {
-      btn.addEventListener('click', () => { tsumoKoIn = btn.dataset.all; refreshTsumoDisplay(); });
     });
 
     /* Main modal confirm / cancel */
@@ -1848,6 +2229,13 @@
 
     /* 保存されたモードを復元 */
     if (localStorage.getItem(LS_MODE) === 'sanma') setSanmaMode(true, true);
+
+    /* 保存された親を復元（無効な値ならデフォルトの東家） */
+    const savedDealer = localStorage.getItem(LS_DEALER);
+    if (savedDealer && YONMA_IDS.includes(savedDealer)) dealerId = savedDealer;
+    /* 三麻モードで親が west なら east にフォールバック */
+    if (!IDS.includes(dealerId)) dealerId = 'east';
+    renderDealerBadges();
   }
 
   init();
