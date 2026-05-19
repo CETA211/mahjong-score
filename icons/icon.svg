@@ -2,14 +2,24 @@
   <!-- Background -->
   <rect width="512" height="512" fill="#060e06"/>
   <!-- Tile body -->
-  <rect x="56" y="56" width="400" height="400" rx="52" fill="#0b170b"/>
-  <!-- Gold border -->
-  <rect x="56" y="56" width="400" height="400" rx="52" fill="none" stroke="#c8a840" stroke-width="7"/>
-  <!-- Top accent line -->
-  <rect x="56" y="56" width="400" height="10" rx="5" fill="#c8a840" opacity="0.4"/>
-  <!-- 中 character -->
-  <text x="256" y="338"
+  <rect x="44" y="44" width="424" height="424" rx="72" fill="#0b170b"/>
+  <!-- Gold outer border -->
+  <rect x="44" y="44" width="424" height="424" rx="72" fill="none" stroke="#c8a840" stroke-width="7"/>
+  <!-- Inner inset border -->
+  <rect x="64" y="64" width="384" height="384" rx="56" fill="none" stroke="#c8a840" stroke-width="2" opacity="0.35"/>
+  <!-- Top accent bar -->
+  <rect x="100" y="92" width="312" height="5" rx="2.5" fill="#c8a840" opacity="0.55"/>
+  <!-- Bottom accent bar -->
+  <rect x="100" y="415" width="312" height="5" rx="2.5" fill="#c8a840" opacity="0.55"/>
+  <!-- 点棒 (large) -->
+  <text x="256" y="258"
     font-family="'Hiragino Mincho ProN','Yu Mincho','MS Mincho',Georgia,serif"
-    font-size="240" font-weight="700"
-    fill="#c8a840" text-anchor="middle">中</text>
+    font-size="152" font-weight="700"
+    fill="#c8a840" text-anchor="middle" dominant-baseline="middle">点棒</text>
+  <!-- いらず (small, below) -->
+  <text x="256" y="366"
+    font-family="'Hiragino Mincho ProN','Yu Mincho','MS Mincho',Georgia,serif"
+    font-size="68" font-weight="400"
+    fill="#c8a840" opacity="0.78" text-anchor="middle" dominant-baseline="middle"
+    letter-spacing="4">いらず</text>
 </svg>
