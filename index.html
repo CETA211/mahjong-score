@@ -124,7 +124,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: clamp(8px, 2vw, 20px);
-      align-items: center; justify-items: center;
+      align-items: center; justify-items: stretch;
       margin-bottom: clamp(14px, 3vw, 24px);
     }
 
@@ -132,6 +132,7 @@
     .player-card {
       width: 100%;
       max-width: clamp(140px, 22vw, 220px);
+      margin: 0 auto;
       background: var(--card);
       border-radius: clamp(16px, 2.5vw, 22px);
       border: 1px solid rgba(255,255,255,0.06);
@@ -240,7 +241,7 @@
       transition: border-color 0.1s, box-shadow 0.1s !important;
     }
 
-    .pos-north { grid-column: 2/3; grid-row: 1/2; justify-items: center; }
+    .pos-north { grid-column: 2/3; grid-row: 1/2; }
     .pos-west  { grid-column: 1/2; grid-row: 2/3; }
     .pos-east  { grid-column: 3/4; grid-row: 2/3; }
     .pos-south { grid-column: 2/3; grid-row: 3/4; }
@@ -482,6 +483,33 @@
     .numpad {
       display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 6px; margin-bottom: 12px;
+    }
+    /* メインモーダルのテンキーはデフォルト非表示 */
+    #mainNumpad { display: none; }
+    #mainNumpad.visible { display: grid; }
+
+    .numpad-toggle {
+      text-align: center; margin-bottom: 8px;
+    }
+    .numpad-toggle-btn {
+      background: none; border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted); font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 1px; cursor: pointer; padding: 5px 14px;
+      border-radius: 20px; touch-action: manipulation;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .numpad-toggle-btn:active { background: rgba(255,255,255,0.06); }
+    .numpad-toggle-btn.active {
+      color: var(--gold); border-color: rgba(200,168,64,0.4);
+      background: rgba(200,168,64,0.08);
+    }
+    [data-theme="light"] .numpad-toggle-btn {
+      border-color: rgba(0,0,0,0.14); color: var(--muted);
+    }
+    [data-theme="light"] .numpad-toggle-btn.active {
+      color: var(--gold); border-color: rgba(160,120,32,0.45);
+      background: rgba(160,120,32,0.08);
     }
     .numpad-btn {
       background: rgba(255,255,255,0.04); border: 1px solid var(--border);
@@ -855,7 +883,7 @@
       <button class="btn btn-reset" id="resetBtn">↺ リセット</button>
     </div>
   </div>
-  <div class="footer-note">スワイプ: ロン　／　2タップ: ツモ</div>
+  <div class="footer-note">スワイプ: 点数移動　／　2タップ: ツモ</div>
 </div>
 
 <!-- ── Score input modal ─────────────────────────── -->
@@ -864,7 +892,7 @@
     <div class="sheet-handle"></div>
 
     <div class="mode-toggle">
-      <button class="mode-btn active" id="modeRon">ロン</button>
+      <button class="mode-btn active" id="modeRon">点数移動</button>
       <button class="mode-btn"        id="modeTsumo">ツモ</button>
     </div>
 
@@ -902,8 +930,13 @@
     <!-- Tsumo field tabs -->
     <div class="tif-tabs" id="tsumoTabs" style="display:none"></div>
 
-    <!-- Shared numpad -->
-    <div class="numpad">
+    <!-- Numpad toggle -->
+    <div class="numpad-toggle">
+      <button class="numpad-toggle-btn" id="showNumpadBtn">⌨ 手入力</button>
+    </div>
+
+    <!-- Shared numpad (hidden by default) -->
+    <div class="numpad" id="mainNumpad">
       <button class="numpad-btn" data-num="1">1</button>
       <button class="numpad-btn" data-num="2">2</button>
       <button class="numpad-btn" data-num="3">3</button>
@@ -1026,7 +1059,7 @@
     <div class="help-title">使 い 方</div>
 
     <div class="help-section">
-      <div class="help-section-title">ロン（点数渡し）</div>
+      <div class="help-section-title">点数移動（スワイプ）</div>
       <div class="help-row">
         <span class="help-op">スワイプ</span>
         <span class="help-desc">プレイヤーをホールドして相手の方向へ指を動かす</span>
@@ -1069,15 +1102,15 @@
       </div>
       <div class="help-row">
         <span class="help-op">+ 本場</span>
-        <span class="help-desc">ロン +300 / ツモは各支払者から +100<br>1本場ごとに加算</span>
+        <span class="help-desc">点数移動 +300 / ツモは各支払者から +100<br>1本場ごとに加算</span>
       </div>
     </div>
 
     <div class="help-section">
-      <div class="help-section-title">電卓入力</div>
+      <div class="help-section-title">手入力（電卓）</div>
       <div class="help-row">
-        <span class="help-op">百の位〜</span>
-        <span class="help-desc">キーは百の位からスタート<br>例）3 → 300点 ／ 39 → 3,900点</span>
+        <span class="help-op">⌨ 手入力</span>
+        <span class="help-desc">点数入力画面の「手入力」ボタンで電卓を表示<br>キーは百の位からスタート。例）3 → 300点 / 39 → 3,900点</span>
       </div>
     </div>
 
@@ -1682,10 +1715,17 @@
     }
   }
 
+  function hideNumpad() {
+    const np = document.getElementById('mainNumpad');
+    const btn = document.getElementById('showNumpadBtn');
+    if (np)  np.classList.remove('visible');
+    if (btn) { btn.textContent = '⌨ 手入力'; btn.classList.remove('active'); }
+  }
   function openRonModal(src, tgt) {
     ronSrc = src; ronTgt = tgt; tsumoWinner = src;
     ronInput = '0'; scoreDisplay.textContent = '0';
     honba = 0; updateHonbaDisplay();
+    hideNumpad();
     setMode('ron');
     setRonCat((tgt === dealerId) ? 'oya' : 'ko');
     modal.classList.add('show');
@@ -1693,6 +1733,7 @@
   function openTsumoModal(winnerId) {
     tsumoWinner = winnerId; ronSrc = null; ronTgt = null;
     honba = 0; updateHonbaDisplay();
+    hideNumpad();
     setMode('tsumo');
     setTsumoType((winnerId === dealerId) ? 'oya' : 'ko');
     modal.classList.add('show');
@@ -2158,7 +2199,7 @@
 
     /* Mode buttons */
     document.getElementById('modeRon').addEventListener('click', () => {
-      if (mode !== 'ron') { if (ronSrc && ronTgt) setMode('ron'); else showToast('ロンはプレイヤーをスワイプして開始', true); }
+      if (mode !== 'ron') { if (ronSrc && ronTgt) setMode('ron'); else showToast('点数移動はプレイヤーをスワイプして開始', true); }
     });
     document.getElementById('modeTsumo').addEventListener('click', () => {
       if (mode !== 'tsumo') { if (!tsumoWinner) tsumoWinner = ronSrc; setMode('tsumo'); setTsumoType('ko'); }
@@ -2168,8 +2209,17 @@
     document.getElementById('btnKo').addEventListener('click',  () => setTsumoType('ko'));
     document.getElementById('btnOya').addEventListener('click', () => setTsumoType('oya'));
 
+    /* 手入力トグル */
+    document.getElementById('showNumpadBtn').addEventListener('click', () => {
+      const np  = document.getElementById('mainNumpad');
+      const btn = document.getElementById('showNumpadBtn');
+      const open = np.classList.toggle('visible');
+      btn.textContent = open ? '✕ 閉じる' : '⌨ 手入力';
+      btn.classList.toggle('active', open);
+    });
+
     /* Numpad (main modal) */
-    document.querySelectorAll('.numpad-btn[data-num]').forEach(btn => {
+    document.querySelectorAll('#mainNumpad .numpad-btn[data-num]').forEach(btn => {
       btn.addEventListener('click', () => handleNum(btn.dataset.num));
     });
     document.getElementById('numBS').addEventListener('click', handleBS);
