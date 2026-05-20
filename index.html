@@ -70,6 +70,7 @@
       font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic UI', system-ui, sans-serif;
       padding: 20px 16px;
       touch-action: pan-y;
+      overflow-x: hidden;
     }
 
     /* ── Theme toggle / Help: fixed top ─────────────── */
@@ -122,9 +123,9 @@
     /* ── Grid ────────────────────────────────────────── */
     .grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: clamp(8px, 2vw, 20px);
-      align-items: center; justify-items: stretch;
+      align-items: center;
       margin-bottom: clamp(14px, 3vw, 24px);
     }
 
@@ -132,6 +133,7 @@
     .player-card {
       width: 100%;
       max-width: clamp(140px, 22vw, 220px);
+      min-width: 0;
       margin: 0 auto;
       background: var(--card);
       border-radius: clamp(16px, 2.5vw, 22px);
@@ -161,7 +163,7 @@
     .player-cell {
       display: flex; flex-direction: column;
       align-items: center; gap: 4px;
-      width: 100%;
+      width: 100%; min-width: 0;
     }
     .dealer-indicator {
       display: inline-flex; align-items: center;
@@ -227,10 +229,11 @@
     .player-name::placeholder { color: var(--muted); opacity: 0.4; }
 
     .score {
-      font-size: clamp(1.9rem, 4vw, 3.2rem);
+      font-size: clamp(1.5rem, 4vw, 3.2rem);
       font-weight: 800; font-feature-settings: "tnum";
       color: var(--text); letter-spacing: -1.5px; line-height: 1;
       transition: color 0.2s;
+      overflow: hidden; white-space: nowrap;
     }
     .score.negative { color: var(--red); }
 
