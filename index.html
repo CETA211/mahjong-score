@@ -1329,7 +1329,7 @@
   let singleTapTimer = null;
 
   /* ── ④ Long press state ─────────────────────────── */
-  let longPressTimer = null, lpActive = false, lpButtons = [];
+  let longPressTimer = null, lpActive = false;
   let lpSrcPid = null, lpCurrentTarget = null;
   const LP_DELAY = 400;
 
@@ -1764,7 +1764,6 @@
     const delta = adjSign === '+' ? amt : -amt;
     players[adjustPid].score += delta;
     renderScores();
-    const windName = WIND_JP[adjustPid] || adjustPid;
     const sign = adjSign === '+' ? '+' : '-';
     lsPush(LS_TRANSFER, {
       timestamp: Date.now(),
@@ -1773,7 +1772,7 @@
       amount: amt, sign: adjSign,
       type: 'adjust'
     }, 200);
-    showToast(`${windName} ${sign}${amt.toLocaleString()}点 調整`);
+    showToast(`${getName(adjustPid)} ${sign}${amt.toLocaleString()}点 調整`);
     return true;
   }
 
@@ -2086,7 +2085,6 @@
     lpSrcPid = null;
     lpCurrentTarget = null;
     highlightLpTarget(null);
-    lpButtons = [];
   }
 
   /* ── Swipe handlers ─────────────────────────────── */
