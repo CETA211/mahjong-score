@@ -256,12 +256,60 @@
       pointer-events: none;
     }
     .center-inner {
-      width: clamp(48px, 8vw, 80px); height: clamp(48px, 8vw, 80px);
-      border-radius: 50%; border: 1px solid var(--gold-line);
-      display: flex; align-items: center; justify-content: center;
+      min-width: clamp(72px, 13vw, 110px);
+      padding: 7px 10px;
+      border-radius: 14px; border: 1px solid var(--gold-line);
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
       background: rgba(200,168,64,0.04);
+      pointer-events: auto; cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
     }
-    .center-kanji { font-size: clamp(1.2rem, 2.5vw, 2.2rem); font-weight: 800; color: var(--gold); opacity: 0.4; }
+    .center-inner:active { background: rgba(200,168,64,0.14); }
+    .ci-kyoku {
+      font-size: clamp(0.82rem, 1.9vw, 1.15rem); font-weight: 800;
+      color: var(--gold); letter-spacing: 1px; white-space: nowrap;
+    }
+    .ci-sub {
+      font-size: clamp(0.5rem, 1.1vw, 0.66rem); color: var(--muted);
+      white-space: nowrap; font-feature-settings: "tnum";
+    }
+
+    /* ── プレイヤー選択ボタン（リーチ/流局モーダル） ── */
+    .pick-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .pick-btn {
+      flex: 1 1 40%; padding: 14px 8px; border-radius: 12px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      color: var(--text); font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .pick-btn:active { background: rgba(255,255,255,0.1); }
+    .pick-btn.on { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+    .pick-btn .pick-sub { display: block; font-size: 0.6rem; color: var(--muted); margin-top: 3px; }
+    .pick-btn.on .pick-sub { color: var(--gold); }
+    [data-theme="light"] .pick-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+
+    /* ── 局・本場・供託 修正モーダル ── */
+    .ie-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .ie-label { flex: 1; font-size: 0.85rem; font-weight: 700; color: var(--text); }
+    .ie-val {
+      min-width: 64px; text-align: center; font-size: 1rem; font-weight: 800;
+      color: var(--gold); font-feature-settings: "tnum";
+    }
+    .ie-btn {
+      width: 44px; height: 40px; border-radius: 10px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--text); font-size: 1.1rem; font-weight: 700; cursor: pointer;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .ie-btn:active { background: rgba(255,255,255,0.12); }
+    [data-theme="light"] .ie-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a1a; }
+
+    .btn-riichi { border-color: rgba(200,168,64,0.55); color: var(--gold); }
+    .btn-riichi:hover  { background: var(--gold-dim); }
+    .btn-riichi:active { background: var(--gold-dim); }
 
     /* ── Action bar ──────────────────────────────────── */
     .action-bar { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
@@ -846,7 +894,10 @@
     </div>
 
     <div class="center">
-      <div class="center-inner"><span class="center-kanji">中</span></div>
+      <div class="center-inner" id="centerInfo" title="タップで修正">
+        <span class="ci-kyoku" id="ciKyoku">東1局</span>
+        <span class="ci-sub" id="ciSub">0本場・供託0</span>
+      </div>
     </div>
 
     <!-- East -->
@@ -870,11 +921,19 @@
 
   <!-- Action bar -->
   <div class="action-bar">
-    <div class="action-row" style="justify-content:center;">
+    <div class="action-row" style="justify-content:center; gap:8px;">
       <div class="rule-toggle" id="ruleToggle">
         <button class="mode-btn active" id="btnYonma">四 麻</button>
         <button class="mode-btn"        id="btnSanma">三 麻</button>
       </div>
+      <div class="rule-toggle" id="rulesetToggle">
+        <button class="mode-btn"        id="btnJantama">雀魂</button>
+        <button class="mode-btn active" id="btnMleague">Mリーグ</button>
+      </div>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-riichi" id="riichiBtn">立直</button>
+      <button class="btn" id="ryuukyokuBtn">流局</button>
     </div>
     <div class="action-row">
       <button class="btn" id="undoBtn">← 戻る</button>
@@ -1006,9 +1065,70 @@
       <button class="numpad-btn" data-adj-num="0">0</button>
       <button class="numpad-btn sp" id="adjBS">⌫</button>
     </div>
+    <button class="modal-btn danger" id="chomboBtn" style="width:100%; margin-bottom:10px; padding:11px;">⚠ チョンボ（罰符処理）</button>
     <div class="modal-actions">
       <button class="modal-btn cancel"  id="adjCancelBtn">キャンセル</button>
       <button class="modal-btn confirm" id="adjConfirmBtn">適用</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── リーチ宣言モーダル ─────────────────────────── -->
+<div class="modal-overlay" id="riichiModal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="modal-label">リーチ宣言</div>
+    <div class="modal-transfer" style="font-size:0.9rem;">宣言者を選択（1,000点を供託）</div>
+    <div id="riichiPlayerList"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="riichiCancelBtn">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 流局モーダル ────────────────────────────────── -->
+<div class="modal-overlay" id="ryuukyokuModal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="modal-label">流局</div>
+    <div class="modal-transfer" style="font-size:0.9rem;">テンパイしたプレイヤーをタップ</div>
+    <div id="tenpaiList"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel"  id="ryuCancelBtn">キャンセル</button>
+      <button class="modal-btn confirm" id="ryuConfirmBtn">流局確定</button>
+    </div>
+    <div id="chuutoRow" style="margin-top:8px;">
+      <button class="modal-btn danger" id="chuutoBtn" style="width:100%;">途中流局（罰符なし・連荘）</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 局・本場・供託 修正モーダル ─────────────────── -->
+<div class="modal-overlay" id="infoEditModal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="modal-label">局・本場・供託の修正</div>
+    <div class="ie-row">
+      <span class="ie-label">局</span>
+      <button class="ie-btn" data-ie="kyoku" data-d="-1">−</button>
+      <span class="ie-val" id="ieKyoku">東1局</span>
+      <button class="ie-btn" data-ie="kyoku" data-d="1">＋</button>
+    </div>
+    <div class="ie-row">
+      <span class="ie-label">本場</span>
+      <button class="ie-btn" data-ie="honba" data-d="-1">−</button>
+      <span class="ie-val" id="ieHonba">0</span>
+      <button class="ie-btn" data-ie="honba" data-d="1">＋</button>
+    </div>
+    <div class="ie-row">
+      <span class="ie-label">供託（リーチ棒）</span>
+      <button class="ie-btn" data-ie="kyotaku" data-d="-1">−</button>
+      <span class="ie-val" id="ieKyotaku">0</span>
+      <button class="ie-btn" data-ie="kyotaku" data-d="1">＋</button>
+    </div>
+    <div class="help-note">局を変更すると親も連動します。本場・供託の修正は点数を動かしません。</div>
+    <div class="modal-actions" style="margin-top:10px;">
+      <button class="modal-btn confirm" id="ieCloseBtn">閉じる</button>
     </div>
   </div>
 </div>
@@ -1105,7 +1225,39 @@
       </div>
       <div class="help-row">
         <span class="help-op">+ 本場</span>
-        <span class="help-desc">点数移動 +300 / ツモは各支払者から +100<br>1本場ごとに加算</span>
+        <span class="help-desc">点数移動 +300 / ツモは各支払者から +100<br>現在の本場が自動で点数に反映される</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">リーチ / 流局</div>
+      <div class="help-row">
+        <span class="help-op">立直</span>
+        <span class="help-desc">「立直」ボタン→宣言者を選択で1,000点を供託へ<br>和了時に供託は自動で和了者へ</span>
+      </div>
+      <div class="help-row">
+        <span class="help-op">流局</span>
+        <span class="help-desc">「流局」ボタン→テンパイ者を選択でノーテン罰符（場3,000点）を自動分配<br>連荘 / 親流れ・本場も自動更新</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">局・本場・供託（中央パネル）</div>
+      <div class="help-row">
+        <span class="help-op">中央パネル</span>
+        <span class="help-desc">局（東1局〜）・本場・供託本数を常時表示<br>和了・流局で自動進行。タップで手動修正</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">ルール（雀魂 / Mリーグ）</div>
+      <div class="help-row">
+        <span class="help-op">雀魂</span>
+        <span class="help-desc">ウマ +15/+5/−5/−15・オカなし（25,000返し）<br>ダブル役満〜6倍役満チップ・飛び即終了・途中流局あり</span>
+      </div>
+      <div class="help-row">
+        <span class="help-op">Mリーグ</span>
+        <span class="help-desc">ウマ +30/+10/−10/−30・オカ+20（30,000返し）<br>切り上げ満貫（3飜60符/4飜30符→満貫）・飛び続行</span>
       </div>
     </div>
 
@@ -1129,7 +1281,7 @@
       <div class="help-section-title">四麻 / 三麻</div>
       <div class="help-row">
         <span class="help-op">四 麻</span>
-        <span class="help-desc">4人・25,000点スタート／ウマ [30, 10, -10, -30]</span>
+        <span class="help-desc">4人・25,000点スタート／ウマ・オカはルール設定（雀魂/Mリーグ）に従う</span>
       </div>
       <div class="help-row">
         <span class="help-op">三 麻</span>
@@ -1172,6 +1324,13 @@
   let UMA        = YONMA_UMA.slice();
   let sanmaMode  = false;
 
+  /* ── ルール軸（雀魂 / Mリーグ）──────────────────── */
+  const RULESETS = {
+    jantama: { label: '雀魂',    UMA4: [15, 5, -5, -15],   BASE4: 25000, kiriage: false, tobiEnd: true  },
+    mleague: { label: 'Mリーグ', UMA4: [30, 10, -10, -30], BASE4: 30000, kiriage: true,  tobiEnd: false },
+  };
+  let ruleset = 'mleague';
+
   /* ── 点数表 ────────────────────────────────────── */
   const RON_KO_SCORES = [
     { score: 1000,  label: '1飜30符' },
@@ -1189,12 +1348,17 @@
     { score: 5800,  label: '2飜90符' },
     { score: 6400,  label: '2飜100符\n3飜50符\n4飜25符' },
     { score: 7100,  label: '2飜110符' },
-    { score: 7700,  label: '3飜60符\n4飜30符' },
+    { score: 7700,  label: '3飜60符\n4飜30符', kiriage: true },
     { score: 8000,  label: '満貫' },
     { score: 12000, label: '跳満' },
     { score: 16000, label: '倍満' },
     { score: 24000, label: '三倍満' },
     { score: 32000, label: '役満' },
+    { score: 64000,  label: 'ダブル役満', jantama: true },
+    { score: 96000,  label: '3倍役満',   jantama: true },
+    { score: 128000, label: '4倍役満',   jantama: true },
+    { score: 160000, label: '5倍役満',   jantama: true },
+    { score: 192000, label: '6倍役満',   jantama: true },
   ];
   const RON_OYA_SCORES = [
     { score: 1500,  label: '1飜30符' },
@@ -1210,12 +1374,17 @@
     { score: 6800,  label: '2飜70符' },
     { score: 7700,  label: '2飜80符\n3飜40符' },
     { score: 9600,  label: '3飜50符\n4飜25符' },
-    { score: 11600, label: '3飜60符\n4飜30符' },
+    { score: 11600, label: '3飜60符\n4飜30符', kiriage: true },
     { score: 12000, label: '満貫' },
     { score: 18000, label: '跳満' },
     { score: 24000, label: '倍満' },
     { score: 36000, label: '三倍満' },
     { score: 48000, label: '役満' },
+    { score: 96000,  label: 'ダブル役満', jantama: true },
+    { score: 144000, label: '3倍役満',   jantama: true },
+    { score: 192000, label: '4倍役満',   jantama: true },
+    { score: 240000, label: '5倍役満',   jantama: true },
+    { score: 288000, label: '6倍役満',   jantama: true },
   ];
   const TSUMO_KO_SCORES = [
     { ko: 300,  oya: 500,   label: '1飜30符' },
@@ -1233,12 +1402,17 @@
     { ko: 1500, oya: 2900,  label: '2飜90符' },
     { ko: 1600, oya: 3200,  label: '2飜100符\n3飜50符' },
     { ko: 1800, oya: 3600,  label: '2飜110符' },
-    { ko: 2000, oya: 3900,  label: '3飜60符\n4飜30符' },
+    { ko: 2000, oya: 3900,  label: '3飜60符\n4飜30符', kiriage: true },
     { ko: 2000, oya: 4000,  label: '満貫' },
     { ko: 3000, oya: 6000,  label: '跳満' },
     { ko: 4000, oya: 8000,  label: '倍満' },
     { ko: 6000, oya: 12000, label: '三倍満' },
     { ko: 8000, oya: 16000, label: '役満' },
+    { ko: 16000, oya: 32000, label: 'ダブル役満', jantama: true },
+    { ko: 24000, oya: 48000, label: '3倍役満',   jantama: true },
+    { ko: 32000, oya: 64000, label: '4倍役満',   jantama: true },
+    { ko: 40000, oya: 80000, label: '5倍役満',   jantama: true },
+    { ko: 48000, oya: 96000, label: '6倍役満',   jantama: true },
   ];
   const TSUMO_OYA_SCORES = [
     { all: 500,   label: '1飜30符' },
@@ -1256,12 +1430,17 @@
     { all: 2900,  label: '2飜90符' },
     { all: 3200,  label: '2飜100符\n3飜50符' },
     { all: 3600,  label: '2飜110符' },
-    { all: 3900,  label: '3飜60符\n4飜30符' },
+    { all: 3900,  label: '3飜60符\n4飜30符', kiriage: true },
     { all: 4000,  label: '満貫' },
     { all: 6000,  label: '跳満' },
     { all: 8000,  label: '倍満' },
     { all: 12000, label: '三倍満' },
     { all: 16000, label: '役満' },
+    { all: 32000, label: 'ダブル役満', jantama: true },
+    { all: 48000, label: '3倍役満',   jantama: true },
+    { all: 64000, label: '4倍役満',   jantama: true },
+    { all: 80000, label: '5倍役満',   jantama: true },
+    { all: 96000, label: '6倍役満',   jantama: true },
   ];
 
   /* ── ① Wind JP name map ─────────────────────────── */
@@ -1279,17 +1458,54 @@
   const LS_GAME     = 'mahjong_game_history';
   const LS_MODE     = 'mahjong_rule_mode';
   const LS_DEALER   = 'mahjong_dealer';
+  const LS_RULESET  = 'mahjong_ruleset';
+  const LS_LIVE     = 'mahjong_live_state';
 
   /* ── Undo / Redo stacks ─────────────────────────── */
   const undoStack = [], redoStack = [];
 
-  function snapshot() { return Object.fromEntries(IDS.map(id => [id, players[id].score])); }
+  function snapshot() {
+    return {
+      scores: Object.fromEntries(IDS.map(id => [id, players[id].score])),
+      dealerId, kyoku, honbaGame, kyotaku,
+    };
+  }
   function saveState() {
     undoStack.push(snapshot()); redoStack.length = 0;
     if (undoStack.length > 50) undoStack.shift();
     syncBtns();
   }
-  function applySnapshot(s) { for (const id of IDS) players[id].score = s[id]; renderScores(); }
+  function applySnapshot(s) {
+    if (s.scores) {
+      for (const id of IDS) players[id].score = s.scores[id];
+      dealerId = s.dealerId; kyoku = s.kyoku;
+      honbaGame = s.honbaGame; kyotaku = s.kyotaku;
+      localStorage.setItem(LS_DEALER, dealerId);
+    } else {
+      for (const id of IDS) players[id].score = s[id];
+    }
+    renderScores(); renderDealerBadges(); renderCenterInfo(); saveLive();
+  }
+
+  /* ── 対局状態の永続化（リロード対策）────────────── */
+  function saveLive() {
+    lsSet(LS_LIVE, {
+      scores: Object.fromEntries(YONMA_IDS.map(id => [id, players[id].score])),
+      dealerId, kyoku, honbaGame, kyotaku,
+    });
+  }
+  function loadLive(raw) {
+    let s;
+    try { s = JSON.parse(raw); } catch { return; }
+    if (!s || !s.scores) return;
+    for (const id of YONMA_IDS) {
+      if (typeof s.scores[id] === 'number') players[id].score = s.scores[id];
+    }
+    if (YONMA_IDS.includes(s.dealerId))    dealerId  = s.dealerId;
+    if (typeof s.kyoku     === 'number')   kyoku     = s.kyoku;
+    if (typeof s.honbaGame === 'number')   honbaGame = s.honbaGame;
+    if (typeof s.kyotaku   === 'number')   kyotaku   = s.kyotaku;
+  }
   function syncBtns() {
     undoBtn.style.opacity = undoStack.length ? '1' : '0.3';
     redoBtn.style.opacity = redoStack.length ? '1' : '0.3';
@@ -1312,7 +1528,25 @@
   /* ── Mode / Tsumo state ─────────────────────────── */
   let dealerId = 'east';   // 初期親 = 東家
   let ronCat = 'ko';       // 'ko' | 'oya'（ロン点数表のカテゴリ）
-  let honba = 0;           // 本場カウンタ（モーダル内のみ）
+  let honba = 0;           // 本場カウンタ（モーダル内・honbaGameから初期化）
+
+  /* ── ゲーム進行状態 ─────────────────────────────── */
+  let kyoku = 0;           // 0〜 = 東1局〜（四麻: 0-7で東南、8〜は西入）
+  let honbaGame = 0;       // 局を跨ぐ本場カウンタ
+  let kyotaku = 0;         // 供託（リーチ棒）本数
+
+  function ROTATION() { return sanmaMode ? ['east', 'south', 'north'] : ['east', 'south', 'west', 'north']; }
+  function kyokuName() {
+    const N = sanmaMode ? 3 : 4;
+    const round = ['東', '南', '西', '北'][Math.floor(kyoku / N) % 4];
+    return `${round}${(kyoku % N) + 1}局`;
+  }
+  function renderCenterInfo() {
+    const k = document.getElementById('ciKyoku'), s = document.getElementById('ciSub');
+    if (!k) return;
+    k.textContent = kyokuName();
+    s.textContent = `${honbaGame}本場・供託${kyotaku}`;
+  }
   let mode = 'ron', tsumoType = 'ko';
   let ronSrc = null, ronTgt = null, ronInput = '0';
   let tsumoWinner = null, tsumoDealerId = null;
@@ -1538,15 +1772,16 @@
 
   /* ── Tsumo type toggle ──────────────────────────── */
   function setTsumoType(type) {
-    tsumoType = type; tsumoKoIn = '0'; tsumoOyaIn = '0';
+    tsumoType = type;
+    /* 本場分を初期値としてプリセット（各支払者 +100/本場） */
+    tsumoKoIn = String(honba * 100); tsumoOyaIn = String(honba * 100);
     /* 子ツモ時は dealer を 親プレイヤーに自動セット（勝者でない場合のみ） */
     tsumoDealerId = (type === 'ko' && dealerId !== tsumoWinner) ? dealerId : null;
     tsumoFocus = 'oya';
     document.getElementById('btnKo').classList.toggle('active', type === 'ko');
     document.getElementById('btnOya').classList.toggle('active', type === 'oya');
-    scoreDisplay.textContent = '0';
     tsumoBreakdown.innerHTML = ''; tsumoBreakdown.classList.remove('visible');
-    renderTsumoTabs();
+    refreshTsumoDisplay();
     renderTsumoChips();
   }
 
@@ -1560,10 +1795,13 @@
     });
   }
   function setDealer(id) {
-    if (!YONMA_IDS.includes(id)) return;
+    if (!IDS.includes(id)) return;
     dealerId = id;
+    /* 局を親に同期（現在の場は維持） */
+    const rot = ROTATION(), N = rot.length;
+    kyoku = Math.floor(kyoku / N) * N + rot.indexOf(id);
     localStorage.setItem(LS_DEALER, id);
-    renderDealerBadges();
+    renderDealerBadges(); renderCenterInfo(); saveLive();
     if (modal.classList.contains('show')) {
       if (mode === 'ron') {
         setRonCat((ronTgt === dealerId) ? 'oya' : 'ko');
@@ -1571,6 +1809,33 @@
         setTsumoType((tsumoWinner === dealerId) ? 'oya' : 'ko');
       }
     }
+  }
+
+  /* ── ルール軸（雀魂 / Mリーグ）切替 ──────────────── */
+  function setRuleset(rs, silent) {
+    if (!RULESETS[rs]) return;
+    ruleset = rs;
+    localStorage.setItem(LS_RULESET, rs);
+    if (!sanmaMode) {
+      UMA        = RULESETS[rs].UMA4.slice();
+      BASE_SCORE = RULESETS[rs].BASE4;
+    }
+    document.getElementById('btnJantama').classList.toggle('active', rs === 'jantama');
+    document.getElementById('btnMleague').classList.toggle('active', rs === 'mleague');
+    renderRonChips();
+    renderTsumoChips();
+    if (!silent) showToast(`${RULESETS[rs].label}ルールに切り替えました`);
+  }
+
+  /* ── チップ表示フィルタ（ルール軸） ──────────────── */
+  function chipVisible(e) {
+    if (e.kiriage && RULESETS[ruleset].kiriage) return false;   /* Mリーグ: 切り上げ満貫 */
+    if (e.jantama && ruleset !== 'jantama')     return false;   /* ダブル役満以上は雀魂のみ */
+    return true;
+  }
+  function chipLabel(e) {
+    if (e.label === '満貫' && RULESETS[ruleset].kiriage) return '満貫\n3飜60符\n4飜30符';
+    return e.label;
   }
 
   /* ── 点数チップ ──────────────────────────────── */
@@ -1581,21 +1846,21 @@
     renderRonChips();
   }
   function renderRonChips() {
-    const table = ronCat === 'oya' ? RON_OYA_SCORES : RON_KO_SCORES;
-    const currentScore = parseInt(ronInput, 10) || 0;
+    const table = (ronCat === 'oya' ? RON_OYA_SCORES : RON_KO_SCORES).filter(chipVisible);
+    const currentScore = (parseInt(ronInput, 10) || 0) - honba * 300;
     ronScoreRail.innerHTML = '';
     let mangaChip = null;
     table.forEach(e => {
       const chip = document.createElement('div');
       chip.className = 'score-chip' + (e.score === currentScore ? ' selected' : '');
       chip.dataset.score = e.score;
-      chip.innerHTML = `<div class="score-chip-val">${e.score.toLocaleString()}</div><div class="score-chip-lbl">${e.label}</div>`;
+      chip.innerHTML = `<div class="score-chip-val">${e.score.toLocaleString()}</div><div class="score-chip-lbl">${chipLabel(e)}</div>`;
       chip.addEventListener('click', () => selectRonChip(e.score));
       ronScoreRail.appendChild(chip);
       if (e.label === '満貫') mangaChip = chip;
     });
     /* 初期表示位置を満貫に（モーダル表示完了後に実行） */
-    if (currentScore === 0 && mangaChip) {
+    if (currentScore <= 0 && mangaChip) {
       setTimeout(() => { centerChip(ronScoreRail, mangaChip); }, 60);
     }
   }
@@ -1605,18 +1870,19 @@
   }
   function syncChipSelection() {
     if (mode === 'ron') {
-      const cur = parseInt(ronInput, 10) || 0;
+      const cur = (parseInt(ronInput, 10) || 0) - honba * 300;
       [...ronScoreRail.children].forEach(c => {
         c.classList.toggle('selected', parseInt(c.dataset.score, 10) === cur);
       });
     } else if (tsumoScoreRail) {
       if (tsumoType === 'oya') {
-        const cur = parseInt(tsumoKoIn, 10) || 0;
+        const cur = (parseInt(tsumoKoIn, 10) || 0) - honba * 100;
         [...tsumoScoreRail.children].forEach(c => {
           c.classList.toggle('selected', parseInt(c.dataset.all, 10) === cur);
         });
       } else {
-        const ko = parseInt(tsumoKoIn, 10) || 0, oya = parseInt(tsumoOyaIn, 10) || 0;
+        const ko  = (parseInt(tsumoKoIn,  10) || 0) - honba * 100;
+        const oya = (parseInt(tsumoOyaIn, 10) || 0) - honba * 100;
         [...tsumoScoreRail.children].forEach(c => {
           c.classList.toggle('selected',
             parseInt(c.dataset.ko, 10) === ko && parseInt(c.dataset.oya, 10) === oya);
@@ -1625,8 +1891,8 @@
     }
   }
   function selectRonChip(score) {
-    ronInput = String(score);
-    honba = 0; updateHonbaDisplay();
+    /* チップ点数 + 本場分（+300/本場）を入力値にする */
+    ronInput = String(score + honba * 300);
     scoreDisplay.textContent = fmt(ronInput);
     [...ronScoreRail.children].forEach(c => {
       c.classList.toggle('selected', parseInt(c.dataset.score, 10) === score);
@@ -1634,7 +1900,7 @@
   }
   function renderTsumoChips() {
     const isOya = tsumoType === 'oya';
-    const table = isOya ? TSUMO_OYA_SCORES : TSUMO_KO_SCORES;
+    const table = (isOya ? TSUMO_OYA_SCORES : TSUMO_KO_SCORES).filter(chipVisible);
     tsumoScoreRail.innerHTML = '';
     let mangaChip = null;
     table.forEach(e => {
@@ -1642,10 +1908,10 @@
       chip.className = 'score-chip';
       let valHtml;
       if (isOya) {
-        valHtml = `<div class="score-chip-val">${e.all.toLocaleString()}</div><div class="score-chip-lbl">オール\n${e.label}</div>`;
+        valHtml = `<div class="score-chip-val">${e.all.toLocaleString()}</div><div class="score-chip-lbl">オール\n${chipLabel(e)}</div>`;
         chip.dataset.all = e.all;
       } else {
-        valHtml = `<div class="score-chip-val">${e.ko.toLocaleString()}/${e.oya.toLocaleString()}</div><div class="score-chip-lbl">${e.label}</div>`;
+        valHtml = `<div class="score-chip-val">${e.ko.toLocaleString()}/${e.oya.toLocaleString()}</div><div class="score-chip-lbl">${chipLabel(e)}</div>`;
         chip.dataset.ko = e.ko; chip.dataset.oya = e.oya;
       }
       chip.innerHTML = valHtml;
@@ -1658,12 +1924,12 @@
     }
   }
   function selectTsumoChip(e) {
+    /* チップ点数 + 本場分（各 +100/本場）を入力値にする */
     if (tsumoType === 'oya') {
-      tsumoKoIn = String(e.all);
+      tsumoKoIn = String(e.all + honba * 100);
     } else {
-      tsumoKoIn = String(e.ko); tsumoOyaIn = String(e.oya);
+      tsumoKoIn = String(e.ko + honba * 100); tsumoOyaIn = String(e.oya + honba * 100);
     }
-    honba = 0; updateHonbaDisplay();
     tsumoFocus = 'oya';
     refreshTsumoDisplay();
     [...tsumoScoreRail.children].forEach(c => {
@@ -1726,8 +1992,9 @@
   }
   function openRonModal(src, tgt) {
     ronSrc = src; ronTgt = tgt; tsumoWinner = src;
-    ronInput = '0'; scoreDisplay.textContent = '0';
-    honba = 0; updateHonbaDisplay();
+    /* 現在の本場を自動適用（+300/本場） */
+    honba = honbaGame; updateHonbaDisplay();
+    ronInput = String(honba * 300); scoreDisplay.textContent = fmt(ronInput);
     hideNumpad();
     setMode('ron');
     setRonCat((tgt === dealerId) ? 'oya' : 'ko');
@@ -1735,7 +2002,8 @@
   }
   function openTsumoModal(winnerId) {
     tsumoWinner = winnerId; ronSrc = null; ronTgt = null;
-    honba = 0; updateHonbaDisplay();
+    /* 現在の本場を自動適用（各 +100/本場） */
+    honba = honbaGame; updateHonbaDisplay();
     hideNumpad();
     setMode('tsumo');
     setTsumoType((winnerId === dealerId) ? 'oya' : 'ko');
@@ -1773,7 +2041,50 @@
       type: 'adjust'
     }, 200);
     showToast(`${getName(adjustPid)} ${sign}${amt.toLocaleString()}点 調整`);
+    saveLive();
+    checkTobi();
     return true;
+  }
+
+  /* ── ゲーム進行（連荘・親流れ・終局判定・飛び）──── */
+  function advanceKyoku() {
+    const rot = ROTATION();
+    kyoku++;
+    dealerId = rot[kyoku % rot.length];
+    localStorage.setItem(LS_DEALER, dealerId);
+    renderDealerBadges();
+  }
+  function advanceAfterWin(winnerId) {
+    if (winnerId === dealerId) {
+      honbaGame++;                       /* 連荘 */
+    } else {
+      honbaGame = 0;
+      advanceKyoku();                    /* 親流れ */
+    }
+    renderCenterInfo();
+  }
+  function checkEndSuggest() {
+    const N = sanmaMode ? 3 : 4;
+    if (kyoku < 2 * N) return;           /* 東南戦の規定局数内 */
+    const top = Math.max(...IDS.map(id => players[id].score));
+    if (ruleset === 'jantama' && top < 30000 && kyoku < 3 * N) {
+      showToast('西入サドンデス（1位が30,000点未満・雀魂ルール）', false, 3200);
+      return;
+    }
+    setTimeout(() => {
+      if (confirm('規定局数を終了しました。精算しますか？')) openGameEndModal();
+    }, 500);
+  }
+  function checkTobi() {
+    const busted = IDS.find(id => players[id].score < 0);
+    if (!busted) return;
+    if (RULESETS[ruleset].tobiEnd) {
+      setTimeout(() => {
+        if (confirm(`${getName(busted)} が0点未満（飛び）。\n雀魂ルールでは終局です。精算しますか？`)) openGameEndModal();
+      }, 600);
+    } else {
+      showToast(`${getName(busted)} 0点未満（Mリーグルールでは続行）`, true, 3000);
+    }
   }
 
   /* ── Transfers ──────────────────────────────────── */
@@ -1783,10 +2094,20 @@
     if (amt <= 0) { showToast('1点以上入力してください', true); return false; }
     saveState();
     players[ronSrc].score -= amt; players[ronTgt].score += amt;
-    renderScores();
-    const desc = `${getName(ronSrc)} → ${getName(ronTgt)}　${amt.toLocaleString()}点`;
+    let desc = `${getName(ronSrc)} → ${getName(ronTgt)}　${amt.toLocaleString()}点`;
+    if (kyotaku > 0) {
+      players[ronTgt].score += kyotaku * 1000;
+      desc += `（供託+${(kyotaku * 1000).toLocaleString()}）`;
+      kyotaku = 0;
+    }
+    const renchan = ronTgt === dealerId;
     lsPush(LS_TRANSFER, { timestamp: Date.now(), from: ronSrc, to: ronTgt, fromName: getName(ronSrc), toName: getName(ronTgt), amount: amt, type: 'ron' }, 200);
-    showToast(desc);
+    advanceAfterWin(ronTgt);
+    renderScores();
+    showToast(desc + (renchan ? '　連荘' : ''));
+    saveLive();
+    checkTobi();
+    checkEndSuggest();
     return true;
   }
 
@@ -1804,11 +2125,125 @@
     saveState();
     for (const [id, amt] of Object.entries(payments)) players[id].score -= amt;
     players[tsumoWinner].score += total;
-    renderScores();
-    const desc = `${getName(tsumoWinner)} ツモ +${total.toLocaleString()}点`;
+    let desc = `${getName(tsumoWinner)} ツモ +${total.toLocaleString()}点`;
+    if (kyotaku > 0) {
+      players[tsumoWinner].score += kyotaku * 1000;
+      desc += `（供託+${(kyotaku * 1000).toLocaleString()}）`;
+      kyotaku = 0;
+    }
+    const renchan = tsumoWinner === dealerId;
     lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: tsumoWinner, toName: getName(tsumoWinner), amount: total, type: 'tsumo' }, 200);
-    showToast(desc);
+    advanceAfterWin(tsumoWinner);
+    renderScores();
+    showToast(desc + (renchan ? '　連荘' : ''));
+    saveLive();
+    checkTobi();
+    checkEndSuggest();
     return true;
+  }
+
+  /* ── リーチ（供託）─────────────────────────────── */
+  function openRiichiModal() {
+    const list = document.getElementById('riichiPlayerList');
+    list.innerHTML = '';
+    const row = document.createElement('div'); row.className = 'pick-row';
+    IDS.forEach(id => {
+      const b = document.createElement('button');
+      b.className = 'pick-btn';
+      b.innerHTML = `${getName(id)}<span class="pick-sub">${players[id].score.toLocaleString()}点</span>`;
+      b.addEventListener('click', () => doRiichi(id));
+      row.appendChild(b);
+    });
+    list.appendChild(row);
+    document.getElementById('riichiModal').classList.add('show');
+  }
+  function doRiichi(pid) {
+    if (players[pid].score < 1000) { showToast('持ち点1,000点未満はリーチできません', true); return; }
+    saveState();
+    players[pid].score -= 1000;
+    kyotaku++;
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), pid, playerName: getName(pid), amount: 1000, type: 'riichi' }, 200);
+    renderScores(); renderCenterInfo(); saveLive();
+    document.getElementById('riichiModal').classList.remove('show');
+    showToast(`${getName(pid)} リーチ！（供託 ${kyotaku}本）`);
+  }
+
+  /* ── 流局 ───────────────────────────────────────── */
+  let tenpaiSel = new Set();
+  function openRyuukyokuModal() {
+    tenpaiSel = new Set();
+    const list = document.getElementById('tenpaiList');
+    list.innerHTML = '';
+    const row = document.createElement('div'); row.className = 'pick-row';
+    IDS.forEach(id => {
+      const b = document.createElement('button');
+      b.className = 'pick-btn';
+      b.innerHTML = `${getName(id)}<span class="pick-sub">ノーテン</span>`;
+      b.addEventListener('click', () => {
+        if (tenpaiSel.has(id)) tenpaiSel.delete(id); else tenpaiSel.add(id);
+        b.classList.toggle('on', tenpaiSel.has(id));
+        b.querySelector('.pick-sub').textContent = tenpaiSel.has(id) ? 'テンパイ' : 'ノーテン';
+      });
+      row.appendChild(b);
+    });
+    list.appendChild(row);
+    /* 途中流局は雀魂ルールのみ */
+    document.getElementById('chuutoRow').style.display = ruleset === 'jantama' ? '' : 'none';
+    document.getElementById('ryuukyokuModal').classList.add('show');
+  }
+  function doRyuukyoku() {
+    saveState();
+    const tenpai = IDS.filter(id => tenpaiSel.has(id));
+    const noten  = IDS.filter(id => !tenpaiSel.has(id));
+    if (tenpai.length && noten.length) {
+      const gain = 3000 / tenpai.length, pay = 3000 / noten.length;
+      tenpai.forEach(id => players[id].score += gain);
+      noten.forEach(id => players[id].score -= pay);
+    }
+    const renchan = tenpaiSel.has(dealerId);
+    honbaGame++;
+    if (!renchan) advanceKyoku();
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), type: 'ryuukyoku', tenpaiNames: tenpai.map(getName) }, 200);
+    renderScores(); renderCenterInfo(); saveLive();
+    document.getElementById('ryuukyokuModal').classList.remove('show');
+    showToast(`流局　${renchan ? '連荘' : '親流れ'}・${honbaGame}本場`);
+    checkTobi();
+    checkEndSuggest();
+  }
+  function doChuuto() {
+    saveState();
+    honbaGame++;
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), type: 'chuuto' }, 200);
+    renderCenterInfo(); saveLive();
+    document.getElementById('ryuukyokuModal').classList.remove('show');
+    showToast(`途中流局　連荘・${honbaGame}本場`);
+  }
+
+  /* ── チョンボ ───────────────────────────────────── */
+  function doChombo() {
+    const pid = adjustPid;
+    if (!pid) return;
+    const isOya = pid === dealerId;
+    const msg = ruleset === 'jantama'
+      ? `${getName(pid)} のチョンボ（満貫払い）\n${isOya ? '他家に各4,000点' : '親に4,000点・他の子に各2,000点'}を支払います。\n（同局再ゲーム・本場据え置き）`
+      : `${getName(pid)} のチョンボを記録します。\nMリーグルールでは点数移動なし（場外で-20P減算）。`;
+    if (!confirm(msg)) return;
+    let moved = false;
+    if (ruleset === 'jantama') {
+      saveState();
+      for (const id of IDS) {
+        if (id === pid) continue;
+        const get = isOya ? 4000 : (id === dealerId ? 4000 : 2000);
+        players[id].score += get;
+        players[pid].score -= get;
+      }
+      moved = true;
+      renderScores(); saveLive();
+    }
+    lsPush(LS_TRANSFER, { timestamp: Date.now(), pid, playerName: getName(pid), type: 'chombo', moved }, 200);
+    showToast(`${getName(pid)} チョンボ${moved ? '（罰符精算・同局再ゲーム）' : '（記録のみ・場外-20P）'}`);
+    closeAdjustModal();
+    if (moved) checkTobi();
   }
 
   /* ── Undo / Redo / Reset ────────────────────────── */
@@ -1822,13 +2257,20 @@
     undoStack.push(snapshot()); applySnapshot(redoStack.pop());
     syncBtns(); showToast('↪ やり直し');
   }
+  function resetProgress() {
+    kyoku = 0; honbaGame = 0; kyotaku = 0;
+    dealerId = 'east';
+    localStorage.setItem(LS_DEALER, 'east');
+    renderDealerBadges(); renderCenterInfo();
+  }
   function resetAll() {
     const s = START_SCORE.toLocaleString();
-    if (!confirm(`全員を ${s}点 にリセットしますか？`)) return;
+    if (!confirm(`全員を ${s}点 にリセットしますか？\n（局・本場・供託も初期化されます）`)) return;
     saveState();
     for (const id of IDS) players[id].score = START_SCORE;
+    resetProgress();
     lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: null, amount: 0, type: 'reset', startScore: START_SCORE }, 200);
-    renderScores(); showToast(`全員 ${s}点にリセットしました`);
+    renderScores(); saveLive(); showToast(`全員 ${s}点にリセットしました`);
   }
 
   /* ── 三麻/四麻 モード切替 ──────────────────────── */
@@ -1840,18 +2282,13 @@
     sanmaMode   = enabled;
     IDS         = enabled ? SANMA_IDS.slice()   : YONMA_IDS.slice();
     START_SCORE = enabled ? SANMA_START : YONMA_START;
-    BASE_SCORE  = enabled ? SANMA_BASE  : YONMA_BASE;
-    UMA         = enabled ? SANMA_UMA.slice()   : YONMA_UMA.slice();
+    BASE_SCORE  = enabled ? SANMA_BASE  : RULESETS[ruleset].BASE4;
+    UMA         = enabled ? SANMA_UMA.slice()   : RULESETS[ruleset].UMA4.slice();
     neighbors   = enabled ? NEIGHBORS_SANMA : NEIGHBORS_YONMA;
-    /* 三麻で親が west になっていたら east に補正 */
-    if (!IDS.includes(dealerId)) {
-      dealerId = 'east';
-      localStorage.setItem(LS_DEALER, 'east');
-      if (typeof renderDealerBadges === 'function') renderDealerBadges();
-    }
     for (const id of YONMA_IDS) players[id].score = START_SCORE;
+    resetProgress();
     undoStack.length = 0; redoStack.length = 0;
-    syncBtns(); renderScores();
+    syncBtns(); renderScores(); saveLive();
     document.querySelector('.grid').classList.toggle('sanma', enabled);
     document.getElementById('btnYonma').classList.toggle('active', !enabled);
     document.getElementById('btnSanma').classList.toggle('active',  enabled);
@@ -1860,6 +2297,15 @@
 
   /* ── Game-end modal ─────────────────────────────── */
   function openGameEndModal() {
+    /* 残留供託は1位に付与（トップ取り） */
+    if (kyotaku > 0) {
+      const topId = IDS.reduce((a, b) => players[b].score > players[a].score ? b : a);
+      saveState();
+      players[topId].score += kyotaku * 1000;
+      showToast(`残留供託 ${(kyotaku * 1000).toLocaleString()}点 → ${getName(topId)}（トップ取り）`);
+      kyotaku = 0;
+      renderScores(); renderCenterInfo(); saveLive();
+    }
     const total        = IDS.reduce((s, id) => s + players[id].score, 0);
     const expectedTotal = IDS.length * START_SCORE;
     if (total !== expectedTotal) {
@@ -1911,8 +2357,9 @@
     const s = START_SCORE.toLocaleString();
     if (!confirm(`もう1試合ですか？\n全員 ${s}点にリセットします。`)) return;
     for (const id of IDS) players[id].score = START_SCORE;
+    resetProgress();
     undoStack.length = 0; redoStack.length = 0;
-    syncBtns(); renderScores();
+    syncBtns(); renderScores(); saveLive();
     gameEndModal.classList.remove('show');
     showToast(`全員 ${s}点でスタート！`);
   }
@@ -1946,7 +2393,7 @@
     const log  = lsGet(LS_TRANSFER);
     list.innerHTML = '';
     if (!log.length) { list.innerHTML = '<div class="hist-empty">点数ログはありません</div>'; return; }
-    const iconMap = { ron:'🀄', tsumo:'🀅', reset:'🔄', adjust:'⚖' };
+    const iconMap = { ron:'🀄', tsumo:'🀅', reset:'🔄', adjust:'⚖', riichi:'🔔', ryuukyoku:'🌊', chuuto:'⏸', chombo:'⚠️' };
     const descMap = {
       ron:    e => `${e.fromName||(e.from?getName(e.from):'-')} → ${e.toName||(e.to?getName(e.to):'-')}　${(e.amount||0).toLocaleString()}点`,
       tsumo:  e => `${e.toName||(e.to?getName(e.to):'-')} ツモ +${(e.amount||0).toLocaleString()}点`,
@@ -1955,6 +2402,10 @@
         const sign = e.sign === '+' ? '+' : '-';
         return `${e.playerName||(e.pid?getName(e.pid):e.pid)} ${sign}${(e.amount||0).toLocaleString()}点 調整`;
       },
+      riichi:    e => `${e.playerName||'-'} リーチ（供託 +1,000）`,
+      ryuukyoku: e => `流局（テンパイ: ${(e.tenpaiNames && e.tenpaiNames.length) ? e.tenpaiNames.join('・') : 'なし'}）`,
+      chuuto:    () => '途中流局（連荘）',
+      chombo:    e => `${e.playerName||'-'} チョンボ${e.moved ? '（罰符精算）' : '（記録のみ）'}`,
     };
     [...log].reverse().forEach(e => {
       const div = document.createElement('div');
@@ -2203,7 +2654,7 @@
       if (mode !== 'ron') { if (ronSrc && ronTgt) setMode('ron'); else showToast('点数移動はプレイヤーをスワイプして開始', true); }
     });
     document.getElementById('modeTsumo').addEventListener('click', () => {
-      if (mode !== 'tsumo') { if (!tsumoWinner) tsumoWinner = ronSrc; setMode('tsumo'); setTsumoType('ko'); }
+      if (mode !== 'tsumo') { if (!tsumoWinner) tsumoWinner = ronSrc; setMode('tsumo'); setTsumoType((tsumoWinner === dealerId) ? 'oya' : 'ko'); }
     });
 
     /* Tsumo type */
@@ -2274,6 +2725,68 @@
     document.getElementById('btnYonma').addEventListener('click', () => setSanmaMode(false));
     document.getElementById('btnSanma').addEventListener('click', () => setSanmaMode(true));
 
+    /* ルール軸（雀魂/Mリーグ）toggle */
+    document.getElementById('btnJantama').addEventListener('click', () => setRuleset('jantama'));
+    document.getElementById('btnMleague').addEventListener('click', () => setRuleset('mleague'));
+
+    /* リーチ */
+    document.getElementById('riichiBtn').addEventListener('click', openRiichiModal);
+    document.getElementById('riichiCancelBtn').addEventListener('click', () => {
+      document.getElementById('riichiModal').classList.remove('show');
+    });
+    document.getElementById('riichiModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('riichiModal')) document.getElementById('riichiModal').classList.remove('show');
+    });
+
+    /* 流局 */
+    document.getElementById('ryuukyokuBtn').addEventListener('click', openRyuukyokuModal);
+    document.getElementById('ryuConfirmBtn').addEventListener('click', doRyuukyoku);
+    document.getElementById('chuutoBtn').addEventListener('click', doChuuto);
+    document.getElementById('ryuCancelBtn').addEventListener('click', () => {
+      document.getElementById('ryuukyokuModal').classList.remove('show');
+    });
+    document.getElementById('ryuukyokuModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('ryuukyokuModal')) document.getElementById('ryuukyokuModal').classList.remove('show');
+    });
+
+    /* 中央パネル → 局・本場・供託修正モーダル */
+    function renderInfoEdit() {
+      document.getElementById('ieKyoku').textContent   = kyokuName();
+      document.getElementById('ieHonba').textContent   = honbaGame;
+      document.getElementById('ieKyotaku').textContent = kyotaku;
+    }
+    document.getElementById('centerInfo').addEventListener('click', () => {
+      renderInfoEdit();
+      document.getElementById('infoEditModal').classList.add('show');
+    });
+    document.querySelectorAll('.ie-btn').forEach(b => b.addEventListener('click', () => {
+      const d = parseInt(b.dataset.d, 10);
+      if (b.dataset.ie === 'kyoku') {
+        if (kyoku + d < 0) return;
+        kyoku += d;
+        const rot = ROTATION();
+        dealerId = rot[kyoku % rot.length];
+        localStorage.setItem(LS_DEALER, dealerId);
+        renderDealerBadges();
+      } else if (b.dataset.ie === 'honba') {
+        if (honbaGame + d < 0) return;
+        honbaGame += d;
+      } else {
+        if (kyotaku + d < 0) return;
+        kyotaku += d;
+      }
+      renderInfoEdit(); renderCenterInfo(); saveLive();
+    }));
+    document.getElementById('ieCloseBtn').addEventListener('click', () => {
+      document.getElementById('infoEditModal').classList.remove('show');
+    });
+    document.getElementById('infoEditModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('infoEditModal')) document.getElementById('infoEditModal').classList.remove('show');
+    });
+
+    /* チョンボ（調整モーダル内） */
+    document.getElementById('chomboBtn').addEventListener('click', doChombo);
+
     /* Action bar */
     undoBtn.addEventListener('click', undo);
     redoBtn.addEventListener('click', redo);
@@ -2305,6 +2818,12 @@
     document.getElementById('newGameBtn').addEventListener('click', newGame);
     gameEndModal.addEventListener('click', e => { if (e.target === gameEndModal) gameEndModal.classList.remove('show'); });
 
+    /* 対局状態を先に退避（setSanmaMode 内の saveLive で上書きされるため） */
+    const savedLiveRaw = localStorage.getItem(LS_LIVE);
+
+    /* 保存されたルール軸を復元（先に適用 → 三麻復元で上書きされ得る） */
+    setRuleset(localStorage.getItem(LS_RULESET) === 'jantama' ? 'jantama' : 'mleague', true);
+
     /* 保存されたモードを復元 */
     if (localStorage.getItem(LS_MODE) === 'sanma') setSanmaMode(true, true);
 
@@ -2313,7 +2832,14 @@
     if (savedDealer && YONMA_IDS.includes(savedDealer)) dealerId = savedDealer;
     /* 三麻モードで親が west なら east にフォールバック */
     if (!IDS.includes(dealerId)) dealerId = 'east';
+
+    /* 対局状態（点数・局・本場・供託）を復元 */
+    loadLive(savedLiveRaw);
+    if (!IDS.includes(dealerId)) dealerId = 'east';
+    renderScores();
     renderDealerBadges();
+    renderCenterInfo();
+    saveLive();
   }
 
   init();

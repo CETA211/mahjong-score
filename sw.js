@@ -1,4 +1,4 @@
-const CACHE = 'mahjong-v2';
+const CACHE = 'mahjong-v3';
 const ASSETS = ['./index.html', './manifest.json', './icons/icon.svg'];
 
 self.addEventListener('install', e => {
