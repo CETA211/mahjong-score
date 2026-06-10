@@ -345,12 +345,13 @@
       margin-top: 2px;
     }
 
-    /* ── Modal base ──────────────────────────────────── */
+    /* ── Modal base（画面中央のダイアログ） ─────────── */
     .modal-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.88);
       backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-      display: flex; align-items: flex-end; justify-content: center;
+      display: flex; align-items: center; justify-content: center;
+      padding: clamp(14px, 4vw, 28px);
       z-index: 1000; visibility: hidden; opacity: 0;
       transition: opacity 0.22s, visibility 0s 0.22s;
     }
@@ -358,18 +359,19 @@
 
     .modal-sheet {
       width: 100%; max-width: 520px;
-      max-height: 92dvh;
+      max-height: 88dvh;
       overflow-y: auto;
       overscroll-behavior: contain;
       background: #0a160a;
-      border-radius: 24px 24px 0 0;
+      border-radius: 22px;
+      border: 1px solid var(--gold-line);
       border-top: 2px solid var(--gold-line);
-      padding: 0 18px max(28px, env(safe-area-inset-bottom));
-      box-shadow: 0 -20px 60px rgba(0,0,0,0.9);
-      transform: translateY(24px);
+      padding: 0 18px 24px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.85);
+      transform: translateY(18px) scale(0.985);
       transition: transform 0.28s cubic-bezier(0.16,1,0.3,1);
     }
-    .modal-overlay.show .modal-sheet { transform: translateY(0); }
+    .modal-overlay.show .modal-sheet { transform: translateY(0) scale(1); }
 
     /* tsumo mode accent on sheet top border */
     .modal-sheet.tsumo-mode { border-top-color: var(--gold); }
@@ -439,7 +441,9 @@
       -webkit-overflow-scrolling: touch;
       padding: 4px 2px 6px; margin: 0 -2px 8px;
       scrollbar-width: none;
+      cursor: grab;
     }
+    .score-rail.dragging { cursor: grabbing; scroll-snap-type: none; }
     .score-rail::-webkit-scrollbar { display: none; }
     .score-chip {
       flex-shrink: 0; scroll-snap-align: center;
@@ -782,7 +786,7 @@
     .adj-current-label { font-size: 0.68rem; color: var(--muted); }
     .adj-current-val   { font-size: 1.3rem; font-weight: 800; color: var(--text); font-feature-settings: "tnum"; }
 
-    /* ── Swipe direction arrow ────────────────────────── */
+    /* ── Swipe direction arrow（流れる光跡） ──────────── */
     #swipeArrowSvg {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
@@ -790,17 +794,33 @@
       z-index: 500;
       display: none;
     }
-    /* グループに opacity を一括適用して棒と三角の重なり二重化を防ぐ */
-    #swipeArrowGroup { opacity: 0.52; }
-    #swipeArrowLine {
-      stroke: rgb(200,168,64);
-      stroke-width: 5;
+    #swipeArrowGroup { opacity: 0.9; }
+    /* 下地のグロー（淡く太い線） */
+    #swipeArrowGlow {
+      stroke: rgba(200,168,64,0.16);
+      stroke-width: 13;
       stroke-linecap: round;
     }
-    #swipeArrowHeadShape { fill: rgb(200,168,64); }
-    [data-theme="light"] #swipeArrowGroup { opacity: 0.48; }
-    [data-theme="light"] #swipeArrowLine  { stroke: rgb(110,82,0); }
-    [data-theme="light"] #swipeArrowHeadShape { fill: rgb(110,82,0); }
+    /* 流れる光の粒（破線をアニメーション） */
+    #swipeArrowLine {
+      stroke: rgb(214,184,90);
+      stroke-width: 4.5;
+      stroke-linecap: round;
+      stroke-dasharray: 1 15;
+      animation: arrowFlow 0.55s linear infinite;
+      filter: drop-shadow(0 0 4px rgba(200,168,64,0.55));
+    }
+    @keyframes arrowFlow { from { stroke-dashoffset: 16; } to { stroke-dashoffset: 0; } }
+    /* 矢じり（静かに明滅） */
+    #swipeArrowHeadShape {
+      fill: rgb(222,194,104);
+      animation: headPulse 1.1s ease-in-out infinite;
+      filter: drop-shadow(0 0 6px rgba(200,168,64,0.6));
+    }
+    @keyframes headPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+    [data-theme="light"] #swipeArrowGlow  { stroke: rgba(110,82,0,0.14); }
+    [data-theme="light"] #swipeArrowLine  { stroke: rgb(110,82,0); filter: drop-shadow(0 0 3px rgba(110,82,0,0.4)); }
+    [data-theme="light"] #swipeArrowHeadShape { fill: rgb(110,82,0); filter: drop-shadow(0 0 4px rgba(110,82,0,0.45)); }
 
     /* ── Help modal ──────────────────────────────────── */
     #helpModal .modal-sheet {
@@ -840,6 +860,105 @@
       font-size: 0.75rem; color: var(--muted); opacity: 0.7;
       text-align: center; margin-top: 6px;
     }
+
+    /* ── 初回コーチマーク（操作デモ） ─────────────────── */
+    #coachOverlay {
+      position: fixed; inset: 0; z-index: 1500;
+      background: rgba(0,0,0,0.86);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    #coachOverlay.show { display: flex; }
+    .coach-box { text-align: center; max-width: 340px; width: 100%; }
+    .coach-demo {
+      position: relative; height: 170px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 6px;
+    }
+    .coach-card {
+      width: 132px;
+      background: var(--card);
+      border: 1px solid var(--gold-line); border-radius: 16px;
+      padding: 18px 10px; text-align: center;
+      box-shadow: 0 0 24px rgba(200,168,64,0.12);
+    }
+    .coach-card-name  { font-size: 0.7rem; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+    .coach-card-score { font-size: 1.5rem; color: var(--text); font-weight: 800; font-feature-settings: "tnum"; }
+    .coach-finger {
+      position: absolute; left: 50%; top: 58%;
+      font-size: 2.2rem; pointer-events: none;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+    }
+    .coach-trail {
+      position: absolute; left: 50%; top: 62%;
+      width: 86px; height: 4px; border-radius: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold));
+      transform-origin: left center;
+      opacity: 0; pointer-events: none;
+    }
+    @keyframes coachSwipe {
+      0%   { transform: translate(-50%, 0);            opacity: 0; }
+      12%  { transform: translate(-50%, 0);            opacity: 1; }
+      70%  { transform: translate(calc(-50% + 84px), -10px); opacity: 1; }
+      100% { transform: translate(calc(-50% + 104px), -14px); opacity: 0; }
+    }
+    .anim-swipe .coach-finger { animation: coachSwipe 1.7s ease-in-out infinite; }
+    @keyframes coachTrail {
+      0%, 12% { transform: scaleX(0); opacity: 0; }
+      70%     { transform: scaleX(1); opacity: 0.85; }
+      100%    { transform: scaleX(1.15); opacity: 0; }
+    }
+    .anim-swipe .coach-trail { animation: coachTrail 1.7s ease-in-out infinite; }
+    @keyframes coachDtap {
+      0%, 55%, 100% { transform: translate(-50%, 0) scale(1); }
+      10%, 30%      { transform: translate(-50%, 6px) scale(0.82); }
+      20%, 40%      { transform: translate(-50%, 0) scale(1); }
+    }
+    .anim-dtap .coach-finger { animation: coachDtap 1.7s ease-in-out infinite; }
+    @keyframes coachTap {
+      0%, 60%, 100% { transform: translate(-50%, 0) scale(1); }
+      20%           { transform: translate(-50%, 6px) scale(0.82); }
+      40%           { transform: translate(-50%, 0) scale(1); }
+    }
+    .anim-tap .coach-finger { animation: coachTap 1.7s ease-in-out infinite; }
+    @keyframes coachCardPulse {
+      0%, 100% { box-shadow: 0 0 24px rgba(200,168,64,0.12); }
+      50%      { box-shadow: 0 0 34px rgba(200,168,64,0.4); }
+    }
+    .anim-dtap .coach-card, .anim-tap .coach-card { animation: coachCardPulse 1.7s ease-in-out infinite; }
+    .coach-title {
+      font-size: 1.02rem; font-weight: 800; color: var(--gold);
+      letter-spacing: 1px; margin-bottom: 6px;
+    }
+    .coach-text {
+      font-size: 0.84rem; color: var(--text); opacity: 0.85;
+      line-height: 1.7; margin-bottom: 14px; white-space: pre-line;
+    }
+    .coach-dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 18px; }
+    .coach-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .coach-dot.on { background: var(--gold); transform: scale(1.25); }
+    .coach-next {
+      width: 100%; border: none; padding: 14px;
+      background: #c8a840; color: #080e08;
+      font-size: 0.92rem; font-weight: 800; letter-spacing: 2px;
+      border-radius: 12px; cursor: pointer; touch-action: manipulation;
+      margin-bottom: 10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .coach-next:active { opacity: 0.75; }
+    .coach-skip {
+      background: none; border: none; color: var(--muted);
+      font-size: 0.76rem; font-weight: 700; letter-spacing: 1px;
+      cursor: pointer; padding: 6px 14px; touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    [data-theme="light"] #coachOverlay { background: rgba(245,240,232,0.92); }
+    [data-theme="light"] .coach-dot { background: rgba(0,0,0,0.15); }
   </style>
 </head>
 <body>
@@ -857,13 +976,12 @@
 
 <!-- Swipe direction arrow overlay -->
 <svg id="swipeArrowSvg" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <marker id="swipeArrowHead" markerWidth="5" markerHeight="4" refX="4.5" refY="2" orient="auto">
-      <polygon id="swipeArrowHeadShape" points="0 0, 5 2, 0 4" />
-    </marker>
-  </defs>
   <g id="swipeArrowGroup">
-    <line id="swipeArrowLine" marker-end="url(#swipeArrowHead)" x1="0" y1="0" x2="0" y2="0" />
+    <line id="swipeArrowGlow" x1="0" y1="0" x2="0" y2="0" />
+    <line id="swipeArrowLine" x1="0" y1="0" x2="0" y2="0" />
+    <g id="swipeArrowHeadG">
+      <polygon id="swipeArrowHeadShape" points="0,-8 16,0 0,8 4,0" />
+    </g>
   </g>
 </svg>
 
@@ -879,7 +997,7 @@
     <div class="player-cell pos-north">
       <button class="dealer-indicator" data-dealer-for="north"><span class="di-wind">北</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="north">
-        <input class="player-name" id="name-north" type="text" value="プレイヤー1" maxlength="8" placeholder="名前">
+        <input class="player-name" id="name-north" type="text" value="プレイヤー4" maxlength="8" placeholder="名前">
         <div class="score" id="score-north">25,000</div>
       </div>
     </div>
@@ -888,7 +1006,7 @@
     <div class="player-cell pos-west">
       <button class="dealer-indicator" data-dealer-for="west"><span class="di-wind">西</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="west">
-        <input class="player-name" id="name-west" type="text" value="プレイヤー2" maxlength="8" placeholder="名前">
+        <input class="player-name" id="name-west" type="text" value="プレイヤー3" maxlength="8" placeholder="名前">
         <div class="score" id="score-west">25,000</div>
       </div>
     </div>
@@ -904,7 +1022,7 @@
     <div class="player-cell pos-east">
       <button class="dealer-indicator" data-dealer-for="east"><span class="di-wind">東</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="east">
-        <input class="player-name" id="name-east" type="text" value="プレイヤー3" maxlength="8" placeholder="名前">
+        <input class="player-name" id="name-east" type="text" value="プレイヤー1" maxlength="8" placeholder="名前">
         <div class="score" id="score-east">25,000</div>
       </div>
     </div>
@@ -913,7 +1031,7 @@
     <div class="player-cell pos-south">
       <button class="dealer-indicator" data-dealer-for="south"><span class="di-wind">南</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="south">
-        <input class="player-name" id="name-south" type="text" value="プレイヤー4" maxlength="8" placeholder="名前">
+        <input class="player-name" id="name-south" type="text" value="プレイヤー2" maxlength="8" placeholder="名前">
         <div class="score" id="score-south">25,000</div>
       </div>
     </div>
@@ -1135,7 +1253,7 @@
 
 <!-- ── History drawer ────────────────────────────── -->
 <div class="modal-overlay" id="histModal">
-  <div class="modal-sheet" style="border-radius:26px 26px 0 0;">
+  <div class="modal-sheet">
     <div class="sheet-handle"></div>
     <div class="modal-label">対局履歴</div>
 
@@ -1290,8 +1408,28 @@
     </div>
 
     <div class="modal-actions">
+      <button class="modal-btn cancel"  id="helpDemoBtn">▶ 操作デモ</button>
       <button class="modal-btn confirm" id="helpCloseBtn">閉じる</button>
     </div>
+  </div>
+</div>
+
+<!-- ── 初回コーチマーク（操作デモ） ─────────────────── -->
+<div id="coachOverlay">
+  <div class="coach-box">
+    <div class="coach-demo" id="coachDemo">
+      <div class="coach-card">
+        <div class="coach-card-name">プレイヤー</div>
+        <div class="coach-card-score">25,000</div>
+      </div>
+      <div class="coach-trail"></div>
+      <div class="coach-finger">👆</div>
+    </div>
+    <div class="coach-title" id="coachTitle"></div>
+    <div class="coach-text" id="coachText"></div>
+    <div class="coach-dots" id="coachDots"></div>
+    <button class="coach-next" id="coachNextBtn">次へ</button>
+    <button class="coach-skip" id="coachSkipBtn">スキップ</button>
   </div>
 </div>
 
@@ -1591,7 +1729,9 @@
   const gameEndModal = document.getElementById('gameEndModal');
   const rankingList  = document.getElementById('rankingList');
 
-  function getName(id) { return nameEls[id].value.trim() || `P${IDS.indexOf(id)+1}`; }
+  /* 席順番号: 東=1 南=2 西=3 北=4（デフォルト名と一致） */
+  const SEAT_NUM = { east: 1, south: 2, west: 3, north: 4 };
+  function getName(id) { return nameEls[id].value.trim() || `P${SEAT_NUM[id]}`; }
 
   /* ── Scores ─────────────────────────────────────── */
   function renderScores() {
@@ -1633,10 +1773,38 @@
   function openHelpModal()  { document.getElementById('helpModal').classList.add('show'); }
   function closeHelpModal() { document.getElementById('helpModal').classList.remove('show'); }
 
+  /* ── 初回コーチマーク（操作デモ） ────────────────── */
+  const COACH_STEPS = [
+    { anim: 'anim-swipe', title: 'スワイプで点数移動', text: '支払う人のカードを押したまま\n相手の方向へ動かして離す' },
+    { anim: 'anim-dtap',  title: '2回タップでツモ',   text: '和了した人のカードを\n素早く2回タップ' },
+    { anim: 'anim-tap',   title: 'タップで点数調整',   text: 'カードを1回タップで加算・減算\nカード上の方角ラベルをタップで親を設定' },
+  ];
+  let coachStep = 0;
+  function renderCoach() {
+    const st = COACH_STEPS[coachStep];
+    document.getElementById('coachDemo').className = 'coach-demo ' + st.anim;
+    document.getElementById('coachTitle').textContent = st.title;
+    document.getElementById('coachText').textContent = st.text;
+    const dots = document.getElementById('coachDots');
+    dots.innerHTML = '';
+    COACH_STEPS.forEach((_, i) => {
+      const d = document.createElement('span');
+      d.className = 'coach-dot' + (i === coachStep ? ' on' : '');
+      dots.appendChild(d);
+    });
+    document.getElementById('coachNextBtn').textContent = coachStep === COACH_STEPS.length - 1 ? 'はじめる' : '次へ';
+  }
+  function openCoach() {
+    coachStep = 0; renderCoach();
+    document.getElementById('coachOverlay').classList.add('show');
+  }
+  function closeCoach() {
+    document.getElementById('coachOverlay').classList.remove('show');
+    localStorage.setItem(LS_TUTORIAL, '1');
+  }
+
   function showTutorialIfNeeded() {
-    if (!localStorage.getItem(LS_TUTORIAL)) {
-      setTimeout(() => { openHelpModal(); localStorage.setItem(LS_TUTORIAL, '1'); }, 600);
-    }
+    if (!localStorage.getItem(LS_TUTORIAL)) setTimeout(openCoach, 500);
   }
 
   /* ── Numpad helpers ─────────────────────────────── */
@@ -1867,6 +2035,37 @@
   function centerChip(rail, chip) {
     if (!rail || !chip) return;
     rail.scrollLeft = chip.offsetLeft - (rail.clientWidth - chip.offsetWidth) / 2;
+  }
+
+  /* ── PC向け: チップレールのドラッグ&ホイール横スクロール ── */
+  function enableDragScroll(rail) {
+    let down = false, moved = false, startX = 0, startLeft = 0;
+    rail.addEventListener('mousedown', e => {
+      down = true; moved = false;
+      startX = e.clientX; startLeft = rail.scrollLeft;
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', e => {
+      if (!down) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) { moved = true; rail.classList.add('dragging'); }
+      rail.scrollLeft = startLeft - dx;
+    });
+    window.addEventListener('mouseup', () => {
+      down = false;
+      rail.classList.remove('dragging');
+    });
+    /* ドラッグ直後の click がチップ選択にならないよう抑止 */
+    rail.addEventListener('click', e => {
+      if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
+    }, true);
+    /* マウスホイールで横スクロール */
+    rail.addEventListener('wheel', e => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        rail.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }
+    }, { passive: false });
   }
   function syncChipSelection() {
     if (mode === 'ron') {
@@ -2458,11 +2657,19 @@
     const y1 = cy + Math.sin(angle) * edgeDist;
     const totalDist = Math.hypot(fingerX - cx, fingerY - cy);
     const endDist = Math.max(edgeDist + 20, totalDist - 22);
-    const x2 = cx + Math.cos(angle) * endDist;
-    const y2 = cy + Math.sin(angle) * endDist;
-    const line = document.getElementById('swipeArrowLine');
-    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    /* 線は矢じりの少し手前まで */
+    const lineEnd = endDist - 8;
+    const lx2 = cx + Math.cos(angle) * lineEnd;
+    const ly2 = cy + Math.sin(angle) * lineEnd;
+    const hx = cx + Math.cos(angle) * endDist;
+    const hy = cy + Math.sin(angle) * endDist;
+    for (const id of ['swipeArrowLine', 'swipeArrowGlow']) {
+      const l = document.getElementById(id);
+      l.setAttribute('x1', x1);  l.setAttribute('y1', y1);
+      l.setAttribute('x2', lx2); l.setAttribute('y2', ly2);
+    }
+    document.getElementById('swipeArrowHeadG')
+      .setAttribute('transform', `translate(${hx},${hy}) rotate(${angle * 180 / Math.PI})`);
     document.getElementById('swipeArrowSvg').style.display = 'block';
   }
 
@@ -2676,6 +2883,10 @@
     });
     document.getElementById('numBS').addEventListener('click', handleBS);
 
+    /* PC: チップレールをドラッグ/ホイールでスクロール */
+    enableDragScroll(ronScoreRail);
+    enableDragScroll(tsumoScoreRail);
+
     /* ロン子/親トグル */
     document.getElementById('ronCatKo').addEventListener('click',  () => setRonCat('ko'));
     document.getElementById('ronCatOya').addEventListener('click', () => setRonCat('oya'));
@@ -2797,6 +3008,14 @@
     document.getElementById('helpModal').addEventListener('click', e => {
       if (e.target === document.getElementById('helpModal')) closeHelpModal();
     });
+
+    /* コーチマーク（操作デモ） */
+    document.getElementById('coachNextBtn').addEventListener('click', () => {
+      if (coachStep < COACH_STEPS.length - 1) { coachStep++; renderCoach(); }
+      else closeCoach();
+    });
+    document.getElementById('coachSkipBtn').addEventListener('click', closeCoach);
+    document.getElementById('helpDemoBtn').addEventListener('click', () => { closeHelpModal(); openCoach(); });
     document.getElementById('endBtn').addEventListener('click', openGameEndModal);
 
     /* History drawer */
