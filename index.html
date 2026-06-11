@@ -244,6 +244,68 @@
       transition: border-color 0.1s, box-shadow 0.1s !important;
     }
 
+    /* ── 点数変動のフローティング表示 ── */
+    .score-float {
+      position: absolute; left: 50%; top: 36%;
+      transform: translateX(-50%);
+      font-size: 1rem; font-weight: 800; font-feature-settings: "tnum";
+      pointer-events: none; z-index: 5; white-space: nowrap;
+      animation: scoreFloat 1.15s ease-out forwards;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.55);
+    }
+    .score-float.plus  { color: #69c97c; }
+    .score-float.minus { color: #e06a6a; }
+    @keyframes scoreFloat {
+      0%   { opacity: 0; transform: translate(-50%, 8px); }
+      18%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -26px); }
+    }
+    [data-theme="light"] .score-float { text-shadow: 0 1px 4px rgba(255,255,255,0.7); }
+    [data-theme="light"] .score-float.plus  { color: #1d8a3c; }
+    [data-theme="light"] .score-float.minus { color: #c0392b; }
+
+    /* ── リーチ中バッジ ── */
+    .player-card.riichi::after {
+      content: '立直';
+      position: absolute; top: 6px; right: 8px;
+      font-size: 0.56rem; font-weight: 800; letter-spacing: 1.5px;
+      color: #ff8a80;
+      background: rgba(200,64,64,0.14);
+      border: 1px solid rgba(200,64,64,0.45);
+      padding: 2px 7px; border-radius: 10px;
+      pointer-events: none;
+    }
+    [data-theme="light"] .player-card.riichi::after {
+      color: #b03030; background: rgba(200,64,64,0.08); border-color: rgba(200,64,64,0.4);
+    }
+
+    /* ── 順位バッジ / TOP点差 ── */
+    .card-rank {
+      position: absolute; top: 6px; left: 8px;
+      width: 18px; height: 18px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.62rem; font-weight: 800;
+      pointer-events: none;
+    }
+    .card-rank.rank-1 { background: #FFD700; color: #1a1a1a; }
+    .card-rank.rank-2 { background: #C0C0C0; color: #1a1a1a; }
+    .card-rank.rank-3 { background: #CD7F32; color: #ffffff; }
+    .card-rank.rank-4 { background: #3a3a3a; color: #cccccc; }
+    .top-diff {
+      margin-top: 6px;
+      font-size: 0.6rem; font-weight: 700;
+      color: var(--muted); font-feature-settings: "tnum"; letter-spacing: 0.5px;
+      min-height: 0.8em;
+    }
+    .top-diff.is-top { color: var(--gold); opacity: 0.85; }
+
+    /* ── カスタム確認ダイアログ ── */
+    .confirm-msg {
+      font-size: 0.92rem; color: var(--text); line-height: 1.8;
+      text-align: center; padding: 6px 4px 18px;
+      white-space: pre-line;
+    }
+
     .pos-north { grid-column: 2/3; grid-row: 1/2; }
     .pos-west  { grid-column: 1/2; grid-row: 2/3; }
     .pos-east  { grid-column: 3/4; grid-row: 2/3; }
@@ -997,8 +1059,10 @@
     <div class="player-cell pos-north">
       <button class="dealer-indicator" data-dealer-for="north"><span class="di-wind">北</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="north">
+        <span class="card-rank" id="rank-north"></span>
         <input class="player-name" id="name-north" type="text" value="プレイヤー4" maxlength="8" placeholder="名前">
         <div class="score" id="score-north">25,000</div>
+        <div class="top-diff" id="diff-north"></div>
       </div>
     </div>
 
@@ -1006,8 +1070,10 @@
     <div class="player-cell pos-west">
       <button class="dealer-indicator" data-dealer-for="west"><span class="di-wind">西</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="west">
+        <span class="card-rank" id="rank-west"></span>
         <input class="player-name" id="name-west" type="text" value="プレイヤー3" maxlength="8" placeholder="名前">
         <div class="score" id="score-west">25,000</div>
+        <div class="top-diff" id="diff-west"></div>
       </div>
     </div>
 
@@ -1022,8 +1088,10 @@
     <div class="player-cell pos-east">
       <button class="dealer-indicator" data-dealer-for="east"><span class="di-wind">東</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="east">
+        <span class="card-rank" id="rank-east"></span>
         <input class="player-name" id="name-east" type="text" value="プレイヤー1" maxlength="8" placeholder="名前">
         <div class="score" id="score-east">25,000</div>
+        <div class="top-diff" id="diff-east"></div>
       </div>
     </div>
 
@@ -1031,8 +1099,10 @@
     <div class="player-cell pos-south">
       <button class="dealer-indicator" data-dealer-for="south"><span class="di-wind">南</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="south">
+        <span class="card-rank" id="rank-south"></span>
         <input class="player-name" id="name-south" type="text" value="プレイヤー2" maxlength="8" placeholder="名前">
         <div class="score" id="score-south">25,000</div>
+        <div class="top-diff" id="diff-south"></div>
       </div>
     </div>
   </div>
@@ -1414,6 +1484,18 @@
   </div>
 </div>
 
+<!-- ── カスタム確認ダイアログ ──────────────────────── -->
+<div class="modal-overlay" id="confirmModal" style="z-index:1600;">
+  <div class="modal-sheet" style="max-width:360px;">
+    <div class="sheet-handle"></div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel"  id="confirmNoBtn">キャンセル</button>
+      <button class="modal-btn confirm" id="confirmYesBtn">OK</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── 初回コーチマーク（操作デモ） ─────────────────── -->
 <div id="coachOverlay">
   <div class="coach-box">
@@ -1598,6 +1680,7 @@
   const LS_DEALER   = 'mahjong_dealer';
   const LS_RULESET  = 'mahjong_ruleset';
   const LS_LIVE     = 'mahjong_live_state';
+  const LS_NAMES    = 'mahjong_player_names';
 
   /* ── Undo / Redo stacks ─────────────────────────── */
   const undoStack = [], redoStack = [];
@@ -1606,6 +1689,7 @@
     return {
       scores: Object.fromEntries(IDS.map(id => [id, players[id].score])),
       dealerId, kyoku, honbaGame, kyotaku,
+      riichiIds: riichiIds.slice(),
     };
   }
   function saveState() {
@@ -1618,11 +1702,12 @@
       for (const id of IDS) players[id].score = s.scores[id];
       dealerId = s.dealerId; kyoku = s.kyoku;
       honbaGame = s.honbaGame; kyotaku = s.kyotaku;
+      riichiIds = (s.riichiIds || []).slice();
       localStorage.setItem(LS_DEALER, dealerId);
     } else {
       for (const id of IDS) players[id].score = s[id];
     }
-    renderScores(); renderDealerBadges(); renderCenterInfo(); saveLive();
+    renderScores(); renderDealerBadges(); renderCenterInfo(); renderRiichiBadges(); saveLive();
   }
 
   /* ── 対局状態の永続化（リロード対策）────────────── */
@@ -1630,6 +1715,7 @@
     lsSet(LS_LIVE, {
       scores: Object.fromEntries(YONMA_IDS.map(id => [id, players[id].score])),
       dealerId, kyoku, honbaGame, kyotaku,
+      riichiIds: riichiIds.slice(),
     });
   }
   function loadLive(raw) {
@@ -1643,6 +1729,7 @@
     if (typeof s.kyoku     === 'number')   kyoku     = s.kyoku;
     if (typeof s.honbaGame === 'number')   honbaGame = s.honbaGame;
     if (typeof s.kyotaku   === 'number')   kyotaku   = s.kyotaku;
+    if (Array.isArray(s.riichiIds))        riichiIds = s.riichiIds.filter(id => YONMA_IDS.includes(id));
   }
   function syncBtns() {
     undoBtn.style.opacity = undoStack.length ? '1' : '0.3';
@@ -1672,6 +1759,17 @@
   let kyoku = 0;           // 0〜 = 東1局〜（四麻: 0-7で東南、8〜は西入）
   let honbaGame = 0;       // 局を跨ぐ本場カウンタ
   let kyotaku = 0;         // 供託（リーチ棒）本数
+  let riichiIds = [];      // 現局でリーチ中のプレイヤー
+
+  function renderRiichiBadges() {
+    for (const id of YONMA_IDS) {
+      const c = getCard(id);
+      if (c) c.classList.toggle('riichi', riichiIds.includes(id));
+    }
+  }
+  function clearRiichi() {
+    if (riichiIds.length) { riichiIds = []; renderRiichiBadges(); }
+  }
 
   function ROTATION() { return sanmaMode ? ['east', 'south', 'north'] : ['east', 'south', 'west', 'north']; }
   function kyokuName() {
@@ -1734,15 +1832,43 @@
   function getName(id) { return nameEls[id].value.trim() || `P${SEAT_NUM[id]}`; }
 
   /* ── Scores ─────────────────────────────────────── */
+  let suppressFloat = true;   /* init完了までフローティング表示を抑止 */
+  function spawnDelta(pid, delta) {
+    if (!delta) return;
+    const card = getCard(pid);
+    if (!card) return;
+    const f = document.createElement('div');
+    f.className = 'score-float ' + (delta > 0 ? 'plus' : 'minus');
+    f.textContent = (delta > 0 ? '+' : '−') + Math.abs(delta).toLocaleString();
+    card.appendChild(f);
+    f.addEventListener('animationend', () => f.remove());
+  }
+  function renderRanks() {
+    const top = Math.max(...IDS.map(id => players[id].score));
+    for (const id of IDS) {
+      const rank = IDS.filter(o => players[o].score > players[id].score).length + 1;
+      const rb = document.getElementById('rank-' + id);
+      if (rb) { rb.textContent = rank; rb.className = 'card-rank rank-' + rank; }
+      const df = document.getElementById('diff-' + id);
+      if (df) {
+        const d = players[id].score - top;
+        df.textContent = d === 0 ? 'TOP' : '−' + Math.abs(d).toLocaleString();
+        df.classList.toggle('is-top', d === 0);
+      }
+    }
+  }
   function renderScores() {
     for (const id of IDS) {
       const el = scoreEls[id], val = players[id].score, txt = val.toLocaleString();
       if (el.textContent !== txt) {
+        const old = parseInt(el.textContent.replace(/,/g, ''), 10);
         el.textContent = txt;
         el.classList.toggle('negative', val < 0);
         el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+        if (!suppressFloat && Number.isFinite(old)) spawnDelta(id, val - old);
       }
     }
+    renderRanks();
   }
 
   /* ── Toast ──────────────────────────────────────── */
@@ -1753,6 +1879,22 @@
     toast.classList.toggle('error', err);
     toast.classList.add('show');
     toastTimer = setTimeout(() => toast.classList.remove('show'), dur);
+  }
+
+  /* ── カスタム確認ダイアログ（confirm代替） ───────── */
+  let confirmResolve = null;
+  function appConfirm(msg, okText = 'OK', cancelText = 'キャンセル') {
+    return new Promise(res => {
+      confirmResolve = res;
+      document.getElementById('confirmMsg').textContent = msg;
+      document.getElementById('confirmYesBtn').textContent = okText;
+      document.getElementById('confirmNoBtn').textContent = cancelText;
+      document.getElementById('confirmModal').classList.add('show');
+    });
+  }
+  function settleConfirm(v) {
+    document.getElementById('confirmModal').classList.remove('show');
+    if (confirmResolve) { confirmResolve(v); confirmResolve = null; }
   }
 
   /* ── Theme ──────────────────────────────────────── */
@@ -2270,16 +2412,16 @@
       showToast('西入サドンデス（1位が30,000点未満・雀魂ルール）', false, 3200);
       return;
     }
-    setTimeout(() => {
-      if (confirm('規定局数を終了しました。精算しますか？')) openGameEndModal();
+    setTimeout(async () => {
+      if (await appConfirm('規定局数を終了しました。精算しますか？', '精算する', '続行')) openGameEndModal();
     }, 500);
   }
   function checkTobi() {
     const busted = IDS.find(id => players[id].score < 0);
     if (!busted) return;
     if (RULESETS[ruleset].tobiEnd) {
-      setTimeout(() => {
-        if (confirm(`${getName(busted)} が0点未満（飛び）。\n雀魂ルールでは終局です。精算しますか？`)) openGameEndModal();
+      setTimeout(async () => {
+        if (await appConfirm(`${getName(busted)} が0点未満（飛び）。\n雀魂ルールでは終局です。精算しますか？`, '精算する', '続行')) openGameEndModal();
       }, 600);
     } else {
       showToast(`${getName(busted)} 0点未満（Mリーグルールでは続行）`, true, 3000);
@@ -2302,6 +2444,7 @@
     const renchan = ronTgt === dealerId;
     lsPush(LS_TRANSFER, { timestamp: Date.now(), from: ronSrc, to: ronTgt, fromName: getName(ronSrc), toName: getName(ronTgt), amount: amt, type: 'ron' }, 200);
     advanceAfterWin(ronTgt);
+    clearRiichi();
     renderScores();
     showToast(desc + (renchan ? '　連荘' : ''));
     saveLive();
@@ -2333,6 +2476,7 @@
     const renchan = tsumoWinner === dealerId;
     lsPush(LS_TRANSFER, { timestamp: Date.now(), from: null, to: tsumoWinner, toName: getName(tsumoWinner), amount: total, type: 'tsumo' }, 200);
     advanceAfterWin(tsumoWinner);
+    clearRiichi();
     renderScores();
     showToast(desc + (renchan ? '　連荘' : ''));
     saveLive();
@@ -2357,12 +2501,14 @@
     document.getElementById('riichiModal').classList.add('show');
   }
   function doRiichi(pid) {
+    if (riichiIds.includes(pid)) { showToast(`${getName(pid)} は既にリーチ中です`, true); return; }
     if (players[pid].score < 1000) { showToast('持ち点1,000点未満はリーチできません', true); return; }
     saveState();
     players[pid].score -= 1000;
     kyotaku++;
+    riichiIds.push(pid);
     lsPush(LS_TRANSFER, { timestamp: Date.now(), pid, playerName: getName(pid), amount: 1000, type: 'riichi' }, 200);
-    renderScores(); renderCenterInfo(); saveLive();
+    renderScores(); renderCenterInfo(); renderRiichiBadges(); saveLive();
     document.getElementById('riichiModal').classList.remove('show');
     showToast(`${getName(pid)} リーチ！（供託 ${kyotaku}本）`);
   }
@@ -2402,6 +2548,7 @@
     const renchan = tenpaiSel.has(dealerId);
     honbaGame++;
     if (!renchan) advanceKyoku();
+    clearRiichi();
     lsPush(LS_TRANSFER, { timestamp: Date.now(), type: 'ryuukyoku', tenpaiNames: tenpai.map(getName) }, 200);
     renderScores(); renderCenterInfo(); saveLive();
     document.getElementById('ryuukyokuModal').classList.remove('show');
@@ -2412,6 +2559,7 @@
   function doChuuto() {
     saveState();
     honbaGame++;
+    clearRiichi();
     lsPush(LS_TRANSFER, { timestamp: Date.now(), type: 'chuuto' }, 200);
     renderCenterInfo(); saveLive();
     document.getElementById('ryuukyokuModal').classList.remove('show');
@@ -2419,14 +2567,14 @@
   }
 
   /* ── チョンボ ───────────────────────────────────── */
-  function doChombo() {
+  async function doChombo() {
     const pid = adjustPid;
     if (!pid) return;
     const isOya = pid === dealerId;
     const msg = ruleset === 'jantama'
       ? `${getName(pid)} のチョンボ（満貫払い）\n${isOya ? '他家に各4,000点' : '親に4,000点・他の子に各2,000点'}を支払います。\n（同局再ゲーム・本場据え置き）`
       : `${getName(pid)} のチョンボを記録します。\nMリーグルールでは点数移動なし（場外で-20P減算）。`;
-    if (!confirm(msg)) return;
+    if (!(await appConfirm(msg, 'チョンボ処理'))) return;
     let moved = false;
     if (ruleset === 'jantama') {
       saveState();
@@ -2437,6 +2585,7 @@
         players[pid].score -= get;
       }
       moved = true;
+      clearRiichi();
       renderScores(); saveLive();
     }
     lsPush(LS_TRANSFER, { timestamp: Date.now(), pid, playerName: getName(pid), type: 'chombo', moved }, 200);
@@ -2458,13 +2607,14 @@
   }
   function resetProgress() {
     kyoku = 0; honbaGame = 0; kyotaku = 0;
+    clearRiichi();
     dealerId = 'east';
     localStorage.setItem(LS_DEALER, 'east');
     renderDealerBadges(); renderCenterInfo();
   }
-  function resetAll() {
+  async function resetAll() {
     const s = START_SCORE.toLocaleString();
-    if (!confirm(`全員を ${s}点 にリセットしますか？\n（局・本場・供託も初期化されます）`)) return;
+    if (!(await appConfirm(`全員を ${s}点 にリセットしますか？\n（局・本場・供託も初期化されます）`, 'リセット'))) return;
     saveState();
     for (const id of IDS) players[id].score = START_SCORE;
     resetProgress();
@@ -2473,10 +2623,10 @@
   }
 
   /* ── 三麻/四麻 モード切替 ──────────────────────── */
-  function setSanmaMode(enabled, skipConfirm) {
+  async function setSanmaMode(enabled, skipConfirm) {
     if (!skipConfirm) {
       const dirty = IDS.some(id => players[id].score !== START_SCORE) || undoStack.length > 0;
-      if (dirty && !confirm(`${enabled ? '三麻' : '四麻'}に切り替えます。\n現在のゲームをリセットしますか？`)) return;
+      if (dirty && !(await appConfirm(`${enabled ? '三麻' : '四麻'}に切り替えます。\n現在のゲームをリセットしますか？`, '切り替える'))) return;
     }
     sanmaMode   = enabled;
     IDS         = enabled ? SANMA_IDS.slice()   : YONMA_IDS.slice();
@@ -2552,9 +2702,9 @@
   }
 
   /* ── newGame ────────────────────────────────────── */
-  function newGame() {
+  async function newGame() {
     const s = START_SCORE.toLocaleString();
-    if (!confirm(`もう1試合ですか？\n全員 ${s}点にリセットします。`)) return;
+    if (!(await appConfirm(`もう1試合ですか？\n全員 ${s}点にリセットします。`, 'はじめる'))) return;
     for (const id of IDS) players[id].score = START_SCORE;
     resetProgress();
     undoStack.length = 0; redoStack.length = 0;
@@ -3016,18 +3166,37 @@
     });
     document.getElementById('coachSkipBtn').addEventListener('click', closeCoach);
     document.getElementById('helpDemoBtn').addEventListener('click', () => { closeHelpModal(); openCoach(); });
+
+    /* カスタム確認ダイアログ */
+    document.getElementById('confirmYesBtn').addEventListener('click', () => settleConfirm(true));
+    document.getElementById('confirmNoBtn').addEventListener('click', () => settleConfirm(false));
+    document.getElementById('confirmModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('confirmModal')) settleConfirm(false);
+    });
+
+    /* プレイヤー名の保存・復元 */
+    try {
+      const savedNames = JSON.parse(localStorage.getItem(LS_NAMES)) || {};
+      for (const id of YONMA_IDS) {
+        if (typeof savedNames[id] === 'string' && savedNames[id]) nameEls[id].value = savedNames[id];
+      }
+    } catch {}
+    const saveNames = () => {
+      lsSet(LS_NAMES, Object.fromEntries(YONMA_IDS.map(id => [id, nameEls[id].value])));
+    };
+    for (const id of YONMA_IDS) nameEls[id].addEventListener('input', saveNames);
     document.getElementById('endBtn').addEventListener('click', openGameEndModal);
 
     /* History drawer */
     document.getElementById('histClose').addEventListener('click', () => histModal.classList.remove('show'));
     document.getElementById('tabTransferBtn').addEventListener('click', () => setHistTab('transfer'));
     document.getElementById('tabGameBtn').addEventListener('click',     () => setHistTab('game'));
-    document.getElementById('clearTransferBtn').addEventListener('click', () => {
-      if (!confirm('点数ログをクリアしますか？')) return;
+    document.getElementById('clearTransferBtn').addEventListener('click', async () => {
+      if (!(await appConfirm('点数ログをクリアしますか？', 'クリア'))) return;
       lsSet(LS_TRANSFER, []); renderTransferLog(); showToast('点数ログをクリアしました');
     });
-    document.getElementById('clearGameBtn').addEventListener('click', () => {
-      if (!confirm('試合履歴をクリアしますか？')) return;
+    document.getElementById('clearGameBtn').addEventListener('click', async () => {
+      if (!(await appConfirm('試合履歴をクリアしますか？', 'クリア'))) return;
       lsSet(LS_GAME, []); renderGameHist(); showToast('試合履歴をクリアしました');
     });
     histModal.addEventListener('click', e => { if (e.target === histModal) histModal.classList.remove('show'); });
@@ -3052,13 +3221,15 @@
     /* 三麻モードで親が west なら east にフォールバック */
     if (!IDS.includes(dealerId)) dealerId = 'east';
 
-    /* 対局状態（点数・局・本場・供託）を復元 */
+    /* 対局状態（点数・局・本場・供託・リーチ）を復元 */
     loadLive(savedLiveRaw);
     if (!IDS.includes(dealerId)) dealerId = 'east';
     renderScores();
     renderDealerBadges();
     renderCenterInfo();
+    renderRiichiBadges();
     saveLive();
+    suppressFloat = false;   /* ここからフローティング表示を有効化 */
   }
 
   init();

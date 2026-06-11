@@ -18,6 +18,11 @@ function t(name, cond) {
 const score = id => parseInt(document.getElementById('score-' + id).textContent.replace(/,/g, ''), 10);
 const center = () => document.getElementById('ciKyoku').textContent + ' / ' + document.getElementById('ciSub').textContent;
 const click = id => document.getElementById(id).click();
+const tick = (ms = 30) => new Promise(r => setTimeout(r, ms));
+/* カスタム確認ダイアログをOKで進める */
+const acceptConfirm = async () => { await tick(); click('confirmYesBtn'); await tick(); };
+
+(async () => {
 
 console.log('--- 初期状態 ---');
 t('初期スコア 25000', score('east') === 25000 && score('north') === 25000);
@@ -96,7 +101,7 @@ console.log('  before:', JSON.stringify(before));
 console.log('  after :', JSON.stringify(after));
 
 console.log('--- シナリオ1: 雀魂精算（ウマ5-15・オカなし）---');
-click('resetBtn');
+click('resetBtn'); await acceptConfirm();
 t('リセットで全員25000・供託0', score('east') === 25000 && document.getElementById('ciSub').textContent.includes('供託0'));
 click('endBtn');
 const rows = [...document.querySelectorAll('#rankingList .rank-row')];
@@ -130,12 +135,11 @@ t('live.dealerId が有効', ['north','west','east','south'].includes(live.deale
 
 console.log('--- シナリオ9: 飛び判定（雀魂・調整で0未満）---');
 click('btnJantama');
-let confirmMsg = '';
-window.confirm = (m) => { confirmMsg = m; return false; }; // 終局はキャンセル
-// south をタップ→調整モーダル（singleTap タイマー依存）— 直接 adjustModal を開けないため
-// 調整モーダルのフローはタイマー絡みのため省略し、チョンボで代替確認は不可（adjustPid必要）
+// 調整モーダルのフローはタイマー絡みのため手動確認とする
 console.log('  (調整→飛びはタイマー絡みのため手動確認へ)');
 
 console.log('');
 console.log('RESULT: pass=' + pass + ' fail=' + fail);
 process.exit(fail ? 1 : 0);
+
+})();

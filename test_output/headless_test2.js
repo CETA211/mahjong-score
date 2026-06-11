@@ -90,15 +90,18 @@ const sc4 = id => parseInt(d.getElementById('score-' + id).textContent.replace(/
 const card = d.querySelector('[data-player-id="north"]'); // north は子（親=east）
 card.dispatchEvent(new w.MouseEvent('mousedown', { button: 0, clientX: 0, clientY: 0, bubbles: true }));
 w.dispatchEvent(new w.MouseEvent('mouseup', { clientX: 0, clientY: 0, bubbles: true }));
-setTimeout(() => {
+setTimeout(async () => {
+  const tick = (ms = 30) => new Promise(r => setTimeout(r, ms));
   const adjShown = d.getElementById('adjustModal').classList.contains('show');
   console.log('  (タップ→調整モーダル: ' + adjShown + ')');
   if (adjShown) {
     d.getElementById('chomboBtn').click();
+    await tick(); d.getElementById('confirmYesBtn').click(); await tick();
     t('チョンボ(子): 本人 -8000', sc4('north') === 17000);
     t('チョンボ(子): 親 +4000', sc4('east') === 29000);
     t('チョンボ(子): 他の子 +2000', sc4('west') === 27000 && sc4('south') === 27000);
     t('チョンボ: 本場据え置き 0本場', d.getElementById('ciSub').textContent.includes('0本場'));
+    t('チョンボ: リーチバッジ解除', !d.querySelector('.player-card.riichi'));
   }
   console.log('');
   console.log('RESULT: pass=' + pass + ' fail=' + fail);

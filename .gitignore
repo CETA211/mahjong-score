@@ -1,2 +1,3 @@
-.DS_Store
-Thumbs.db
+test_output/tmp/
+test_output/chromeprofile/
+test_output/edgeprofile/
