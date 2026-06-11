@@ -25,6 +25,7 @@
       --card-act:   #111f11;
       --text:       #ece8d8;
       --muted:      #4a5240;
+      --dim:        rgba(236,232,216,0.6);   /* 押下可能だが未選択の要素用（muted より明るい） */
       --border:     rgba(255,255,255,0.05);
       --red:        #c84040;
     }
@@ -36,6 +37,7 @@
       --card-act:   #f0ebe0;
       --text:       #1a1a1a;
       --muted:      #8a7a60;
+      --dim:        rgba(26,26,26,0.58);
       --border:     rgba(0,0,0,0.08);
       --gold:       #a07820;
       --gold-dim:   rgba(160,120,32,0.12);
@@ -82,13 +84,14 @@
       border: 1px solid rgba(200,168,64,0.3);
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; cursor: pointer; z-index: 900;
+      color: var(--gold);
+      cursor: pointer; z-index: 900;
       touch-action: manipulation;
       transition: background 0.15s;
       -webkit-tap-highlight-color: transparent;
     }
     .theme-toggle  { right: 16px; }
-    .settings-fixed-btn { right: 60px; font-size: 1rem; }
+    .settings-fixed-btn { right: 60px; }
     .hist-fixed-btn { left: 16px; }
     .theme-toggle:active, .hist-fixed-btn:active, .settings-fixed-btn:active { background: rgba(200,168,64,0.25); }
     [data-theme="light"] .theme-toggle,
@@ -176,7 +179,7 @@
       cursor: pointer; touch-action: manipulation; white-space: nowrap;
       transition: background 0.22s, border-color 0.22s, color 0.22s,
                   box-shadow 0.22s, opacity 0.22s;
-      color: var(--muted); opacity: 0.55;
+      color: var(--dim); opacity: 0.85;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
@@ -202,7 +205,7 @@
       box-shadow: 0 0 0 1px rgba(200,168,64,0.16), 0 0 18px rgba(200,168,64,0.16);
     }
     [data-theme="light"] .dealer-indicator {
-      background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: var(--muted);
+      background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.12); color: var(--dim);
     }
     [data-theme="light"] .dealer-indicator.is-dealer {
       color: var(--gold); border-color: rgba(160,120,32,0.55);
@@ -486,7 +489,7 @@
       border-radius: 10px; padding: 4px; margin-bottom: 14px;
     }
     .mode-btn {
-      flex: 1; background: none; border: none; color: var(--muted);
+      flex: 1; background: none; border: none; color: var(--dim);
       font-size: 0.82rem; font-weight: 800; letter-spacing: 3px;
       padding: 9px; border-radius: 8px; cursor: pointer;
       transition: background 0.15s, color 0.15s;
@@ -525,7 +528,7 @@
       border-radius: 8px; padding: 3px; margin-bottom: 8px;
     }
     .score-cat-btn {
-      flex: 1; background: none; border: none; color: var(--muted);
+      flex: 1; background: none; border: none; color: var(--dim);
       font-size: 0.74rem; font-weight: 800; letter-spacing: 2px;
       padding: 6px; border-radius: 6px; cursor: pointer;
       transition: background 0.12s, color 0.12s;
@@ -584,7 +587,7 @@
       transition: background 0.12s;
     }
     .honba-btn:active { background: rgba(255,255,255,0.12); }
-    .honba-btn.dec { flex: 0 0 38px; opacity: 0.7; font-size: 0.95rem; }
+    .honba-btn.dec { flex: 0 0 38px; font-size: 0.95rem; }
     [data-theme="light"] .honba-btn {
       background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a1a;
     }
@@ -605,7 +608,7 @@
       border-radius: 8px; padding: 3px; margin-bottom: 12px;
     }
     .tsumo-type-btn {
-      flex: 1; background: none; border: none; color: var(--muted);
+      flex: 1; background: none; border: none; color: var(--dim);
       font-size: 0.75rem; font-weight: 700; letter-spacing: 2px;
       padding: 8px 4px; border-radius: 6px; cursor: pointer;
       transition: background 0.12s, color 0.12s;
@@ -624,7 +627,7 @@
     .tif-tab.active { border-color: var(--gold-line); background: var(--gold-dim); }
     .tif-tab-label {
       display: block; font-size: 0.58rem; font-weight: 700;
-      letter-spacing: 2px; color: var(--muted); margin-bottom: 3px;
+      letter-spacing: 2px; color: var(--dim); margin-bottom: 3px;
     }
     .tif-tab.active .tif-tab-label { color: var(--gold); }
     .tif-tab-val {
@@ -645,8 +648,8 @@
       text-align: center; margin-bottom: 8px;
     }
     .numpad-toggle-btn {
-      background: none; border: 1px solid rgba(255,255,255,0.1);
-      color: var(--muted); font-size: 0.68rem; font-weight: 700;
+      background: none; border: 1px solid rgba(255,255,255,0.18);
+      color: var(--text); font-size: 0.68rem; font-weight: 700;
       letter-spacing: 1px; cursor: pointer; padding: 5px 14px;
       border-radius: 20px; touch-action: manipulation;
       transition: color 0.15s, border-color 0.15s, background 0.15s;
@@ -658,7 +661,7 @@
       background: rgba(200,168,64,0.08);
     }
     [data-theme="light"] .numpad-toggle-btn {
-      border-color: rgba(0,0,0,0.14); color: var(--muted);
+      border-color: rgba(0,0,0,0.2); color: #1a1a1a;
     }
     [data-theme="light"] .numpad-toggle-btn.active {
       color: var(--gold); border-color: rgba(160,120,32,0.45);
@@ -691,7 +694,7 @@
       padding: 3px 7px; border-radius: 5px; cursor: pointer;
     }
     .tsumo-badge.oya { color: var(--gold); background: rgba(200,168,64,0.15); border: 1px solid var(--gold-line); }
-    .tsumo-badge.ko  { color: var(--muted); background: rgba(255,255,255,0.04); border: 1px solid var(--border); }
+    .tsumo-badge.ko  { color: var(--text); background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.16); }
     .tsumo-pname  { font-size: 0.84rem; font-weight: 700; color: var(--text); }
     .tsumo-amount { font-size: 1rem; font-weight: 800; color: var(--red); font-feature-settings: "tnum"; }
     .tsumo-hint   { font-size: 0.62rem; color: var(--gold); opacity: 0.65; letter-spacing: 0.5px; margin-top: 2px; }
@@ -707,7 +710,8 @@
       -webkit-tap-highlight-color: transparent;
     }
     .modal-btn:active { opacity: 0.7; }
-    .modal-btn.cancel  { background: rgba(255,255,255,0.12); color: var(--muted); }
+    .modal-btn.cancel  { background: rgba(255,255,255,0.14); color: var(--text); }
+    [data-theme="light"] .modal-btn.cancel { background: rgba(0,0,0,0.08); color: #1a1a1a; }
     .modal-btn.confirm { background: #c8a840; color: #080e08; }
     .modal-btn.danger  { background: rgba(200,64,64,0.15); color: var(--red); border: 1px solid rgba(200,64,64,0.3); }
 
@@ -718,7 +722,7 @@
       border-radius: 10px; padding: 4px; margin-bottom: 12px;
     }
     .hist-tab-btn {
-      flex: 1; background: none; border: none; color: var(--muted);
+      flex: 1; background: none; border: none; color: var(--dim);
       font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
       padding: 8px; border-radius: 7px; cursor: pointer;
       transition: background 0.15s, color 0.15s;
@@ -913,10 +917,10 @@
       stroke-width: 2.6;
       stroke-linecap: round; stroke-linejoin: round;
       filter: drop-shadow(0 0 5px rgba(200,168,64,0.55));
-      animation: tipPulse 1.1s ease-in-out infinite;
+      animation: tipPulse 2.2s ease-in-out infinite;
     }
     @keyframes tipPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-    .arrow-tip.tip2 { animation: tipPulse2 1.1s ease-in-out infinite; }
+    .arrow-tip.tip2 { animation: tipPulse2 2.2s ease-in-out infinite; }
     @keyframes tipPulse2 { 0%, 100% { opacity: 0.22; } 50% { opacity: 0.48; } }
     [data-theme="light"] #swipeArrowBase { stroke: rgba(110,82,0,0.25); }
     [data-theme="light"] .arrow-chev { stroke: rgb(110,82,0); filter: drop-shadow(0 0 2px rgba(110,82,0,0.35)); }
@@ -1052,7 +1056,7 @@
     }
     .coach-next:active { opacity: 0.75; }
     .coach-skip {
-      background: none; border: none; color: var(--muted);
+      background: none; border: none; color: var(--text);
       font-size: 0.76rem; font-weight: 700; letter-spacing: 1px;
       cursor: pointer; padding: 6px 14px; touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
@@ -1064,13 +1068,20 @@
 <body>
 
 <!-- Theme toggle (fixed top-right) -->
-<button class="theme-toggle" id="themeToggle" title="テーマ切替">🌙</button>
+<button class="theme-toggle" id="themeToggle" title="テーマ切替">
+  <svg id="iconMoon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <svg id="iconSun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.7" y2="6.7"/><line x1="17.3" y1="17.3" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.7" y2="17.3"/><line x1="17.3" y1="6.7" x2="19.07" y2="4.93"/></svg>
+</button>
 
 <!-- Settings button (fixed top-right, theme の左隣) -->
-<button class="settings-fixed-btn" id="settingsBtn" title="設定">⚙</button>
+<button class="settings-fixed-btn" id="settingsBtn" title="設定">
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+</button>
 
 <!-- Help button (fixed top-left) -->
-<button class="hist-fixed-btn" id="helpBtn" title="使い方">？</button>
+<button class="hist-fixed-btn" id="helpBtn" title="使い方">
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+</button>
 
 <!-- ④ Long press radial arrows overlay -->
 <div id="longPressOverlay">
@@ -1224,7 +1235,7 @@
 
     <!-- Numpad toggle -->
     <div class="numpad-toggle">
-      <button class="numpad-toggle-btn" id="showNumpadBtn">⌨ 手入力</button>
+      <button class="numpad-toggle-btn" id="showNumpadBtn">⌨︎ 手入力</button>
     </div>
 
     <!-- Shared numpad (hidden by default) -->
@@ -1295,7 +1306,7 @@
       <button class="numpad-btn" data-adj-num="0">0</button>
       <button class="numpad-btn sp" id="adjBS">⌫</button>
     </div>
-    <button class="modal-btn danger" id="chomboBtn" style="width:100%; margin-bottom:10px; padding:11px;">⚠ チョンボ（罰符処理）</button>
+    <button class="modal-btn danger" id="chomboBtn" style="width:100%; margin-bottom:10px; padding:11px;">⚠︎ チョンボ（罰符処理）</button>
     <div class="modal-actions">
       <button class="modal-btn cancel"  id="adjCancelBtn">キャンセル</button>
       <button class="modal-btn confirm" id="adjConfirmBtn">適用</button>
@@ -1494,7 +1505,7 @@
     <div class="help-section">
       <div class="help-section-title">手入力（電卓）</div>
       <div class="help-row">
-        <span class="help-op">⌨ 手入力</span>
+        <span class="help-op">⌨︎ 手入力</span>
         <span class="help-desc">点数入力画面の「手入力」ボタンで電卓を表示<br>キーは百の位からスタート。例）3 → 300点 / 39 → 3,900点</span>
       </div>
     </div>
@@ -1520,7 +1531,7 @@
     </div>
 
     <div class="modal-actions">
-      <button class="modal-btn cancel"  id="helpDemoBtn">▶ 操作デモ</button>
+      <button class="modal-btn cancel"  id="helpDemoBtn">▶︎ 操作デモ</button>
       <button class="modal-btn confirm" id="helpCloseBtn">閉じる</button>
     </div>
   </div>
@@ -1979,7 +1990,8 @@
   const themeToggle = document.getElementById('themeToggle');
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    themeToggle.textContent = theme === 'dark' ? '🌙' : '☀️';
+    document.getElementById('iconMoon').style.display = theme === 'dark' ? '' : 'none';
+    document.getElementById('iconSun').style.display  = theme === 'dark' ? 'none' : '';
     localStorage.setItem(LS_THEME, theme);
   }
   function initTheme() {
@@ -2407,7 +2419,7 @@
     const np = document.getElementById('mainNumpad');
     const btn = document.getElementById('showNumpadBtn');
     if (np)  np.classList.remove('visible');
-    if (btn) { btn.textContent = '⌨ 手入力'; btn.classList.remove('active'); }
+    if (btn) { btn.textContent = '⌨︎ 手入力'; btn.classList.remove('active'); }
   }
   function openRonModal(src, tgt) {
     ronSrc = src; ronTgt = tgt; tsumoWinner = src;
@@ -2820,7 +2832,7 @@
     const log  = lsGet(LS_TRANSFER);
     list.innerHTML = '';
     if (!log.length) { list.innerHTML = '<div class="hist-empty">点数ログはありません</div>'; return; }
-    const iconMap = { ron:'🀄', tsumo:'🀅', reset:'🔄', adjust:'⚖', riichi:'🔔', ryuukyoku:'🌊', chuuto:'⏸', chombo:'⚠️' };
+    const iconMap = { ron:'🀄', tsumo:'🀅', reset:'🔄', adjust:'⚖︎', riichi:'🔔', ryuukyoku:'🌊', chuuto:'⏸︎', chombo:'⚠️' };
     const descMap = {
       ron:    e => `${e.fromName||(e.from?getName(e.from):'-')} → ${e.toName||(e.to?getName(e.to):'-')}　${(e.amount||0).toLocaleString()}点`,
       tsumo:  e => `${e.toName||(e.to?getName(e.to):'-')} ツモ +${(e.amount||0).toLocaleString()}点`,
@@ -2876,7 +2888,7 @@
   /* シェブロンストリーム: 位置・透明度を requestAnimationFrame で毎フレーム更新 */
   const ARROW_CHEV_COUNT = 14;     /* 長距離スワイプでも足りる数 */
   const ARROW_SPACING    = 30;     /* シェブロン間隔 px */
-  const ARROW_SPEED      = 0.22;   /* px/ms ≒ 220px/s でターゲットへ流れる */
+  const ARROW_SPEED      = 0.11;   /* px/ms ≒ 110px/s（目に優しいゆったりした流れ） */
   let arrowGeom = null, arrowRaf = null;
 
   function initArrowChevrons() {
@@ -3136,7 +3148,7 @@
       const np  = document.getElementById('mainNumpad');
       const btn = document.getElementById('showNumpadBtn');
       const open = np.classList.toggle('visible');
-      btn.textContent = open ? '✕ 閉じる' : '⌨ 手入力';
+      btn.textContent = open ? '✕ 閉じる' : '⌨︎ 手入力';
       btn.classList.toggle('active', open);
     });
 
