@@ -884,7 +884,7 @@
     .adj-current-label { font-size: 0.68rem; color: var(--muted); }
     .adj-current-val   { font-size: 1.3rem; font-weight: 800; color: var(--text); font-feature-settings: "tnum"; }
 
-    /* ── Swipe direction arrow（流れる光跡） ──────────── */
+    /* ── Swipe direction arrow（シェブロンストリーム / rAF駆動） ── */
     #swipeArrowSvg {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
@@ -892,33 +892,35 @@
       z-index: 500;
       display: none;
     }
-    #swipeArrowGroup { opacity: 0.9; }
-    /* 下地のグロー（淡く太い線） */
-    #swipeArrowGlow {
-      stroke: rgba(200,168,64,0.16);
-      stroke-width: 13;
-      stroke-linecap: round;
+    /* ガイドの細線（幾何学的な基準線） */
+    #swipeArrowBase {
+      stroke: rgba(200,168,64,0.22);
+      stroke-width: 1;
+      stroke-dasharray: 3 5;
     }
-    /* 流れる光の粒（破線をアニメーション） */
-    #swipeArrowLine {
-      stroke: rgb(214,184,90);
-      stroke-width: 4.5;
-      stroke-linecap: round;
-      stroke-dasharray: 1 15;
-      animation: arrowFlow 0.55s linear infinite;
-      filter: drop-shadow(0 0 4px rgba(200,168,64,0.55));
+    /* 流れるシェブロン（位置・透明度はJSが毎フレーム更新） */
+    .arrow-chev {
+      fill: none;
+      stroke: rgb(220,192,104);
+      stroke-width: 2.2;
+      stroke-linecap: round; stroke-linejoin: round;
+      filter: drop-shadow(0 0 3px rgba(200,168,64,0.45));
     }
-    @keyframes arrowFlow { from { stroke-dashoffset: 16; } to { stroke-dashoffset: 0; } }
-    /* 矢じり（静かに明滅） */
-    #swipeArrowHeadShape {
-      fill: rgb(222,194,104);
-      animation: headPulse 1.1s ease-in-out infinite;
-      filter: drop-shadow(0 0 6px rgba(200,168,64,0.6));
+    /* 先端のダブルシェブロン（静かに明滅） */
+    .arrow-tip {
+      fill: none;
+      stroke: rgb(232,206,122);
+      stroke-width: 2.6;
+      stroke-linecap: round; stroke-linejoin: round;
+      filter: drop-shadow(0 0 5px rgba(200,168,64,0.55));
+      animation: tipPulse 1.1s ease-in-out infinite;
     }
-    @keyframes headPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
-    [data-theme="light"] #swipeArrowGlow  { stroke: rgba(110,82,0,0.14); }
-    [data-theme="light"] #swipeArrowLine  { stroke: rgb(110,82,0); filter: drop-shadow(0 0 3px rgba(110,82,0,0.4)); }
-    [data-theme="light"] #swipeArrowHeadShape { fill: rgb(110,82,0); filter: drop-shadow(0 0 4px rgba(110,82,0,0.45)); }
+    @keyframes tipPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    .arrow-tip.tip2 { animation: tipPulse2 1.1s ease-in-out infinite; }
+    @keyframes tipPulse2 { 0%, 100% { opacity: 0.22; } 50% { opacity: 0.48; } }
+    [data-theme="light"] #swipeArrowBase { stroke: rgba(110,82,0,0.25); }
+    [data-theme="light"] .arrow-chev { stroke: rgb(110,82,0); filter: drop-shadow(0 0 2px rgba(110,82,0,0.35)); }
+    [data-theme="light"] .arrow-tip  { stroke: rgb(96,72,0);  filter: drop-shadow(0 0 3px rgba(110,82,0,0.4)); }
 
     /* ── Help modal ──────────────────────────────────── */
     #helpModal .modal-sheet {
@@ -1078,10 +1080,11 @@
 <!-- Swipe direction arrow overlay -->
 <svg id="swipeArrowSvg" xmlns="http://www.w3.org/2000/svg">
   <g id="swipeArrowGroup">
-    <line id="swipeArrowGlow" x1="0" y1="0" x2="0" y2="0" />
-    <line id="swipeArrowLine" x1="0" y1="0" x2="0" y2="0" />
-    <g id="swipeArrowHeadG">
-      <polygon id="swipeArrowHeadShape" points="0,-8 16,0 0,8 4,0" />
+    <line id="swipeArrowBase" x1="0" y1="0" x2="0" y2="0" />
+    <g id="swipeArrowChevrons"></g>
+    <g id="swipeArrowTipG">
+      <path class="arrow-tip tip2" d="M -13 -8 L -3 0 L -13 8" />
+      <path class="arrow-tip" d="M -4 -8 L 6 0 L -4 8" />
     </g>
   </g>
 </svg>
@@ -2870,6 +2873,42 @@
       .forEach(a => a.classList.remove('highlighted'));
   }
 
+  /* シェブロンストリーム: 位置・透明度を requestAnimationFrame で毎フレーム更新 */
+  const ARROW_CHEV_COUNT = 14;     /* 長距離スワイプでも足りる数 */
+  const ARROW_SPACING    = 30;     /* シェブロン間隔 px */
+  const ARROW_SPEED      = 0.22;   /* px/ms ≒ 220px/s でターゲットへ流れる */
+  let arrowGeom = null, arrowRaf = null;
+
+  function initArrowChevrons() {
+    const g = document.getElementById('swipeArrowChevrons');
+    for (let i = 0; i < ARROW_CHEV_COUNT; i++) {
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', 'M -5 -6 L 5 0 L -5 6');
+      p.setAttribute('class', 'arrow-chev');
+      p.setAttribute('opacity', '0');
+      g.appendChild(p);
+    }
+  }
+
+  function arrowFrame(ts) {
+    if (!arrowGeom) { arrowRaf = null; return; }
+    const { x1, y1, angle, len } = arrowGeom;
+    const deg = angle * 180 / Math.PI;
+    const phase = (ts * ARROW_SPEED) % ARROW_SPACING;
+    const chevs = document.getElementById('swipeArrowChevrons').children;
+    const travel = len - 16;   /* 先端シェブロンの手前まで */
+    for (let i = 0; i < chevs.length; i++) {
+      const el = chevs[i];
+      const dist = i * ARROW_SPACING + phase;
+      if (dist > travel) { el.setAttribute('opacity', '0'); continue; }
+      /* 始点・終点付近はフェード（幾何学的に溶け込ませる） */
+      const fade = Math.min(1, dist / 36, (travel - dist) / 36);
+      el.setAttribute('transform', `translate(${x1 + Math.cos(angle) * dist},${y1 + Math.sin(angle) * dist}) rotate(${deg})`);
+      el.setAttribute('opacity', (0.9 * Math.max(0, fade)).toFixed(3));
+    }
+    arrowRaf = requestAnimationFrame(arrowFrame);
+  }
+
   function showSwipeArrow(fingerX, fingerY) {
     if (!swipeOrigin) return;
     const srcCard = getCard(swipeOrigin.pid);
@@ -2882,23 +2921,21 @@
     const y1 = cy + Math.sin(angle) * edgeDist;
     const totalDist = Math.hypot(fingerX - cx, fingerY - cy);
     const endDist = Math.max(edgeDist + 20, totalDist - 22);
-    /* 線は矢じりの少し手前まで */
-    const lineEnd = endDist - 8;
-    const lx2 = cx + Math.cos(angle) * lineEnd;
-    const ly2 = cy + Math.sin(angle) * lineEnd;
     const hx = cx + Math.cos(angle) * endDist;
     const hy = cy + Math.sin(angle) * endDist;
-    for (const id of ['swipeArrowLine', 'swipeArrowGlow']) {
-      const l = document.getElementById(id);
-      l.setAttribute('x1', x1);  l.setAttribute('y1', y1);
-      l.setAttribute('x2', lx2); l.setAttribute('y2', ly2);
-    }
-    document.getElementById('swipeArrowHeadG')
+    arrowGeom = { x1, y1, angle, len: endDist - edgeDist };
+    const base = document.getElementById('swipeArrowBase');
+    base.setAttribute('x1', x1); base.setAttribute('y1', y1);
+    base.setAttribute('x2', hx); base.setAttribute('y2', hy);
+    document.getElementById('swipeArrowTipG')
       .setAttribute('transform', `translate(${hx},${hy}) rotate(${angle * 180 / Math.PI})`);
     document.getElementById('swipeArrowSvg').style.display = 'block';
+    if (!arrowRaf) arrowRaf = requestAnimationFrame(arrowFrame);
   }
 
   function hideSwipeArrow() {
+    arrowGeom = null;
+    if (arrowRaf) { cancelAnimationFrame(arrowRaf); arrowRaf = null; }
     document.getElementById('swipeArrowSvg').style.display = 'none';
   }
 
@@ -3059,6 +3096,7 @@
   /* ── Init ───────────────────────────────────────── */
   function init() {
     initTheme();
+    initArrowChevrons();
     renderScores();
     syncBtns();
     showTutorialIfNeeded();

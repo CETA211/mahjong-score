@@ -52,9 +52,10 @@ setTimeout(() => {
     w2.document.getElementById('helpDemoBtn').click();
     t('ヘルプからコーチ再生', w2.document.getElementById('coachOverlay').classList.contains('show'));
 
-    console.log('--- ④ 矢印SVG構造 ---');
-    t('グロー線あり', !!w2.document.getElementById('swipeArrowGlow'));
-    t('矢じりグループあり', !!w2.document.getElementById('swipeArrowHeadG'));
+    console.log('--- ④ 矢印SVG構造（シェブロンストリーム） ---');
+    t('ガイド基準線あり', !!w2.document.getElementById('swipeArrowBase'));
+    t('シェブロンが生成されている', w2.document.getElementById('swipeArrowChevrons').children.length === 14);
+    t('先端ダブルシェブロンあり', w2.document.querySelectorAll('#swipeArrowTipG .arrow-tip').length === 2);
     t('旧markerは削除済み', !w2.document.getElementById('swipeArrowHead'));
 
     console.log('--- ② モーダル中央化CSS ---');
