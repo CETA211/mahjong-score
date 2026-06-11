@@ -73,8 +73,8 @@
       overflow-x: hidden;
     }
 
-    /* ── Theme toggle / Help: fixed top ─────────────── */
-    .theme-toggle, .hist-fixed-btn {
+    /* ── Theme toggle / Help / Settings: fixed top ──── */
+    .theme-toggle, .hist-fixed-btn, .settings-fixed-btn {
       position: fixed;
       top: calc(env(safe-area-inset-top) + 12px);
       width: 36px; height: 36px;
@@ -88,10 +88,12 @@
       -webkit-tap-highlight-color: transparent;
     }
     .theme-toggle  { right: 16px; }
+    .settings-fixed-btn { right: 60px; font-size: 1rem; }
     .hist-fixed-btn { left: 16px; }
-    .theme-toggle:active, .hist-fixed-btn:active { background: rgba(200,168,64,0.25); }
+    .theme-toggle:active, .hist-fixed-btn:active, .settings-fixed-btn:active { background: rgba(200,168,64,0.25); }
     [data-theme="light"] .theme-toggle,
-    [data-theme="light"] .hist-fixed-btn {
+    [data-theme="light"] .hist-fixed-btn,
+    [data-theme="light"] .settings-fixed-btn {
       background: rgba(160,120,32,0.1);
       border-color: rgba(160,120,32,0.35);
     }
@@ -279,25 +281,59 @@
       color: #b03030; background: rgba(200,64,64,0.08); border-color: rgba(200,64,64,0.4);
     }
 
-    /* ── 順位バッジ / TOP点差 ── */
+    /* ── 順位バッジ / TOP点差（デフォルト非表示・設定でON） ── */
     .card-rank {
       position: absolute; top: 6px; left: 8px;
       width: 18px; height: 18px; border-radius: 50%;
-      display: inline-flex; align-items: center; justify-content: center;
+      display: none; align-items: center; justify-content: center;
       font-size: 0.62rem; font-weight: 800;
       pointer-events: none;
     }
+    body.show-rank .card-rank { display: inline-flex; }
     .card-rank.rank-1 { background: #FFD700; color: #1a1a1a; }
     .card-rank.rank-2 { background: #C0C0C0; color: #1a1a1a; }
     .card-rank.rank-3 { background: #CD7F32; color: #ffffff; }
     .card-rank.rank-4 { background: #3a3a3a; color: #cccccc; }
     .top-diff {
+      display: none;
       margin-top: 6px;
       font-size: 0.6rem; font-weight: 700;
       color: var(--muted); font-feature-settings: "tnum"; letter-spacing: 0.5px;
       min-height: 0.8em;
     }
+    body.show-diff .top-diff { display: block; }
     .top-diff.is-top { color: var(--gold); opacity: 0.85; }
+
+    /* ── 設定モーダル ── */
+    .set-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 13px 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .set-row:last-of-type { border-bottom: none; }
+    .set-info  { flex: 1; }
+    .set-label { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+    .set-desc  { font-size: 0.64rem; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+    .switch {
+      position: relative; flex-shrink: 0;
+      width: 46px; height: 26px; border-radius: 13px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--border);
+      cursor: pointer; touch-action: manipulation;
+      transition: background 0.18s, border-color 0.18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .switch::after {
+      content: '';
+      position: absolute; top: 2px; left: 2px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #777;
+      transition: left 0.18s, background 0.18s;
+    }
+    .switch.on { background: rgba(200,168,64,0.35); border-color: var(--gold); }
+    .switch.on::after { left: 22px; background: var(--gold); }
+    [data-theme="light"] .switch { background: rgba(0,0,0,0.08); }
+    [data-theme="light"] .switch::after { background: #aaa; }
 
     /* ── カスタム確認ダイアログ ── */
     .confirm-msg {
@@ -1028,6 +1064,9 @@
 <!-- Theme toggle (fixed top-right) -->
 <button class="theme-toggle" id="themeToggle" title="テーマ切替">🌙</button>
 
+<!-- Settings button (fixed top-right, theme の左隣) -->
+<button class="settings-fixed-btn" id="settingsBtn" title="設定">⚙</button>
+
 <!-- Help button (fixed top-left) -->
 <button class="hist-fixed-btn" id="helpBtn" title="使い方">？</button>
 
@@ -1484,6 +1523,31 @@
   </div>
 </div>
 
+<!-- ── 設定モーダル ────────────────────────────────── -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-sheet" style="max-width:400px;">
+    <div class="sheet-handle"></div>
+    <div class="modal-label">設 定</div>
+    <div class="set-row">
+      <div class="set-info">
+        <div class="set-label">順位バッジ</div>
+        <div class="set-desc">各プレイヤーカードに現在の順位（1〜4位）を表示</div>
+      </div>
+      <button class="switch" id="swRank" data-setting="showRank"></button>
+    </div>
+    <div class="set-row">
+      <div class="set-info">
+        <div class="set-label">TOPとの点差</div>
+        <div class="set-desc">点数の下に1位との差を表示（1位は「TOP」）</div>
+      </div>
+      <button class="switch" id="swDiff" data-setting="showDiff"></button>
+    </div>
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="modal-btn confirm" id="settingsCloseBtn">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── カスタム確認ダイアログ ──────────────────────── -->
 <div class="modal-overlay" id="confirmModal" style="z-index:1600;">
   <div class="modal-sheet" style="max-width:360px;">
@@ -1681,6 +1745,17 @@
   const LS_RULESET  = 'mahjong_ruleset';
   const LS_LIVE     = 'mahjong_live_state';
   const LS_NAMES    = 'mahjong_player_names';
+  const LS_SETTINGS = 'mahjong_settings';
+
+  /* ── 表示設定（デフォルトは順位・点差とも非表示） ── */
+  const settings = { showRank: false, showDiff: false };
+  function applySettings() {
+    document.body.classList.toggle('show-rank', !!settings.showRank);
+    document.body.classList.toggle('show-diff', !!settings.showDiff);
+    document.querySelectorAll('.switch[data-setting]').forEach(sw => {
+      sw.classList.toggle('on', !!settings[sw.dataset.setting]);
+    });
+  }
 
   /* ── Undo / Redo stacks ─────────────────────────── */
   const undoStack = [], redoStack = [];
@@ -3172,6 +3247,26 @@
     document.getElementById('confirmNoBtn').addEventListener('click', () => settleConfirm(false));
     document.getElementById('confirmModal').addEventListener('click', e => {
       if (e.target === document.getElementById('confirmModal')) settleConfirm(false);
+    });
+
+    /* 設定モーダル */
+    try { Object.assign(settings, JSON.parse(localStorage.getItem(LS_SETTINGS)) || {}); } catch {}
+    applySettings();
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+      document.getElementById('settingsModal').classList.add('show');
+    });
+    document.getElementById('settingsCloseBtn').addEventListener('click', () => {
+      document.getElementById('settingsModal').classList.remove('show');
+    });
+    document.getElementById('settingsModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('settingsModal')) document.getElementById('settingsModal').classList.remove('show');
+    });
+    document.querySelectorAll('.switch[data-setting]').forEach(sw => {
+      sw.addEventListener('click', () => {
+        settings[sw.dataset.setting] = !settings[sw.dataset.setting];
+        lsSet(LS_SETTINGS, settings);
+        applySettings();
+      });
     });
 
     /* プレイヤー名の保存・復元 */
