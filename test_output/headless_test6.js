@@ -24,17 +24,23 @@ let w = boot({ mahjong_tutorial_shown: '1' });
 let d = w.document;
 t('html data-theme=dark', d.documentElement.getAttribute('data-theme') === 'dark');
 t('スウォッチ: 標準がon', d.querySelector('.theme-sw[data-theme-val="dark"]').classList.contains('on'));
-t('Mリーグテーマ変数がCSSに定義', /\[data-theme="mleague"\] \{/.test(html));
+t('Mリーグテーマ変数がCSSに定義', /\[data-skin="mleague"\] \{/.test(html));
 t('Mリーグ: M.LEAGUEグリーン #1c7622 使用', html.includes('#1c7622'));
-t('Mリーグ: 緑フレーム #118945 使用', html.includes('#118945'));
+t('Mリーグ: 緑フレーム #0f8043 使用', html.includes('#0f8043'));
 t('Mリーグ: 赤アクセント #cd0000 使用', html.includes('#cd0000'));
-t('Mリーグ: 白背景(--bg #ffffff)', /\[data-theme="mleague"\] \{[^}]*--bg:\s*#ffffff/.test(html));
+// 背景は純白ではない淡色（白カードを影で浮かせるコントラスト確保）
+const mlVars = (html.match(/\[data-skin="mleague"\] \{[^}]*\}/) || [''])[0];
+const bgm = mlVars.match(/--bg:\s*(#[0-9a-fA-F]{6})/);
+t('Mリーグ: 背景は純白ではない淡色', !!bgm && bgm[1].toLowerCase() !== '#ffffff');
+t('Mリーグ: カード白(--card #ffffff)', /--card:\s*#ffffff/.test(mlVars));
 
 console.log('--- 設定でMリーグに切替 ---');
 d.getElementById('settingsBtn').click();
 t('設定モーダルが開く', d.getElementById('settingsModal').classList.contains('show'));
 d.querySelector('.theme-sw[data-theme-val="mleague"]').click();
-t('data-theme=mleague に', d.documentElement.getAttribute('data-theme') === 'mleague');
+t('論理テーマ=mleague (data-theme-name)', d.documentElement.getAttribute('data-theme-name') === 'mleague');
+t('描画土台=light (data-theme)', d.documentElement.getAttribute('data-theme') === 'light');
+t('skin=mleague (data-skin)', d.documentElement.getAttribute('data-skin') === 'mleague');
 t('スウォッチ: Mリーグがon', d.querySelector('.theme-sw[data-theme-val="mleague"]').classList.contains('on'));
 t('標準スウォッチはoff', !d.querySelector('.theme-sw[data-theme-val="dark"]').classList.contains('on'));
 t('LS_THEMEにmleague保存', w.localStorage.getItem('mahjong_theme') === 'mleague');
@@ -45,16 +51,16 @@ d.getElementById('themeToggle').click();
 t('Mリーグ→ライト', d.documentElement.getAttribute('data-theme') === 'light');
 t('ライト時は太陽アイコン', d.getElementById('iconSun').style.display === '');
 d.getElementById('themeToggle').click();
-t('ライト→Mリーグに戻る（lastDarkTheme記憶）', d.documentElement.getAttribute('data-theme') === 'mleague');
+t('ライト→Mリーグに戻る（lastDarkTheme記憶）', d.documentElement.getAttribute('data-theme-name') === 'mleague');
 
 console.log('--- 再起動でテーマ復元 ---');
 const w2 = boot({ mahjong_tutorial_shown: '1', mahjong_theme: 'mleague' });
-t('mleague復元', w2.document.documentElement.getAttribute('data-theme') === 'mleague');
+t('mleague復元', w2.document.documentElement.getAttribute('data-theme-name') === 'mleague');
 t('スウォッチも復元', w2.document.querySelector('.theme-sw[data-theme-val="mleague"]').classList.contains('on'));
 
 console.log('--- 不正値はdarkにフォールバック ---');
 const w3 = boot({ mahjong_tutorial_shown: '1', mahjong_theme: 'bogus' });
-t('不正テーマ→dark', w3.document.documentElement.getAttribute('data-theme') === 'dark');
+t('不正テーマ→dark', w3.document.documentElement.getAttribute('data-theme-name') === 'dark');
 
 console.log('');
 console.log('RESULT: pass=' + pass + ' fail=' + fail);

@@ -31,7 +31,7 @@
     }
 
     /* ── ① Light theme ───────────────────────────────── */
-    [data-theme="light"], [data-theme="mleague"] {
+    [data-theme="light"] {
       --bg:         #f5f0e8;
       --card:       #ffffff;
       --card-act:   #f0ebe0;
@@ -43,26 +43,26 @@
       --gold-dim:   rgba(160,120,32,0.12);
       --gold-line:  #d4b87a;
     }
-    [data-theme="light"], [data-theme="mleague"] body {
+    [data-theme="light"] body {
       background: var(--bg);
       background-image: radial-gradient(ellipse at 50% -5%, rgba(45,140,80,0.05) 0%, transparent 55%);
     }
-    [data-theme="light"], [data-theme="mleague"] .modal-sheet,
-    [data-theme="light"], [data-theme="mleague"] .gameover-sheet { background: #faf6ee; }
-    [data-theme="light"], [data-theme="mleague"] .modal-overlay  { background: rgba(0,0,0,0.55); }
-    [data-theme="light"], [data-theme="mleague"] .toast          { background: rgba(250,246,238,0.97); color: #1a1a1a; border-color: #d4b87a; }
-    [data-theme="light"], [data-theme="mleague"] .numpad-btn     { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: #1a1a1a; }
-    [data-theme="light"], [data-theme="mleague"] .numpad-btn:active { background: rgba(0,0,0,0.1); }
-    [data-theme="light"], [data-theme="mleague"] .player-card    { border-color: rgba(0,0,0,0.12); }
-    [data-theme="light"], [data-theme="mleague"] .btn            { border-color: rgba(0,0,0,0.35); color: #1a1a1a; }
-    [data-theme="light"], [data-theme="mleague"] .btn:hover      { background: rgba(160,120,32,0.1); }
-    [data-theme="light"], [data-theme="mleague"] .btn-hist,
-    [data-theme="light"], [data-theme="mleague"] .btn-end        { border-color: rgba(160,120,32,0.6); color: var(--gold); }
-    [data-theme="light"], [data-theme="mleague"] .btn-reset      { border-color: rgba(0,0,0,0.35); color: #1a1a1a; }
-    [data-theme="light"], [data-theme="mleague"] .center-inner   { background: rgba(160,120,32,0.06); }
-    [data-theme="light"], [data-theme="mleague"] .mode-toggle,
-    [data-theme="light"], [data-theme="mleague"] .tsumo-type-toggle,
-    [data-theme="light"], [data-theme="mleague"] .hist-tabs { background: rgba(0,0,0,0.05); }
+    [data-theme="light"] .modal-sheet,
+    [data-theme="light"] .gameover-sheet { background: #faf6ee; }
+    [data-theme="light"] .modal-overlay  { background: rgba(0,0,0,0.55); }
+    [data-theme="light"] .toast          { background: rgba(250,246,238,0.97); color: #1a1a1a; border-color: #d4b87a; }
+    [data-theme="light"] .numpad-btn     { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: #1a1a1a; }
+    [data-theme="light"] .numpad-btn:active { background: rgba(0,0,0,0.1); }
+    [data-theme="light"] .player-card    { border-color: rgba(0,0,0,0.12); }
+    [data-theme="light"] .btn            { border-color: rgba(0,0,0,0.35); color: #1a1a1a; }
+    [data-theme="light"] .btn:hover      { background: rgba(160,120,32,0.1); }
+    [data-theme="light"] .btn-hist,
+    [data-theme="light"] .btn-end        { border-color: rgba(160,120,32,0.6); color: var(--gold); }
+    [data-theme="light"] .btn-reset      { border-color: rgba(0,0,0,0.35); color: #1a1a1a; }
+    [data-theme="light"] .center-inner   { background: rgba(160,120,32,0.06); }
+    [data-theme="light"] .mode-toggle,
+    [data-theme="light"] .tsumo-type-toggle,
+    [data-theme="light"] .hist-tabs { background: rgba(0,0,0,0.05); }
 
     body {
       background: var(--bg);
@@ -94,9 +94,9 @@
     .settings-fixed-btn { right: 60px; }
     .hist-fixed-btn { left: 16px; }
     .theme-toggle:active, .hist-fixed-btn:active, .settings-fixed-btn:active { background: rgba(200,168,64,0.25); }
-    [data-theme="light"], [data-theme="mleague"] .theme-toggle,
-    [data-theme="light"], [data-theme="mleague"] .hist-fixed-btn,
-    [data-theme="light"], [data-theme="mleague"] .settings-fixed-btn {
+    [data-theme="light"] .theme-toggle,
+    [data-theme="light"] .hist-fixed-btn,
+    [data-theme="light"] .settings-fixed-btn {
       background: rgba(160,120,32,0.1);
       border-color: rgba(160,120,32,0.35);
     }
@@ -121,7 +121,7 @@
       white-space: nowrap;
       text-shadow: 0 0 24px rgba(200,168,64,0.45), 0 1px 2px rgba(0,0,0,0.25);
     }
-    [data-theme="light"], [data-theme="mleague"] .app-title {
+    [data-theme="light"] .app-title {
       text-shadow: 0 0 16px rgba(160,120,32,0.35), 0 1px 1px rgba(0,0,0,0.1);
     }
 
@@ -204,16 +204,16 @@
       border-color: rgba(200,168,64,0.48);
       box-shadow: 0 0 0 1px rgba(200,168,64,0.16), 0 0 18px rgba(200,168,64,0.16);
     }
-    [data-theme="light"], [data-theme="mleague"] .dealer-indicator {
+    [data-theme="light"] .dealer-indicator {
       background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.12); color: var(--dim);
     }
-    [data-theme="light"], [data-theme="mleague"] .dealer-indicator.is-dealer {
+    [data-theme="light"] .dealer-indicator.is-dealer {
       color: var(--gold); border-color: rgba(160,120,32,0.55);
       background: rgba(160,120,32,0.1);
       box-shadow: 0 0 10px rgba(160,120,32,0.25), 0 0 0 1px rgba(160,120,32,0.1);
       text-shadow: 0 0 6px rgba(160,120,32,0.45);
     }
-    [data-theme="light"], [data-theme="mleague"] .player-card.is-dealer {
+    [data-theme="light"] .player-card.is-dealer {
       border-color: rgba(160,120,32,0.55);
       box-shadow: 0 0 0 1px rgba(160,120,32,0.18), 0 0 14px rgba(160,120,32,0.14);
     }
@@ -265,9 +265,9 @@
       18%  { opacity: 1; }
       100% { opacity: 0; transform: translate(-50%, -26px); }
     }
-    [data-theme="light"], [data-theme="mleague"] .score-float { text-shadow: 0 1px 4px rgba(255,255,255,0.7); }
-    [data-theme="light"], [data-theme="mleague"] .score-float.plus  { color: #1d8a3c; }
-    [data-theme="light"], [data-theme="mleague"] .score-float.minus { color: #c0392b; }
+    [data-theme="light"] .score-float { text-shadow: 0 1px 4px rgba(255,255,255,0.7); }
+    [data-theme="light"] .score-float.plus  { color: #1d8a3c; }
+    [data-theme="light"] .score-float.minus { color: #c0392b; }
 
     /* ── リーチ中バッジ ── */
     .player-card.riichi::after {
@@ -280,7 +280,7 @@
       padding: 2px 7px; border-radius: 10px;
       pointer-events: none;
     }
-    [data-theme="light"], [data-theme="mleague"] .player-card.riichi::after {
+    [data-theme="light"] .player-card.riichi::after {
       color: #b03030; background: rgba(200,64,64,0.08); border-color: rgba(200,64,64,0.4);
     }
 
@@ -335,8 +335,8 @@
     }
     .switch.on { background: rgba(200,168,64,0.35); border-color: var(--gold); }
     .switch.on::after { left: 22px; background: var(--gold); }
-    [data-theme="light"], [data-theme="mleague"] .switch { background: rgba(0,0,0,0.08); }
-    [data-theme="light"], [data-theme="mleague"] .switch::after { background: #aaa; }
+    [data-theme="light"] .switch { background: rgba(0,0,0,0.08); }
+    [data-theme="light"] .switch::after { background: #aaa; }
 
     /* ── テーマ選択スウォッチ ── */
     .theme-swatches { display: flex; gap: 8px; margin-top: 10px; }
@@ -354,7 +354,7 @@
     .theme-sw .sw-name { font-size: 0.66rem; font-weight: 700; color: var(--dim); letter-spacing: 0.5px; }
     .theme-sw.on { border-color: var(--gold); background: var(--gold-dim); }
     .theme-sw.on .sw-name { color: var(--gold); }
-    [data-theme="light"], [data-theme="mleague"] .theme-sw { background: rgba(0,0,0,0.03); }
+    [data-theme="light"] .theme-sw { background: rgba(0,0,0,0.03); }
 
     /* ── カスタム確認ダイアログ ── */
     .confirm-msg {
@@ -408,7 +408,7 @@
     .pick-btn.on { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
     .pick-btn .pick-sub { display: block; font-size: 0.6rem; color: var(--muted); margin-top: 3px; }
     .pick-btn.on .pick-sub { color: var(--gold); }
-    [data-theme="light"], [data-theme="mleague"] .pick-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+    [data-theme="light"] .pick-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
 
     /* ── 局・本場・供託 修正モーダル ── */
     .ie-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -424,7 +424,7 @@
       touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     }
     .ie-btn:active { background: rgba(255,255,255,0.12); }
-    [data-theme="light"], [data-theme="mleague"] .ie-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a1a; }
+    [data-theme="light"] .ie-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a1a; }
 
     .btn-riichi { border-color: rgba(200,168,64,0.55); color: var(--gold); }
     .btn-riichi:hover  { background: var(--gold-dim); }
@@ -589,7 +589,7 @@
       font-size: 0.54rem; color: var(--muted);
       margin-top: 3px; line-height: 1.2; white-space: pre-line;
     }
-    [data-theme="light"], [data-theme="mleague"] .score-chip.selected { background: rgba(200,168,64,0.3); }
+    [data-theme="light"] .score-chip.selected { background: rgba(200,168,64,0.3); }
 
     /* ── 本場ボタン ────────────────────────────── */
     .honba-row {
@@ -606,10 +606,10 @@
     }
     .honba-btn:active { background: rgba(255,255,255,0.12); }
     .honba-btn.dec { flex: 0 0 38px; font-size: 0.95rem; }
-    [data-theme="light"], [data-theme="mleague"] .honba-btn {
+    [data-theme="light"] .honba-btn {
       background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a1a;
     }
-    [data-theme="light"], [data-theme="mleague"] .honba-btn:active { background: rgba(0,0,0,0.08); }
+    [data-theme="light"] .honba-btn:active { background: rgba(0,0,0,0.08); }
 
     /* Shared score display */
     .score-display { text-align: center; margin-bottom: 12px; line-height: 1; }
@@ -678,10 +678,10 @@
       color: var(--gold); border-color: rgba(200,168,64,0.4);
       background: rgba(200,168,64,0.08);
     }
-    [data-theme="light"], [data-theme="mleague"] .numpad-toggle-btn {
+    [data-theme="light"] .numpad-toggle-btn {
       border-color: rgba(0,0,0,0.2); color: #1a1a1a;
     }
-    [data-theme="light"], [data-theme="mleague"] .numpad-toggle-btn.active {
+    [data-theme="light"] .numpad-toggle-btn.active {
       color: var(--gold); border-color: rgba(160,120,32,0.45);
       background: rgba(160,120,32,0.08);
     }
@@ -729,7 +729,7 @@
     }
     .modal-btn:active { opacity: 0.7; }
     .modal-btn.cancel  { background: rgba(255,255,255,0.14); color: var(--text); }
-    [data-theme="light"], [data-theme="mleague"] .modal-btn.cancel { background: rgba(0,0,0,0.08); color: #1a1a1a; }
+    [data-theme="light"] .modal-btn.cancel { background: rgba(0,0,0,0.08); color: #1a1a1a; }
     .modal-btn.confirm { background: #c8a840; color: #080e08; }
     .modal-btn.danger  { background: rgba(200,64,64,0.15); color: var(--red); border: 1px solid rgba(200,64,64,0.3); }
 
@@ -896,7 +896,7 @@
     .rule-toggle .mode-btn.active {
       background: rgba(200,168,64,0.22); color: var(--gold);
     }
-    [data-theme="light"], [data-theme="mleague"] .rule-toggle .mode-btn.active {
+    [data-theme="light"] .rule-toggle .mode-btn.active {
       background: rgba(200,168,64,0.18); color: #8a6000;
     }
     /* ── ③ Adjust score modal extras ─────────────────── */
@@ -940,9 +940,9 @@
     @keyframes tipPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     .arrow-tip.tip2 { animation: tipPulse2 2.2s ease-in-out infinite; }
     @keyframes tipPulse2 { 0%, 100% { opacity: 0.22; } 50% { opacity: 0.48; } }
-    [data-theme="light"], [data-theme="mleague"] #swipeArrowBase { stroke: rgba(110,82,0,0.25); }
-    [data-theme="light"], [data-theme="mleague"] .arrow-chev { stroke: rgb(110,82,0); filter: drop-shadow(0 0 2px rgba(110,82,0,0.35)); }
-    [data-theme="light"], [data-theme="mleague"] .arrow-tip  { stroke: rgb(96,72,0);  filter: drop-shadow(0 0 3px rgba(110,82,0,0.4)); }
+    [data-theme="light"] #swipeArrowBase { stroke: rgba(110,82,0,0.25); }
+    [data-theme="light"] .arrow-chev { stroke: rgb(110,82,0); filter: drop-shadow(0 0 2px rgba(110,82,0,0.35)); }
+    [data-theme="light"] .arrow-tip  { stroke: rgb(96,72,0);  filter: drop-shadow(0 0 3px rgba(110,82,0,0.4)); }
 
     /* ── Help modal ──────────────────────────────────── */
     #helpModal .modal-sheet {
@@ -960,7 +960,7 @@
       border-bottom: 1px solid rgba(255,255,255,0.07);
       padding-bottom: 4px; margin-bottom: 10px;
     }
-    [data-theme="light"], [data-theme="mleague"] .help-section-title {
+    [data-theme="light"] .help-section-title {
       border-bottom-color: rgba(0,0,0,0.1);
     }
     .help-row {
@@ -1079,21 +1079,21 @@
       cursor: pointer; padding: 6px 14px; touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
-    [data-theme="light"], [data-theme="mleague"] #coachOverlay { background: rgba(245,240,232,0.92); }
-    [data-theme="light"], [data-theme="mleague"] .coach-dot { background: rgba(0,0,0,0.15); }
+    [data-theme="light"] #coachOverlay { background: rgba(245,240,232,0.92); }
+    [data-theme="light"] .coach-dot { background: rgba(0,0,0,0.15); }
 
     /* ══════════════════════════════════════════════════
        Mリーグ公式テーマ（白地 × 緑フレーム × 緑ピル × 赤親）
        light をベースに M.LEAGUE のブランドアクセントを最後に上書き
        ══════════════════════════════════════════════════ */
-    [data-theme="mleague"] {
-      --bg:         #ffffff;
+    [data-skin="mleague"] {
+      --bg:         #eef1ee;   /* 白寄りの淡いグレー緑（影で白カードを浮かせる） */
       --card:       #ffffff;
-      --card-act:   #f1f7f1;
-      --text:       #141414;
-      --muted:      #9a9a9a;
-      --dim:        rgba(20,20,20,0.55);
-      --border:     rgba(0,0,0,0.12);
+      --card-act:   #eef5ee;
+      --text:       #161616;
+      --muted:      #8a8f8a;
+      --dim:        rgba(22,22,22,0.6);
+      --border:     rgba(0,0,0,0.14);
       --green:      #1c7622;
       --green-dim:  rgba(28,118,34,0.10);
       --green-line: rgba(28,118,34,0.50);
@@ -1103,90 +1103,120 @@
       --red:        #cd0000;
     }
     /* 署名的: 画面を囲む緑フレーム */
-    [data-theme="mleague"] body::before {
+    [data-skin="mleague"] body::before {
       content: ''; position: fixed;
       top: calc(env(safe-area-inset-top) + 6px); right: 6px;
       bottom: calc(env(safe-area-inset-bottom) + 6px); left: 6px;
-      border: 3px solid #118945; border-radius: 10px;
+      border: 3px solid #0f8043; border-radius: 12px;
       pointer-events: none; z-index: 850;
     }
-    [data-theme="mleague"] body { background: #ffffff; background-image: none; }
-    /* サーフェスは純白（M.LEAGUE） */
-    [data-theme="mleague"] .modal-sheet,
-    [data-theme="mleague"] .gameover-sheet { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); border-top: 3px solid #1c7622; }
-    [data-theme="mleague"] .gameover-sheet { border-top-width: 1px; border-color: rgba(0,0,0,0.1); }
-    [data-theme="mleague"] .toast { background: #ffffff; color: #141414; border-color: #1c7622; }
+    [data-skin="mleague"] body { background: #eef1ee; background-image: none; }
+    /* サーフェス: 純白＋影で地から浮かせる */
+    [data-skin="mleague"] .modal-sheet,
+    [data-skin="mleague"] .gameover-sheet { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); border-top: 3px solid #1c7622; }
+    [data-skin="mleague"] .gameover-sheet { border-top-width: 1px; border-color: rgba(0,0,0,0.1); }
+    [data-skin="mleague"] .toast { background: #ffffff; color: #161616; border-color: #1c7622; box-shadow: 0 6px 20px rgba(0,0,0,0.18); }
     /* タイトル: 黒の極太ゴシック＋緑サイドライン */
-    [data-theme="mleague"] .app-title {
+    [data-skin="mleague"] .app-title {
       font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic UI', system-ui, sans-serif;
-      font-weight: 900; color: #141414; letter-spacing: clamp(4px,1vw,10px); text-shadow: none;
+      font-weight: 900; color: #161616; letter-spacing: clamp(4px,1vw,10px); text-shadow: none;
     }
-    [data-theme="mleague"] .header-line:first-child { background: linear-gradient(90deg, transparent, #118945); height: 3px; }
-    [data-theme="mleague"] .header-line:last-child  { background: linear-gradient(90deg, #118945, transparent); height: 3px; }
-    /* ヘッダー丸ボタン: 緑アウトライン */
-    [data-theme="mleague"] .theme-toggle,
-    [data-theme="mleague"] .hist-fixed-btn,
-    [data-theme="mleague"] .settings-fixed-btn {
+    [data-skin="mleague"] .header-line:first-child { background: linear-gradient(90deg, transparent, #0f8043); height: 3px; }
+    [data-skin="mleague"] .header-line:last-child  { background: linear-gradient(90deg, #0f8043, transparent); height: 3px; }
+    /* ヘッダー丸ボタン: 白地＋緑アウトライン＋影 */
+    [data-skin="mleague"] .theme-toggle,
+    [data-skin="mleague"] .hist-fixed-btn,
+    [data-skin="mleague"] .settings-fixed-btn {
       background: #ffffff; border: 1.5px solid #1c7622; color: #1c7622;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
-    /* プレイヤーカード: 白＋濃いめボーダー、上アクセント緑 */
-    [data-theme="mleague"] .player-card {
-      border: 1.5px solid rgba(0,0,0,0.13); box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    /* プレイヤーカード: 白＋影で地から明確に浮かせる */
+    [data-skin="mleague"] .player-card {
+      border: 1px solid #d6dcd6; box-shadow: 0 2px 10px rgba(0,0,0,0.09);
     }
-    [data-theme="mleague"] .player-card::before { background: linear-gradient(90deg, transparent, #1c7622, transparent); }
-    [data-theme="mleague"] .player-card:active { border-color: var(--green-line); box-shadow: 0 0 0 2px rgba(28,118,34,0.2); }
+    [data-skin="mleague"] .player-card::before { background: linear-gradient(90deg, transparent, #1c7622, transparent); }
+    [data-skin="mleague"] .player-card:active { border-color: var(--green-line); box-shadow: 0 0 0 2px rgba(28,118,34,0.25), 0 2px 10px rgba(0,0,0,0.1); }
     /* 親インジケーター: M.LEAGUE レッド（1位バッジ風） */
-    [data-theme="mleague"] .dealer-indicator.is-dealer {
+    [data-skin="mleague"] .dealer-indicator { background: #ffffff; border-color: #d6dcd6; }
+    [data-skin="mleague"] .dealer-indicator.is-dealer {
       color: #ffffff; background: #cd0000; border-color: #cd0000;
-      box-shadow: 0 2px 8px rgba(205,0,0,0.32); text-shadow: none;
+      box-shadow: 0 2px 8px rgba(205,0,0,0.35); text-shadow: none;
     }
-    [data-theme="mleague"] .player-card.is-dealer {
-      border-color: #cd0000; box-shadow: 0 0 0 1.5px rgba(205,0,0,0.4), 0 1px 4px rgba(0,0,0,0.06);
+    [data-skin="mleague"] .player-card.is-dealer {
+      border-color: #cd0000; box-shadow: 0 0 0 2px rgba(205,0,0,0.45), 0 2px 10px rgba(0,0,0,0.1);
     }
-    /* 中央パネル（局）: 緑アウトライン */
-    [data-theme="mleague"] .center-inner { background: #ffffff; border: 1.5px solid #1c7622; }
+    /* 中央パネル（局）: 白＋緑アウトライン＋影 */
+    [data-skin="mleague"] .center-inner { background: #ffffff; border: 1.5px solid #1c7622; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    [data-skin="mleague"] .ci-kyoku { color: #1c7622; }
     /* アクティブタブ: 緑ピル＋白文字 */
-    [data-theme="mleague"] .mode-btn.active { background: #1c7622; color: #fff; }
-    [data-theme="mleague"] .score-cat-btn.active,
-    [data-theme="mleague"] .tsumo-type-btn.active,
-    [data-theme="mleague"] .hist-tab-btn.active,
-    [data-theme="mleague"] .rule-toggle .mode-btn.active { background: var(--green-dim); color: #1c7622; }
-    /* スコアチップ選択: 緑 */
-    [data-theme="mleague"] .score-chip.selected {
-      background: rgba(28,118,34,0.18); border-color: #1c7622; box-shadow: 0 0 0 1px rgba(28,118,34,0.25);
+    [data-skin="mleague"] .mode-btn.active { background: #1c7622; color: #fff; }
+    [data-skin="mleague"] .score-cat-btn.active,
+    [data-skin="mleague"] .tsumo-type-btn.active,
+    [data-skin="mleague"] .hist-tab-btn.active,
+    [data-skin="mleague"] .rule-toggle .mode-btn.active {
+      background: #e2f0e4; color: #1c7622;
+      box-shadow: inset 0 0 0 1.5px #1c7622;
     }
+    /* スコアチップ: 白地＋薄緑枠（タップ可能に見せる）、選択は緑塗り */
+    [data-skin="mleague"] .score-chip {
+      background: #ffffff; border: 1px solid #cdd5cd;
+    }
+    [data-skin="mleague"] .score-chip.selected {
+      background: rgba(28,118,34,0.16); border-color: #1c7622; box-shadow: 0 0 0 1.5px rgba(28,118,34,0.3);
+    }
+    [data-skin="mleague"] .score-chip-val { color: #1c7622; }
     /* 決定・確定系: 緑ピル（白太字） */
-    [data-theme="mleague"] .modal-btn.confirm,
-    [data-theme="mleague"] .coach-next { background: #1c7622; color: #ffffff; }
-    /* アクションバー */
-    [data-theme="mleague"] .btn-hist,
-    [data-theme="mleague"] .btn-end { border-color: #1c7622; color: #1c7622; }
-    [data-theme="mleague"] .btn-hist:hover, [data-theme="mleague"] .btn-hist:active,
-    [data-theme="mleague"] .btn-end:hover,  [data-theme="mleague"] .btn-end:active { background: rgba(28,118,34,0.08); }
-    [data-theme="mleague"] .btn-riichi { border-color: #cd0000; color: #cd0000; }
-    [data-theme="mleague"] .btn:hover { background: rgba(28,118,34,0.07); }
+    [data-skin="mleague"] .modal-btn.confirm,
+    [data-skin="mleague"] .coach-next { background: #1c7622; color: #ffffff; }
+    /* アクションバー: 白ピル＋影、種別で色分け（詳細度を揃える） */
+    [data-skin="mleague"] .action-bar .btn {
+      background: #ffffff; border: 1.5px solid #d6dcd6; color: #222;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    [data-skin="mleague"] .action-bar .btn-hist,
+    [data-skin="mleague"] .action-bar .btn-end { border-color: #1c7622; color: #1c7622; }
+    [data-skin="mleague"] .action-bar .btn-riichi { border-color: #cd0000; color: #cd0000; }
+    [data-skin="mleague"] .action-bar .btn:hover,
+    [data-skin="mleague"] .action-bar .btn:active { background: #f2f6f2; }
+    /* セグメントトラック（四麻/三麻 等）: 白ピル＋影 */
+    [data-skin="mleague"] .rule-toggle,
+    [data-skin="mleague"] .mode-toggle,
+    [data-skin="mleague"] .tsumo-type-toggle,
+    [data-skin="mleague"] .score-cat-toggle,
+    [data-skin="mleague"] .hist-tabs {
+      background: #ffffff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #e2e6e2;
+    }
     /* スワイプ矢印: 緑 */
-    [data-theme="mleague"] #swipeArrowBase { stroke: rgba(28,118,34,0.3); }
-    [data-theme="mleague"] .arrow-chev { stroke: #1c7622; filter: drop-shadow(0 0 2px rgba(28,118,34,0.4)); }
-    [data-theme="mleague"] .arrow-tip  { stroke: #14601c; filter: drop-shadow(0 0 3px rgba(28,118,34,0.45)); }
+    [data-skin="mleague"] #swipeArrowBase { stroke: rgba(28,118,34,0.3); }
+    [data-skin="mleague"] .arrow-chev { stroke: #1c7622; filter: drop-shadow(0 0 2px rgba(28,118,34,0.4)); }
+    [data-skin="mleague"] .arrow-tip  { stroke: #14601c; filter: drop-shadow(0 0 3px rgba(28,118,34,0.45)); }
     /* スウォッチ on を緑に */
-    [data-theme="mleague"] .theme-sw.on { border-color: #1c7622; background: rgba(28,118,34,0.1); }
-    [data-theme="mleague"] .theme-sw.on .sw-name { color: #1c7622; }
+    [data-skin="mleague"] .theme-sw.on { border-color: #1c7622; background: rgba(28,118,34,0.1); }
+    [data-skin="mleague"] .theme-sw.on .sw-name { color: #1c7622; }
     /* 精算ランキング: 1位は緑ピル＋白文字（M.LEAGUE 署名） */
-    [data-theme="mleague"] .rank-row.rank-1 {
+    [data-skin="mleague"] .rank-row.rank-1 {
       background: #1c7622; border-color: #1c7622;
     }
-    [data-theme="mleague"] .rank-row.rank-1 .rank-pname,
-    [data-theme="mleague"] .rank-row.rank-1 .rank-score { color: #ffffff; }
-    [data-theme="mleague"] .rank-row.rank-1 .rank-detail { color: rgba(255,255,255,0.8); }
-    [data-theme="mleague"] .rank-row.rank-1 .rank-total { color: #ffe9a8; }
-    [data-theme="mleague"] .rank-row.rank-1 .rank-badge { background: #ffffff; color: #1c7622; }
-    [data-theme="mleague"] .rank-row.rank-2 { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
-    [data-theme="mleague"] .rank-badge.rank-1 { background: #cd0000; color: #fff; }
-    [data-theme="mleague"] .gameover-title { color: #1c7622; }
+    [data-skin="mleague"] .rank-row.rank-1 .rank-pname,
+    [data-skin="mleague"] .rank-row.rank-1 .rank-score { color: #ffffff; }
+    [data-skin="mleague"] .rank-row.rank-1 .rank-detail { color: rgba(255,255,255,0.8); }
+    [data-skin="mleague"] .rank-row.rank-1 .rank-total { color: #ffe9a8; }
+    [data-skin="mleague"] .rank-row.rank-1 .rank-badge { background: #ffffff; color: #1c7622; }
+    [data-skin="mleague"] .rank-row.rank-2 { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+    [data-skin="mleague"] .rank-badge.rank-1 { background: #cd0000; color: #fff; }
+    [data-skin="mleague"] .gameover-title { color: #1c7622; }
     /* プレイヤー名をやや濃く（白地での視認性） */
-    [data-theme="mleague"] .player-name { color: #555; }
-    [data-theme="mleague"] .footer-note { color: #1c7622; }
+    [data-skin="mleague"] .player-name { color: #555; }
+    [data-skin="mleague"] .footer-note { color: #1c7622; }
+    /* スワイプ移動先の強調を緑グロー（金色をやめる） */
+    [data-skin="mleague"] .card-lp-target {
+      border-color: #1c7622 !important;
+      box-shadow: 0 0 0 2px rgba(28,118,34,0.35), 0 2px 12px rgba(28,118,34,0.3) !important;
+    }
+    /* コーチ背景・確認ダイアログを白寄りに */
+    [data-skin="mleague"] #coachOverlay { background: rgba(233,237,233,0.95); }
+    /* 破壊的アクションの確認は赤を主役に */
+    [data-skin="mleague"] #confirmModal .modal-btn.confirm { background: #cd0000; }
   </style>
 </head>
 <body>
@@ -2130,13 +2160,20 @@
     if (confirmResolve) { confirmResolve(v); confirmResolve = null; }
   }
 
-  /* ── Theme（dark=和 / mleague / light の3種） ────── */
+  /* ── Theme（dark=和 / mleague / light の3種） ──────
+     mleague は light を土台(data-theme="light")に skin(data-skin="mleague") を重ねる。
+     論理テーマは data-theme-name に保持（dark / light / mleague）。 */
   const THEMES = ['dark', 'mleague', 'light'];
   const themeToggle = document.getElementById('themeToggle');
   let lastDarkTheme = 'dark';   /* ライトとの行き来で戻る先（dark or mleague） */
+  function currentTheme() { return document.documentElement.getAttribute('data-theme-name') || 'dark'; }
   function applyTheme(theme) {
     if (!THEMES.includes(theme)) theme = 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
+    const root = document.documentElement;
+    root.setAttribute('data-theme-name', theme);            /* 論理テーマ */
+    root.setAttribute('data-theme', theme === 'mleague' ? 'light' : theme);  /* 描画土台 */
+    if (theme === 'mleague') root.setAttribute('data-skin', 'mleague');
+    else root.removeAttribute('data-skin');
     if (theme !== 'light') lastDarkTheme = theme;
     /* ヘッダーは明るさ切替（ライト時のみ太陽） */
     document.getElementById('iconMoon').style.display = theme === 'light' ? 'none' : '';
@@ -2152,8 +2189,7 @@
     applyTheme(THEMES.includes(saved) ? saved : 'dark');
   }
   themeToggle.addEventListener('click', () => {
-    const cur = document.documentElement.getAttribute('data-theme');
-    applyTheme(cur === 'light' ? lastDarkTheme : 'light');
+    applyTheme(currentTheme() === 'light' ? lastDarkTheme : 'light');
   });
 
   /* ── Tutorial toast ─────────────────────────────── */
