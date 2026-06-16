@@ -25,7 +25,10 @@ let d = w.document;
 t('html data-theme=dark', d.documentElement.getAttribute('data-theme') === 'dark');
 t('スウォッチ: 標準がon', d.querySelector('.theme-sw[data-theme-val="dark"]').classList.contains('on'));
 t('Mリーグテーマ変数がCSSに定義', /\[data-theme="mleague"\] \{/.test(html));
-t('Mリーグ: クリムゾン #c8102e 使用', html.includes('#c8102e'));
+t('Mリーグ: M.LEAGUEグリーン #1c7622 使用', html.includes('#1c7622'));
+t('Mリーグ: 緑フレーム #118945 使用', html.includes('#118945'));
+t('Mリーグ: 赤アクセント #cd0000 使用', html.includes('#cd0000'));
+t('Mリーグ: 白背景(--bg #ffffff)', /\[data-theme="mleague"\] \{[^}]*--bg:\s*#ffffff/.test(html));
 
 console.log('--- 設定でMリーグに切替 ---');
 d.getElementById('settingsBtn').click();
