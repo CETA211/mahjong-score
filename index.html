@@ -64,6 +64,54 @@
     [data-theme="light"] .tsumo-type-toggle,
     [data-theme="light"] .hist-tabs { background: rgba(0,0,0,0.05); }
 
+    /* ── Mリーグテーマ（漆黒 × クリムゾン × ゴールド × 白銀） ── */
+    [data-theme="mleague"] {
+      --green:      #c8102e;   /* プライマリ＝Mリーグレッド（active・スワイプ強調） */
+      --green-dim:  rgba(200,16,46,0.16);
+      --green-line: rgba(200,16,46,0.45);
+      --gold:       #cbac57;   /* シャンパンゴールド */
+      --gold-dim:   rgba(203,172,87,0.14);
+      --gold-line:  rgba(203,172,87,0.36);
+      --bg:         #09070a;
+      --card:       #17121a;
+      --card-act:   #221620;
+      --text:       #f3eef0;
+      --muted:      #6f5f6a;
+      --dim:        rgba(243,238,240,0.62);
+      --border:     rgba(255,255,255,0.07);
+      --red:        #ff5c64;
+    }
+    [data-theme="mleague"] body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse at 50% -8%, rgba(200,16,46,0.22) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 108%, rgba(200,16,46,0.08) 0%, transparent 55%);
+    }
+    [data-theme="mleague"] .modal-sheet,
+    [data-theme="mleague"] .gameover-sheet { background: #130d14; }
+    [data-theme="mleague"] .toast { background: rgba(15,9,16,0.97); border-color: var(--green-line); }
+    /* 署名的クリムゾンアクセント */
+    [data-theme="mleague"] .modal-sheet { border-color: var(--green-line); border-top-color: var(--green); }
+    [data-theme="mleague"] .modal-sheet.tsumo-mode { border-top-color: var(--gold); }
+    [data-theme="mleague"] .player-card::before {
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+    }
+    [data-theme="mleague"] .player-card:active {
+      border-color: var(--green-line);
+      box-shadow: 0 0 22px rgba(200,16,46,0.28);
+    }
+    [data-theme="mleague"] .player-card.swiping { box-shadow: 0 0 26px rgba(200,16,46,0.32); }
+    [data-theme="mleague"] .theme-toggle,
+    [data-theme="mleague"] .hist-fixed-btn,
+    [data-theme="mleague"] .settings-fixed-btn {
+      background: rgba(200,16,46,0.12);
+      border-color: rgba(200,16,46,0.4);
+      color: var(--gold);
+    }
+    [data-theme="mleague"] .header-line:first-child { background: linear-gradient(90deg, transparent, var(--green-line)); }
+    [data-theme="mleague"] .header-line:last-child  { background: linear-gradient(90deg, var(--green-line), transparent); }
+    [data-theme="mleague"] .app-title { text-shadow: 0 0 22px rgba(200,16,46,0.4), 0 1px 2px rgba(0,0,0,0.4); }
+
     body {
       background: var(--bg);
       background-image: radial-gradient(ellipse at 50% -5%, rgba(45,140,80,0.07) 0%, transparent 55%);
@@ -337,6 +385,24 @@
     .switch.on::after { left: 22px; background: var(--gold); }
     [data-theme="light"] .switch { background: rgba(0,0,0,0.08); }
     [data-theme="light"] .switch::after { background: #aaa; }
+
+    /* ── テーマ選択スウォッチ ── */
+    .theme-swatches { display: flex; gap: 8px; margin-top: 10px; }
+    .theme-sw {
+      flex: 1; padding: 10px 4px 9px; border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid var(--border);
+      cursor: pointer; touch-action: manipulation;
+      display: flex; flex-direction: column; align-items: center; gap: 7px;
+      transition: border-color 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .theme-sw .sw-dots { display: flex; gap: 3px; }
+    .theme-sw .sw-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .theme-sw .sw-name { font-size: 0.66rem; font-weight: 700; color: var(--dim); letter-spacing: 0.5px; }
+    .theme-sw.on { border-color: var(--gold); background: var(--gold-dim); }
+    .theme-sw.on .sw-name { color: var(--gold); }
+    [data-theme="light"] .theme-sw { background: rgba(0,0,0,0.03); }
 
     /* ── カスタム確認ダイアログ ── */
     .confirm-msg {
@@ -1542,6 +1608,26 @@
   <div class="modal-sheet" style="max-width:400px;">
     <div class="sheet-handle"></div>
     <div class="modal-label">設 定</div>
+    <div class="set-row" style="display:block;">
+      <div class="set-info">
+        <div class="set-label">テーマ</div>
+        <div class="set-desc">配色を切り替えます</div>
+      </div>
+      <div class="theme-swatches" id="themeSwatches">
+        <button class="theme-sw" data-theme-val="dark">
+          <span class="sw-dots"><span class="sw-dot" style="background:#0b170b"></span><span class="sw-dot" style="background:#2d8c50"></span><span class="sw-dot" style="background:#c8a840"></span></span>
+          <span class="sw-name">標準（和）</span>
+        </button>
+        <button class="theme-sw" data-theme-val="mleague">
+          <span class="sw-dots"><span class="sw-dot" style="background:#09070a"></span><span class="sw-dot" style="background:#c8102e"></span><span class="sw-dot" style="background:#cbac57"></span></span>
+          <span class="sw-name">Mリーグ</span>
+        </button>
+        <button class="theme-sw" data-theme-val="light">
+          <span class="sw-dots"><span class="sw-dot" style="background:#ffffff;border:1px solid #ddd"></span><span class="sw-dot" style="background:#a07820"></span><span class="sw-dot" style="background:#d4b87a"></span></span>
+          <span class="sw-name">ライト</span>
+        </button>
+      </div>
+    </div>
     <div class="set-row">
       <div class="set-info">
         <div class="set-label">順位バッジ</div>
@@ -1986,19 +2072,30 @@
     if (confirmResolve) { confirmResolve(v); confirmResolve = null; }
   }
 
-  /* ── Theme ──────────────────────────────────────── */
+  /* ── Theme（dark=和 / mleague / light の3種） ────── */
+  const THEMES = ['dark', 'mleague', 'light'];
   const themeToggle = document.getElementById('themeToggle');
+  let lastDarkTheme = 'dark';   /* ライトとの行き来で戻る先（dark or mleague） */
   function applyTheme(theme) {
+    if (!THEMES.includes(theme)) theme = 'dark';
     document.documentElement.setAttribute('data-theme', theme);
-    document.getElementById('iconMoon').style.display = theme === 'dark' ? '' : 'none';
-    document.getElementById('iconSun').style.display  = theme === 'dark' ? 'none' : '';
+    if (theme !== 'light') lastDarkTheme = theme;
+    /* ヘッダーは明るさ切替（ライト時のみ太陽） */
+    document.getElementById('iconMoon').style.display = theme === 'light' ? 'none' : '';
+    document.getElementById('iconSun').style.display  = theme === 'light' ? '' : 'none';
+    /* 設定のスウォッチ選択状態 */
+    document.querySelectorAll('.theme-sw[data-theme-val]').forEach(sw => {
+      sw.classList.toggle('on', sw.dataset.themeVal === theme);
+    });
     localStorage.setItem(LS_THEME, theme);
   }
   function initTheme() {
-    applyTheme(localStorage.getItem(LS_THEME) || 'dark');
+    const saved = localStorage.getItem(LS_THEME);
+    applyTheme(THEMES.includes(saved) ? saved : 'dark');
   }
   themeToggle.addEventListener('click', () => {
-    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    const cur = document.documentElement.getAttribute('data-theme');
+    applyTheme(cur === 'light' ? lastDarkTheme : 'light');
   });
 
   /* ── Tutorial toast ─────────────────────────────── */
@@ -3317,6 +3414,11 @@
         lsSet(LS_SETTINGS, settings);
         applySettings();
       });
+    });
+
+    /* テーマ選択スウォッチ */
+    document.querySelectorAll('.theme-sw[data-theme-val]').forEach(sw => {
+      sw.addEventListener('click', () => applyTheme(sw.dataset.themeVal));
     });
 
     /* プレイヤー名の保存・復元 */

@@ -61,7 +61,7 @@ setTimeout(() => {
     console.log('--- ② モーダル中央化CSS ---');
     const css = html.match(/\n    \.modal-overlay \{[^}]*\}/)[0];
     t('align-items: center', css.includes('align-items: center'));
-    const sheetCss = html.match(/\.modal-sheet\s*\{[^}]*\}/)[0];
+    const sheetCss = html.match(/\n    \.modal-sheet \{[^}]*\}/)[0];
     t('border-radius が全周 22px', sheetCss.includes('border-radius: 22px'));
 
     console.log('--- ① ドラッグスクロール ---');
