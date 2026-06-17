@@ -2629,9 +2629,9 @@
 
   /* ── ゲーム進行（連荘・親流れ・終局判定・飛び）──── */
   function advanceKyoku() {
-    const rot = ROTATION();
     kyoku++;
-    dealerId = rot[kyoku % rot.length];
+    const rot = ROTATION();
+    dealerId = rot[(rot.indexOf(dealerId) + 1) % rot.length];
     localStorage.setItem(LS_DEALER, dealerId);
     renderDealerBadges();
   }
@@ -3392,10 +3392,6 @@
       if (b.dataset.ie === 'kyoku') {
         if (kyoku + d < 0) return;
         kyoku += d;
-        const rot = ROTATION();
-        dealerId = rot[kyoku % rot.length];
-        localStorage.setItem(LS_DEALER, dealerId);
-        renderDealerBadges();
       } else if (b.dataset.ie === 'honba') {
         if (honbaGame + d < 0) return;
         honbaGame += d;
