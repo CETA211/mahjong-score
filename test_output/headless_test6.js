@@ -44,14 +44,18 @@ t('skin=mleague (data-skin)', d.documentElement.getAttribute('data-skin') === 'm
 t('スウォッチ: Mリーグがon', d.querySelector('.theme-sw[data-theme-val="mleague"]').classList.contains('on'));
 t('標準スウォッチはoff', !d.querySelector('.theme-sw[data-theme-val="dark"]').classList.contains('on'));
 t('LS_THEMEにmleague保存', w.localStorage.getItem('mahjong_theme') === 'mleague');
-t('Mリーグ時は月アイコン表示（太陽非表示）', d.getElementById('iconSun').style.display === 'none');
+t('設定スウォッチとピッカー両方がon', d.querySelector('.tp-item[data-theme-val="mleague"]').classList.contains('on'));
 
-console.log('--- ヘッダーボタン: Mリーグ⇄ライト ---');
+console.log('--- ヘッダーのテーマピッカー（ポップオーバー） ---');
 d.getElementById('themeToggle').click();
-t('Mリーグ→ライト', d.documentElement.getAttribute('data-theme') === 'light');
-t('ライト時は太陽アイコン', d.getElementById('iconSun').style.display === '');
+t('ピッカーが開く', d.getElementById('themePopover').classList.contains('show'));
+d.querySelector('.tp-item[data-theme-val="light"]').click();
+t('ピッカーでライト選択', d.documentElement.getAttribute('data-theme-name') === 'light');
+t('選択後ピッカーが閉じる', !d.getElementById('themePopover').classList.contains('show'));
+t('ピッカー: ライトがon', d.querySelector('.tp-item[data-theme-val="light"]').classList.contains('on'));
 d.getElementById('themeToggle').click();
-t('ライト→Mリーグに戻る（lastDarkTheme記憶）', d.documentElement.getAttribute('data-theme-name') === 'mleague');
+d.querySelector('.tp-item[data-theme-val="dark"]').click();
+t('ピッカーで和テーマに', d.documentElement.getAttribute('data-theme-name') === 'dark');
 
 console.log('--- 再起動でテーマ復元 ---');
 const w2 = boot({ mahjong_tutorial_shown: '1', mahjong_theme: 'mleague' });

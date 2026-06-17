@@ -356,6 +356,66 @@
     .theme-sw.on .sw-name { color: var(--gold); }
     [data-theme="light"] .theme-sw { background: rgba(0,0,0,0.03); }
 
+    /* ── テーマピッカー（ヘッダーのポップオーバー） ── */
+    #themePopover {
+      position: fixed;
+      top: calc(env(safe-area-inset-top) + 54px); right: 14px;
+      background: var(--card); border: 1px solid var(--gold-line);
+      border-radius: 14px; padding: 6px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+      z-index: 1300; display: none; min-width: 168px;
+    }
+    #themePopover.show { display: block; animation: popIn 0.16s ease; }
+    @keyframes popIn { from { opacity: 0; transform: translateY(-6px) scale(0.97); } to { opacity: 1; transform: none; } }
+    [data-theme="light"] #themePopover { box-shadow: 0 12px 36px rgba(0,0,0,0.22); }
+    .tp-item {
+      display: flex; align-items: center; gap: 10px; width: 100%;
+      padding: 9px 10px; border: none; background: none; border-radius: 9px;
+      cursor: pointer; touch-action: manipulation; color: var(--text);
+      font-size: 0.82rem; font-weight: 700; text-align: left;
+      -webkit-tap-highlight-color: transparent; transition: background 0.12s;
+    }
+    .tp-item:hover, .tp-item:active { background: var(--gold-dim); }
+    .tp-item .tp-dots { display: flex; gap: 3px; flex-shrink: 0; }
+    .tp-item .tp-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .tp-item .tp-check { margin-left: auto; color: var(--gold); opacity: 0; font-weight: 800; }
+    .tp-item.on .tp-check { opacity: 1; }
+    .tp-item.on { background: var(--gold-dim); }
+
+    /* ── 設定: セグメント（東風/半荘 等） ── */
+    .set-seg { display: flex; gap: 5px; background: rgba(255,255,255,0.04); border-radius: 9px; padding: 3px; margin-top: 8px; }
+    .set-seg-btn {
+      flex: 1; background: none; border: none; color: var(--dim);
+      font-size: 0.8rem; font-weight: 800; letter-spacing: 1px; padding: 8px;
+      border-radius: 7px; cursor: pointer; touch-action: manipulation;
+      transition: background 0.12s, color 0.12s; -webkit-tap-highlight-color: transparent;
+    }
+    .set-seg-btn.active { background: var(--gold-dim); color: var(--gold); box-shadow: inset 0 0 0 1.5px var(--gold-line); }
+    [data-theme="light"] .set-seg { background: rgba(0,0,0,0.05); }
+
+    /* ── 設定: メンバープリセット ── */
+    .preset-save-btn {
+      width: 100%; margin-top: 8px; padding: 10px; border-radius: 10px;
+      background: var(--gold-dim); border: 1px solid var(--gold-line); color: var(--gold);
+      font-size: 0.8rem; font-weight: 700; cursor: pointer; touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .preset-save-btn:active { opacity: 0.7; }
+    .preset-list { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .preset-item {
+      display: flex; align-items: center; gap: 8px; padding: 9px 10px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px;
+    }
+    [data-theme="light"] .preset-item { background: rgba(0,0,0,0.03); }
+    .preset-item .pi-names { flex: 1; font-size: 0.78rem; font-weight: 600; color: var(--text); cursor: pointer; touch-action: manipulation; }
+    .preset-item .pi-load { font-size: 0.66rem; color: var(--gold); font-weight: 700; flex-shrink: 0; }
+    .preset-item .pi-del {
+      flex-shrink: 0; width: 26px; height: 26px; border-radius: 7px; border: none;
+      background: rgba(200,64,64,0.12); color: var(--red); font-size: 0.9rem; cursor: pointer;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .preset-empty { font-size: 0.7rem; color: var(--muted); text-align: center; padding: 8px 0; }
+
     /* ── カスタム確認ダイアログ ── */
     .confirm-msg {
       font-size: 0.92rem; color: var(--text); line-height: 1.8;
@@ -1205,11 +1265,25 @@
 </head>
 <body>
 
-<!-- Theme toggle (fixed top-right) -->
-<button class="theme-toggle" id="themeToggle" title="テーマ切替">
-  <svg id="iconMoon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-  <svg id="iconSun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.7" y2="6.7"/><line x1="17.3" y1="17.3" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.7" y2="17.3"/><line x1="17.3" y1="6.7" x2="19.07" y2="4.93"/></svg>
+<!-- Theme picker (fixed top-right) -->
+<button class="theme-toggle" id="themeToggle" title="テーマ" aria-haspopup="true">
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3 A9 9 0 0 1 12 21 Z" fill="currentColor" stroke="none"/></svg>
 </button>
+<!-- Theme picker popover -->
+<div id="themePopover" role="menu">
+  <button class="tp-item" data-theme-val="dark" role="menuitem">
+    <span class="tp-dots"><span class="tp-dot" style="background:#0b170b"></span><span class="tp-dot" style="background:#2d8c50"></span><span class="tp-dot" style="background:#c8a840"></span></span>
+    標準（和）<span class="tp-check">✓</span>
+  </button>
+  <button class="tp-item" data-theme-val="mleague" role="menuitem">
+    <span class="tp-dots"><span class="tp-dot" style="background:#ffffff;border:1px solid #ddd"></span><span class="tp-dot" style="background:#1c7622"></span><span class="tp-dot" style="background:#cd0000"></span></span>
+    Mリーグ<span class="tp-check">✓</span>
+  </button>
+  <button class="tp-item" data-theme-val="light" role="menuitem">
+    <span class="tp-dots"><span class="tp-dot" style="background:#ffffff;border:1px solid #ddd"></span><span class="tp-dot" style="background:#a07820"></span><span class="tp-dot" style="background:#d4b87a"></span></span>
+    ライト<span class="tp-check">✓</span>
+  </button>
+</div>
 
 <!-- Settings button (fixed top-right, theme の左隣) -->
 <button class="settings-fixed-btn" id="settingsBtn" title="設定">
@@ -1706,6 +1780,24 @@
       </div>
       <button class="switch" id="swDiff" data-setting="showDiff"></button>
     </div>
+    <div class="set-row" style="display:block;">
+      <div class="set-info">
+        <div class="set-label">対局の長さ</div>
+        <div class="set-desc">規定局数を終えると精算を提案します</div>
+      </div>
+      <div class="set-seg" id="lengthSeg">
+        <button class="set-seg-btn" data-length="tonpu">東風戦</button>
+        <button class="set-seg-btn active" data-length="hanchan">半荘戦</button>
+      </div>
+    </div>
+    <div class="set-row" style="display:block;">
+      <div class="set-info">
+        <div class="set-label">メンバー</div>
+        <div class="set-desc">よく遊ぶ4人の名前を保存・呼び出し</div>
+      </div>
+      <button class="preset-save-btn" id="presetSaveBtn">＋ 今の4人を保存</button>
+      <div class="preset-list" id="presetList"></div>
+    </div>
     <div class="modal-actions" style="margin-top:14px;">
       <button class="modal-btn confirm" id="settingsCloseBtn">閉じる</button>
     </div>
@@ -1910,6 +2002,10 @@
   const LS_LIVE     = 'mahjong_live_state';
   const LS_NAMES    = 'mahjong_player_names';
   const LS_SETTINGS = 'mahjong_settings';
+  const LS_LENGTH   = 'mahjong_game_length';   // 'hanchan' | 'tonpu'
+  const LS_PRESETS  = 'mahjong_member_presets';
+
+  let gameLength = 'hanchan';   // 半荘戦（南4）/ 東風戦（東4）
 
   /* ── 表示設定（デフォルトは順位・点差とも非表示） ── */
   const settings = { showRank: false, showDiff: false };
@@ -2151,12 +2247,9 @@
     if (theme === 'mleague') root.setAttribute('data-skin', 'mleague');
     else root.removeAttribute('data-skin');
     if (theme !== 'light') lastDarkTheme = theme;
-    /* ヘッダーは明るさ切替（ライト時のみ太陽） */
-    document.getElementById('iconMoon').style.display = theme === 'light' ? 'none' : '';
-    document.getElementById('iconSun').style.display  = theme === 'light' ? '' : 'none';
-    /* 設定のスウォッチ選択状態 */
-    document.querySelectorAll('.theme-sw[data-theme-val]').forEach(sw => {
-      sw.classList.toggle('on', sw.dataset.themeVal === theme);
+    /* 設定スウォッチ＋ヘッダーピッカーの選択状態 */
+    document.querySelectorAll('.theme-sw[data-theme-val], .tp-item[data-theme-val]').forEach(el => {
+      el.classList.toggle('on', el.dataset.themeVal === theme);
     });
     localStorage.setItem(LS_THEME, theme);
   }
@@ -2164,8 +2257,19 @@
     const saved = localStorage.getItem(LS_THEME);
     applyTheme(THEMES.includes(saved) ? saved : 'dark');
   }
-  themeToggle.addEventListener('click', () => {
-    applyTheme(currentTheme() === 'light' ? lastDarkTheme : 'light');
+  /* ヘッダー: テーマピッカーの開閉 */
+  const themePopover = document.getElementById('themePopover');
+  function toggleThemePopover(force) {
+    const open = force !== undefined ? force : !themePopover.classList.contains('show');
+    themePopover.classList.toggle('show', open);
+  }
+  themeToggle.addEventListener('click', e => { e.stopPropagation(); toggleThemePopover(); });
+  themePopover.querySelectorAll('.tp-item[data-theme-val]').forEach(item => {
+    item.addEventListener('click', () => { applyTheme(item.dataset.themeVal); toggleThemePopover(false); });
+  });
+  document.addEventListener('click', e => {
+    if (themePopover.classList.contains('show') && !themePopover.contains(e.target) && e.target !== themeToggle)
+      toggleThemePopover(false);
   });
 
   /* ── Tutorial toast ─────────────────────────────── */
@@ -2646,15 +2750,25 @@
   }
   function checkEndSuggest() {
     const N = sanmaMode ? 3 : 4;
-    if (kyoku < 2 * N) return;           /* 東南戦の規定局数内 */
+    const endKyoku   = gameLength === 'tonpu' ? N : 2 * N;       /* 東風=東4 / 半荘=南4 */
+    const suddenMax  = gameLength === 'tonpu' ? 2 * N : 3 * N;   /* 延長(入)の上限 */
+    if (kyoku < endKyoku) return;        /* 規定局数内 */
     const top = Math.max(...IDS.map(id => players[id].score));
-    if (ruleset === 'jantama' && top < 30000 && kyoku < 3 * N) {
-      showToast('西入サドンデス（1位が30,000点未満・雀魂ルール）', false, 3200);
+    if (ruleset === 'jantama' && top < 30000 && kyoku < suddenMax) {
+      showToast(`${gameLength === 'tonpu' ? '南入' : '西入'}サドンデス（1位が30,000点未満・雀魂ルール）`, false, 3200);
       return;
     }
     setTimeout(async () => {
       if (await appConfirm('規定局数を終了しました。精算しますか？', '精算する', '続行')) openGameEndModal();
     }, 500);
+  }
+  function setGameLength(len, silent) {
+    gameLength = len === 'tonpu' ? 'tonpu' : 'hanchan';
+    localStorage.setItem(LS_LENGTH, gameLength);
+    document.querySelectorAll('.set-seg-btn[data-length]').forEach(b => {
+      b.classList.toggle('active', b.dataset.length === gameLength);
+    });
+    if (!silent) showToast(gameLength === 'tonpu' ? '東風戦に設定（東4で精算）' : '半荘戦に設定（南4で精算）');
   }
   function checkTobi() {
     const busted = IDS.find(id => players[id].score < 0);
@@ -2902,9 +3016,11 @@
       showToast(`合計 ${total.toLocaleString()}点 — ${expectedTotal.toLocaleString()}点でないと計算できません`, true, 3500);
       return;
     }
+    /* 同点は起家（東家）に近い席順が上位（東→南→西→北） */
+    const seatOrder = ROTATION();
     const sorted = IDS
       .map(id => ({ id, name: getName(id), score: players[id].score }))
-      .sort((a, b) => b.score - a.score);
+      .sort((a, b) => b.score - a.score || seatOrder.indexOf(a.id) - seatOrder.indexOf(b.id));
 
     const okaTotal = Math.round((BASE_SCORE - START_SCORE) * IDS.length / 1000);
     const results = sorted.map((p, i) => {
@@ -3474,6 +3590,52 @@
       lsSet(LS_NAMES, Object.fromEntries(YONMA_IDS.map(id => [id, nameEls[id].value])));
     };
     for (const id of YONMA_IDS) nameEls[id].addEventListener('input', saveNames);
+
+    /* 対局の長さ（東風 / 半荘）を復元・配線 */
+    setGameLength(localStorage.getItem(LS_LENGTH) === 'tonpu' ? 'tonpu' : 'hanchan', true);
+    document.querySelectorAll('.set-seg-btn[data-length]').forEach(b => {
+      b.addEventListener('click', () => setGameLength(b.dataset.length));
+    });
+
+    /* メンバープリセット */
+    const SEAT_DISPLAY = ['east', 'south', 'west', 'north'];
+    function getPresets() { try { return JSON.parse(localStorage.getItem(LS_PRESETS)) || []; } catch { return []; } }
+    function loadPreset(idx) {
+      const p = getPresets()[idx]; if (!p) return;
+      for (const id of YONMA_IDS) { if (typeof p[id] === 'string') nameEls[id].value = p[id]; }
+      saveNames();
+      showToast('メンバーを呼び出しました');
+    }
+    function renderPresets() {
+      const list = document.getElementById('presetList');
+      const presets = getPresets();
+      list.innerHTML = '';
+      if (!presets.length) { list.innerHTML = '<div class="preset-empty">保存されたメンバーはありません</div>'; return; }
+      presets.forEach((p, idx) => {
+        const item  = document.createElement('div'); item.className = 'preset-item';
+        const names = document.createElement('div'); names.className = 'pi-names';
+        names.textContent = SEAT_DISPLAY.map(id => p[id] || '—').join(' / ');
+        names.addEventListener('click', () => loadPreset(idx));
+        const load = document.createElement('span'); load.className = 'pi-load'; load.textContent = '呼出';
+        load.addEventListener('click', () => loadPreset(idx));
+        const del = document.createElement('button'); del.className = 'pi-del'; del.title = '削除'; del.textContent = '×';
+        del.addEventListener('click', () => { const ps = getPresets(); ps.splice(idx, 1); lsSet(LS_PRESETS, ps); renderPresets(); });
+        item.appendChild(names); item.appendChild(load); item.appendChild(del);
+        list.appendChild(item);
+      });
+    }
+    document.getElementById('presetSaveBtn').addEventListener('click', () => {
+      const cur = Object.fromEntries(YONMA_IDS.map(id => [id, nameEls[id].value.trim() || getName(id)]));
+      const ps  = getPresets();
+      const key = SEAT_DISPLAY.map(id => cur[id]).join('|');
+      if (ps.some(p => SEAT_DISPLAY.map(id => p[id]).join('|') === key)) { showToast('同じメンバーは保存済みです', true); return; }
+      ps.push(cur);
+      if (ps.length > 12) ps.shift();
+      lsSet(LS_PRESETS, ps); renderPresets();
+      showToast('メンバーを保存しました');
+    });
+    renderPresets();
+
     document.getElementById('endBtn').addEventListener('click', openGameEndModal);
 
     /* History drawer */

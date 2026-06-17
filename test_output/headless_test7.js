@@ -1,0 +1,97 @@
+/* 点棒いらず ヘッドレス検証 その7: 同点タイブレーク・東風/半荘・メンバープリセット */
+const fs = require('fs');
+const path = require('path');
+const { JSDOM } = require(path.join(process.env.TEMP, 'mahjong-test', 'node_modules', 'jsdom'));
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+let pass = 0, fail = 0;
+function t(name, cond) { if (cond) { pass++; console.log('  OK  ' + name); } else { fail++; console.log('  NG  ' + name); } }
+function boot(seed) {
+  return new JSDOM(html, {
+    runScripts: 'dangerously', pretendToBeVisual: true, url: 'http://localhost/',
+    beforeParse(window) { window.confirm = () => false; if (seed) for (const [k, v] of Object.entries(seed)) window.localStorage.setItem(k, v); },
+  }).window;
+}
+const tick = (ms = 30) => new Promise(r => setTimeout(r, ms));
+
+(async () => {
+
+console.log('--- 同点タイブレーク（起家=東家に近い席順が上位）---');
+// east と west が同点(30000)。east(起家)が上位、west が下位になるべき。south/north で合計100000に調整
+let w = boot({
+  mahjong_tutorial_shown: '1',
+  mahjong_live_state: JSON.stringify({ scores: { east: 30000, west: 30000, south: 25000, north: 15000 }, dealerId: 'east', kyoku: 7, honbaGame: 0, kyotaku: 0 }),
+});
+let d = w.document;
+d.getElementById('endBtn').click();
+await tick();
+let rows = [...d.querySelectorAll('#rankingList .rank-row')];
+const names = rows.map(r => r.querySelector('.rank-pname').textContent);
+console.log('  順位:', names.join(' > '));
+// east=プレイヤー1, south=プレイヤー2, west=プレイヤー3, north=プレイヤー4（席順 east<south<west<north）
+t('同点: east(プレイヤー1)が west(プレイヤー3)より上位', names.indexOf('プレイヤー1') < names.indexOf('プレイヤー3'));
+t('1位は east(プレイヤー1)', names[0] === 'プレイヤー1');
+t('2位は west(プレイヤー3)（同点だが席順下）', names[1] === 'プレイヤー3');
+
+console.log('--- 東風戦: 東4(kyoku=4)で精算提案 ---');
+w = boot({ mahjong_tutorial_shown: '1', mahjong_game_length: 'tonpu' });
+d = w.document;
+t('東風セグがactive', d.querySelector('.set-seg-btn[data-length="tonpu"]').classList.contains('active'));
+t('半荘セグはoff', !d.querySelector('.set-seg-btn[data-length="hanchan"]').classList.contains('active'));
+// 東4(kyoku=3)で親(east以外?) 実際は kyoku進行を直接いじれないので関数挙動を間接確認:
+// 半荘ならkyoku=4で精算提案しないが東風ならする → confirmが呼ばれるか。confirmはfalse固定なので結果は出ないが呼び出しを検出
+let confirmCalled = false;
+w.confirm = () => { confirmCalled = true; return false; };
+// appConfirm はカスタムダイアログなので confirmModal の表示で検出する。
+// kyoku を東4終了相当(4)にしてから ryuukyoku で advance→kyoku=4, checkEndSuggest
+// 直接 live_state で kyoku=3(東4) にし、親ノーテン流局で kyoku=4へ
+w = boot({ mahjong_tutorial_shown: '1', mahjong_game_length: 'tonpu',
+  mahjong_live_state: JSON.stringify({ scores: { east:25000, south:25000, west:25000, north:25000 }, dealerId:'north', kyoku: 3, honbaGame:0, kyotaku:0 }) });
+d = w.document;
+d.getElementById('ryuukyokuBtn').click(); // 全員ノーテンで確定→親流れ kyoku=4
+d.getElementById('ryuConfirmBtn').click();
+await tick(600);
+t('東風戦: 東4終了で精算確認ダイアログ', d.getElementById('confirmModal').classList.contains('show'));
+d.getElementById('confirmNoBtn').click();
+
+console.log('--- 半荘戦: 東4(kyoku=4)では精算提案しない ---');
+w = boot({ mahjong_tutorial_shown: '1', mahjong_game_length: 'hanchan',
+  mahjong_live_state: JSON.stringify({ scores: { east:25000, south:25000, west:25000, north:25000 }, dealerId:'north', kyoku: 3, honbaGame:0, kyotaku:0 }) });
+d = w.document;
+d.getElementById('ryuukyokuBtn').click();
+d.getElementById('ryuConfirmBtn').click();
+await tick(600);
+t('半荘戦: 東4終了では精算提案なし', !d.getElementById('confirmModal').classList.contains('show'));
+
+console.log('--- メンバープリセット: 保存・呼出・削除 ---');
+w = boot({ mahjong_tutorial_shown: '1' });
+d = w.document;
+// 名前を変更
+d.getElementById('name-east').value = 'たろう';
+d.getElementById('name-south').value = 'じろう';
+d.getElementById('name-west').value = 'さぶろう';
+d.getElementById('name-north').value = 'しろう';
+d.getElementById('settingsBtn').click(); await tick();
+d.getElementById('presetSaveBtn').click(); await tick();
+let presets = JSON.parse(w.localStorage.getItem('mahjong_member_presets'));
+t('プリセットが保存される', Array.isArray(presets) && presets.length === 1);
+t('保存内容が正しい（east=たろう）', presets[0].east === 'たろう');
+t('プリセット一覧に1件表示', d.querySelectorAll('#presetList .preset-item').length === 1);
+// 重複保存は拒否
+d.getElementById('presetSaveBtn').click(); await tick();
+t('同じメンバーは重複保存されない', JSON.parse(w.localStorage.getItem('mahjong_member_presets')).length === 1);
+// 名前を変えてから呼び出し→元に戻る
+d.getElementById('name-east').value = 'XXX';
+d.querySelector('#presetList .pi-names').click(); await tick();
+t('呼び出しで名前が復元（east=たろう）', d.getElementById('name-east').value === 'たろう');
+t('呼び出しでLS_NAMESも更新', JSON.parse(w.localStorage.getItem('mahjong_player_names')).east === 'たろう');
+// 削除
+d.querySelector('#presetList .pi-del').click(); await tick();
+t('削除でプリセットが空に', JSON.parse(w.localStorage.getItem('mahjong_member_presets')).length === 0);
+t('一覧が空表示に', !!d.querySelector('#presetList .preset-empty'));
+
+console.log('');
+console.log('RESULT: pass=' + pass + ' fail=' + fail);
+process.exit(fail ? 1 : 0);
+
+})();
