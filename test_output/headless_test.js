@@ -59,8 +59,14 @@ t('south が -1000 / 供託2', score('south') === 24000 && document.getElementBy
 console.log('--- シナリオ6: 流局 3人テンパイ（親eastテンパイ含む）---');
 click('ryuukyokuBtn');
 t('途中流局ボタン表示（雀魂）', document.getElementById('chuutoRow').style.display !== 'none');
-let tenpaiBtns = [...document.querySelectorAll('#tenpaiList .pick-btn')];
-tenpaiBtns[0].click(); tenpaiBtns[1].click(); tenpaiBtns[2].click(); // north, west, east
+let tenpaiBtns = [...document.querySelectorAll('#tenpaiList .pick-btn')]; // IDS順: north, west, east, south
+// 新仕様: リーチ者(north, south)はテンパイとしてプリセット済み
+t('リーチ者がテンパイにプリセット (north)', tenpaiBtns[0].classList.contains('on'));
+t('リーチ者がテンパイにプリセット (south)', tenpaiBtns[3].classList.contains('on'));
+// 目的のテンパイ集合 = {north, west, east}: west/east を追加し、south を外す
+tenpaiBtns[1].click(); // west on
+tenpaiBtns[2].click(); // east on
+tenpaiBtns[3].click(); // south off
 click('ryuConfirmBtn');
 t('テンパイ各+1000 (north 24000→25000)', score('north') === 25000);
 t('ノーテン-3000 (south 24000→21000)', score('south') === 21000);
