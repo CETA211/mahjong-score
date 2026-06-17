@@ -2756,14 +2756,15 @@
   /* ── 流局 ───────────────────────────────────────── */
   let tenpaiSel = new Set();
   function openRyuukyokuModal() {
-    tenpaiSel = new Set();
+    tenpaiSel = new Set(riichiIds.filter(id => IDS.includes(id)));
     const list = document.getElementById('tenpaiList');
     list.innerHTML = '';
     const row = document.createElement('div'); row.className = 'pick-row';
     IDS.forEach(id => {
+      const pre = tenpaiSel.has(id);
       const b = document.createElement('button');
-      b.className = 'pick-btn';
-      b.innerHTML = `${getName(id)}<span class="pick-sub">ノーテン</span>`;
+      b.className = 'pick-btn' + (pre ? ' on' : '');
+      b.innerHTML = `${getName(id)}<span class="pick-sub">${pre ? 'テンパイ' : 'ノーテン'}</span>`;
       b.addEventListener('click', () => {
         if (tenpaiSel.has(id)) tenpaiSel.delete(id); else tenpaiSel.add(id);
         b.classList.toggle('on', tenpaiSel.has(id));
