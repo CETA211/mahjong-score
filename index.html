@@ -540,19 +540,6 @@
     .preset-btn small { font-size: 0.6rem; opacity: 0.8; }
 
     /* ── 点数チップレール ──────────────────────── */
-    .score-cat-toggle {
-      display: flex; gap: 4px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 8px; padding: 3px; margin-bottom: 8px;
-    }
-    .score-cat-btn {
-      flex: 1; background: none; border: none; color: var(--dim);
-      font-size: 0.74rem; font-weight: 800; letter-spacing: 2px;
-      padding: 6px; border-radius: 6px; cursor: pointer;
-      transition: background 0.12s, color 0.12s;
-    }
-    .score-cat-btn.active { background: var(--gold-dim); color: var(--gold); }
-
     .score-rail {
       display: flex; gap: 6px;
       overflow-x: auto;
@@ -715,7 +702,6 @@
     .tsumo-badge.ko  { color: var(--text); background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.16); }
     .tsumo-pname  { font-size: 0.84rem; font-weight: 700; color: var(--text); }
     .tsumo-amount { font-size: 1rem; font-weight: 800; color: var(--red); font-feature-settings: "tnum"; }
-    .tsumo-hint   { font-size: 0.62rem; color: var(--gold); opacity: 0.65; letter-spacing: 0.5px; margin-top: 2px; }
     .tsumo-total  { text-align: right; font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; margin-top: 3px; }
 
     /* Modal actions */
@@ -1150,7 +1136,6 @@
     [data-skin="mleague"] .ci-kyoku { color: #1c7622; }
     /* アクティブタブ: 緑ピル＋白文字 */
     [data-skin="mleague"] .mode-btn.active { background: #1c7622; color: #fff; }
-    [data-skin="mleague"] .score-cat-btn.active,
     [data-skin="mleague"] .tsumo-type-btn.active,
     [data-skin="mleague"] .hist-tab-btn.active,
     [data-skin="mleague"] .rule-toggle .mode-btn.active {
@@ -1182,7 +1167,6 @@
     [data-skin="mleague"] .rule-toggle,
     [data-skin="mleague"] .mode-toggle,
     [data-skin="mleague"] .tsumo-type-toggle,
-    [data-skin="mleague"] .score-cat-toggle,
     [data-skin="mleague"] .hist-tabs {
       background: #ffffff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #e2e6e2;
     }
@@ -1357,19 +1341,11 @@
 
     <!-- Ron presets (score table chips) -->
     <div id="ronPresets">
-      <div class="score-cat-toggle">
-        <button class="score-cat-btn active" id="ronCatKo">子の上がり</button>
-        <button class="score-cat-btn"        id="ronCatOya">親の上がり</button>
-      </div>
       <div class="score-rail" id="ronScoreRail"></div>
     </div>
 
     <!-- Tsumo top controls -->
     <div id="tsumoTop" style="display:none">
-      <div class="score-cat-toggle">
-        <button class="score-cat-btn active" id="btnKo">子ツモ</button>
-        <button class="score-cat-btn"        id="btnOya">親ツモ</button>
-      </div>
       <div class="score-rail" id="tsumoScoreRail"></div>
     </div>
 
@@ -2338,20 +2314,10 @@
       const badge = document.createElement('span');
       badge.className = 'tsumo-badge ' + (isOya ? 'oya' : 'ko');
       badge.textContent = isOya ? '親' : '子';
-      if (tsumoType === 'ko') {
-        badge.addEventListener('click', e => {
-          e.stopPropagation(); tsumoDealerId = isOya ? null : id; renderTsumoBreakdown();
-        });
-      }
       const nameEl = document.createElement('span'); nameEl.className = 'tsumo-pname'; nameEl.textContent = getName(id);
       const left   = document.createElement('div');  left.className   = 'tsumo-left';  left.appendChild(badge); left.appendChild(nameEl);
       const amtEl  = document.createElement('span'); amtEl.className  = 'tsumo-amount'; amtEl.textContent = amt > 0 ? `-${amt.toLocaleString()}` : '—';
       row.appendChild(left); row.appendChild(amtEl); tsumoBreakdown.appendChild(row);
-    }
-    if (tsumoType === 'ko' && !tsumoDealerId && (koAmt > 0 || oyaAmt > 0)) {
-      const hint = document.createElement('div'); hint.className = 'tsumo-hint';
-      hint.textContent = '「子」バッジをタップして親プレイヤーを指定';
-      tsumoBreakdown.appendChild(hint);
     }
     if (total > 0) {
       const tot = document.createElement('div'); tot.className = 'tsumo-total';
@@ -2369,8 +2335,6 @@
     /* 子ツモ時は dealer を 親プレイヤーに自動セット（勝者でない場合のみ） */
     tsumoDealerId = (type === 'ko' && dealerId !== tsumoWinner) ? dealerId : null;
     tsumoFocus = 'oya';
-    document.getElementById('btnKo').classList.toggle('active', type === 'ko');
-    document.getElementById('btnOya').classList.toggle('active', type === 'oya');
     tsumoBreakdown.innerHTML = ''; tsumoBreakdown.classList.remove('visible');
     refreshTsumoDisplay();
     renderTsumoChips();
@@ -2388,9 +2352,6 @@
   function setDealer(id) {
     if (!IDS.includes(id)) return;
     dealerId = id;
-    /* 局を親に同期（現在の場は維持） */
-    const rot = ROTATION(), N = rot.length;
-    kyoku = Math.floor(kyoku / N) * N + rot.indexOf(id);
     localStorage.setItem(LS_DEALER, id);
     renderDealerBadges(); renderCenterInfo(); saveLive();
     if (modal.classList.contains('show')) {
@@ -2432,8 +2393,6 @@
   /* ── 点数チップ ──────────────────────────────── */
   function setRonCat(cat) {
     ronCat = cat;
-    document.getElementById('ronCatKo').classList.toggle('active',  cat === 'ko');
-    document.getElementById('ronCatOya').classList.toggle('active', cat === 'oya');
     renderRonChips();
   }
   function renderRonChips() {
@@ -3330,10 +3289,6 @@
       if (mode !== 'tsumo') { if (!tsumoWinner) tsumoWinner = ronSrc; setMode('tsumo'); setTsumoType((tsumoWinner === dealerId) ? 'oya' : 'ko'); }
     });
 
-    /* Tsumo type */
-    document.getElementById('btnKo').addEventListener('click',  () => setTsumoType('ko'));
-    document.getElementById('btnOya').addEventListener('click', () => setTsumoType('oya'));
-
     /* 手入力トグル */
     document.getElementById('showNumpadBtn').addEventListener('click', () => {
       const np  = document.getElementById('mainNumpad');
@@ -3352,10 +3307,6 @@
     /* PC: チップレールをドラッグ/ホイールでスクロール */
     enableDragScroll(ronScoreRail);
     enableDragScroll(tsumoScoreRail);
-
-    /* ロン子/親トグル */
-    document.getElementById('ronCatKo').addEventListener('click',  () => setRonCat('ko'));
-    document.getElementById('ronCatOya').addEventListener('click', () => setRonCat('oya'));
 
     /* 本場 +/- */
     document.getElementById('honbaIncBtn').addEventListener('click', () => addHonba(+1));
