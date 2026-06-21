@@ -1,0 +1,62 @@
+# 点棒いらず — iOS 無人ビルド（Codemagic / Mac不要）
+# 前提（Codemagic UI 側で1回だけ設定）:
+#   1. App Store Connect API キーを連携（Integrations → App Store Connect）
+#      → 環境変数グループ "appstore" を作り、integration を割り当て
+#   2. Bundle ID `com.cetacompany.tenboirazu` を App Store Connect 側で作成済みにする
+#      （または下の自動署名 fetch-signing-files が --create で作成）
+workflows:
+  ios-release:
+    name: 点棒いらず iOS Release
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: CodemagicApiKey   # ← Codemagic UI で作成したAPIキー名に置換
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.cetacompany.tenboirazu
+      vars:
+        BUNDLE_ID: "com.cetacompany.tenboirazu"
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+      node: 20
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: npm 依存をインストール
+        script: npm install
+      - name: Web資産を www/ に生成
+        script: npm run build:web
+      - name: iOSプラットフォームを追加（無ければ）＋同期
+        script: |
+          if [ ! -d "ios" ]; then npx cap add ios; fi
+          npx cap sync ios
+      - name: アイコン/スプラッシュを反映（任意）
+        script: |
+          npx @capacitor/assets generate --ios \
+            --iconBackgroundColor '#060e06' \
+            --splashBackgroundColor '#060e06' || true
+        # appstore/icon-1024.png・splash-2732.png を assets/ に置けば自動生成可
+      - name: CocoaPods
+        script: |
+          cd ios/App && pod install
+      - name: 署名プロファイル取得
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE --create
+          keychain initialize
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: ビルド（.ipa 生成）
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true   # 最初は TestFlight へ。審査提出は手動 or true に変更
+        # submit_to_app_store: false

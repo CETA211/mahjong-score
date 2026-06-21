@@ -1,0 +1,21 @@
+{
+  "appId": "com.cetacompany.tenboirazu",
+  "appName": "点棒いらず",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#060e06"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 600,
+      "backgroundColor": "#060e06",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#060e06",
+      "overlaysWebView": true
+    }
+  }
+}
