@@ -1129,7 +1129,7 @@
     [data-theme="light"] .coach-dot { background: rgba(0,0,0,0.15); }
 
     /* ══════════════════════════════════════════════════
-       Mリーグ公式テーマ（白地 × 緑フレーム × 緑ピル × 赤親）
+       競技テーマ（白地 × 緑フレーム × 緑ピル × 赤親）
        light をベースに M.LEAGUE のブランドアクセントを最後に上書き
        ══════════════════════════════════════════════════ */
     [data-skin="mleague"] {
@@ -1273,11 +1273,11 @@
 <div id="themePopover" role="menu">
   <button class="tp-item" data-theme-val="dark" role="menuitem">
     <span class="tp-dots"><span class="tp-dot" style="background:#0b170b"></span><span class="tp-dot" style="background:#2d8c50"></span><span class="tp-dot" style="background:#c8a840"></span></span>
-    標準（和）<span class="tp-check">✓</span>
+    和<span class="tp-check">✓</span>
   </button>
   <button class="tp-item" data-theme-val="mleague" role="menuitem">
     <span class="tp-dots"><span class="tp-dot" style="background:#ffffff;border:1px solid #ddd"></span><span class="tp-dot" style="background:#1c7622"></span><span class="tp-dot" style="background:#cd0000"></span></span>
-    Mリーグ<span class="tp-check">✓</span>
+    グリーン<span class="tp-check">✓</span>
   </button>
   <button class="tp-item" data-theme-val="light" role="menuitem">
     <span class="tp-dots"><span class="tp-dot" style="background:#ffffff;border:1px solid #ddd"></span><span class="tp-dot" style="background:#a07820"></span><span class="tp-dot" style="background:#d4b87a"></span></span>
@@ -1380,8 +1380,8 @@
         <button class="mode-btn"        id="btnSanma">三 麻</button>
       </div>
       <div class="rule-toggle" id="rulesetToggle">
-        <button class="mode-btn"        id="btnJantama">雀魂</button>
-        <button class="mode-btn active" id="btnMleague">Mリーグ</button>
+        <button class="mode-btn"        id="btnJantama">標準</button>
+        <button class="mode-btn active" id="btnMleague">競技</button>
       </div>
     </div>
     <div class="action-row">
@@ -1695,13 +1695,13 @@
     </div>
 
     <div class="help-section">
-      <div class="help-section-title">ルール（雀魂 / Mリーグ）</div>
+      <div class="help-section-title">ルール（標準 / 競技）</div>
       <div class="help-row">
-        <span class="help-op">雀魂</span>
+        <span class="help-op">標準</span>
         <span class="help-desc">ウマ +15/+5/−5/−15・オカなし（25,000返し）<br>ダブル役満〜6倍役満チップ・飛び即終了・途中流局あり</span>
       </div>
       <div class="help-row">
-        <span class="help-op">Mリーグ</span>
+        <span class="help-op">競技</span>
         <span class="help-desc">ウマ +30/+10/−10/−30・オカ+20（30,000返し）<br>切り上げ満貫（3飜60符/4飜30符→満貫）・飛び続行</span>
       </div>
     </div>
@@ -1726,12 +1726,16 @@
       <div class="help-section-title">四麻 / 三麻</div>
       <div class="help-row">
         <span class="help-op">四 麻</span>
-        <span class="help-desc">4人・25,000点スタート／ウマ・オカはルール設定（雀魂/Mリーグ）に従う</span>
+        <span class="help-desc">4人・25,000点スタート／ウマ・オカはルール設定（標準/競技）に従う</span>
       </div>
       <div class="help-row">
         <span class="help-op">三 麻</span>
         <span class="help-desc">3人・35,000点スタート（西家なし）／ウマ [20, 0, -20]</span>
       </div>
+    </div>
+
+    <div class="help-note" style="margin-top:14px; line-height:1.6;">
+      本アプリは点数管理ツールです。特定の麻雀ゲーム・大会・団体とは一切関係ありません。
     </div>
 
     <div class="modal-actions">
@@ -1754,11 +1758,11 @@
       <div class="theme-swatches" id="themeSwatches">
         <button class="theme-sw" data-theme-val="dark">
           <span class="sw-dots"><span class="sw-dot" style="background:#0b170b"></span><span class="sw-dot" style="background:#2d8c50"></span><span class="sw-dot" style="background:#c8a840"></span></span>
-          <span class="sw-name">標準（和）</span>
+          <span class="sw-name">和</span>
         </button>
         <button class="theme-sw" data-theme-val="mleague">
           <span class="sw-dots"><span class="sw-dot" style="background:#ffffff;border:1px solid #ddd"></span><span class="sw-dot" style="background:#1c7622"></span><span class="sw-dot" style="background:#cd0000"></span></span>
-          <span class="sw-name">Mリーグ</span>
+          <span class="sw-name">グリーン</span>
         </button>
         <button class="theme-sw" data-theme-val="light">
           <span class="sw-dots"><span class="sw-dot" style="background:#ffffff;border:1px solid #ddd"></span><span class="sw-dot" style="background:#a07820"></span><span class="sw-dot" style="background:#d4b87a"></span></span>
@@ -1864,10 +1868,10 @@
   let UMA        = YONMA_UMA.slice();
   let sanmaMode  = false;
 
-  /* ── ルール軸（雀魂 / Mリーグ）──────────────────── */
+  /* ── ルール軸（標準 / 競技）。内部IDは jantama/mleague を維持 ── */
   const RULESETS = {
-    jantama: { label: '雀魂',    UMA4: [15, 5, -5, -15],   BASE4: 25000, kiriage: false, tobiEnd: true  },
-    mleague: { label: 'Mリーグ', UMA4: [30, 10, -10, -30], BASE4: 30000, kiriage: true,  tobiEnd: false },
+    jantama: { label: '標準', UMA4: [15, 5, -5, -15],   BASE4: 25000, kiriage: false, tobiEnd: true  },
+    mleague: { label: '競技', UMA4: [30, 10, -10, -30], BASE4: 30000, kiriage: true,  tobiEnd: false },
   };
   let ruleset = 'mleague';
 
@@ -2467,7 +2471,7 @@
     }
   }
 
-  /* ── ルール軸（雀魂 / Mリーグ）切替 ──────────────── */
+  /* ── ルール軸（標準 / 競技）切替 ──────────────── */
   function setRuleset(rs, silent) {
     if (!RULESETS[rs]) return;
     ruleset = rs;
@@ -2485,8 +2489,8 @@
 
   /* ── チップ表示フィルタ（ルール軸） ──────────────── */
   function chipVisible(e) {
-    if (e.kiriage && RULESETS[ruleset].kiriage) return false;   /* Mリーグ: 切り上げ満貫 */
-    if (e.jantama && ruleset !== 'jantama')     return false;   /* ダブル役満以上は雀魂のみ */
+    if (e.kiriage && RULESETS[ruleset].kiriage) return false;   /* 競技: 切り上げ満貫 */
+    if (e.jantama && ruleset !== 'jantama')     return false;   /* ダブル役満以上は標準のみ */
     return true;
   }
   function chipLabel(e) {
@@ -2755,7 +2759,7 @@
     if (kyoku < endKyoku) return;        /* 規定局数内 */
     const top = Math.max(...IDS.map(id => players[id].score));
     if (ruleset === 'jantama' && top < 30000 && kyoku < suddenMax) {
-      showToast(`${gameLength === 'tonpu' ? '南入' : '西入'}サドンデス（1位が30,000点未満・雀魂ルール）`, false, 3200);
+      showToast(`${gameLength === 'tonpu' ? '南入' : '西入'}サドンデス（1位が30,000点未満・標準ルール）`, false, 3200);
       return;
     }
     setTimeout(async () => {
@@ -2775,10 +2779,10 @@
     if (!busted) return;
     if (RULESETS[ruleset].tobiEnd) {
       setTimeout(async () => {
-        if (await appConfirm(`${getName(busted)} が0点未満（飛び）。\n雀魂ルールでは終局です。精算しますか？`, '精算する', '続行')) openGameEndModal();
+        if (await appConfirm(`${getName(busted)} が0点未満（飛び）。\n標準ルールでは終局です。精算しますか？`, '精算する', '続行')) openGameEndModal();
       }, 600);
     } else {
-      showToast(`${getName(busted)} 0点未満（Mリーグルールでは続行）`, true, 3000);
+      showToast(`${getName(busted)} 0点未満（競技ルールでは続行）`, true, 3000);
     }
   }
 
@@ -2887,7 +2891,7 @@
       row.appendChild(b);
     });
     list.appendChild(row);
-    /* 途中流局は雀魂ルールのみ */
+    /* 途中流局は標準ルールのみ */
     document.getElementById('chuutoRow').style.display = ruleset === 'jantama' ? '' : 'none';
     document.getElementById('ryuukyokuModal').classList.add('show');
   }
@@ -2928,7 +2932,7 @@
     const isOya = pid === dealerId;
     const msg = ruleset === 'jantama'
       ? `${getName(pid)} のチョンボ（満貫払い）\n${isOya ? '他家に各4,000点' : '親に4,000点・他の子に各2,000点'}を支払います。\n（同局再ゲーム・本場据え置き）`
-      : `${getName(pid)} のチョンボを記録します。\nMリーグルールでは点数移動なし（場外で-20P減算）。`;
+      : `${getName(pid)} のチョンボを記録します。\n競技ルールでは点数移動なし（場外で-20P減算）。`;
     if (!(await appConfirm(msg, 'チョンボ処理'))) return;
     let moved = false;
     if (ruleset === 'jantama') {
@@ -3470,7 +3474,7 @@
     document.getElementById('btnYonma').addEventListener('click', () => setSanmaMode(false));
     document.getElementById('btnSanma').addEventListener('click', () => setSanmaMode(true));
 
-    /* ルール軸（雀魂/Mリーグ）toggle */
+    /* ルール軸（標準/競技）toggle */
     document.getElementById('btnJantama').addEventListener('click', () => setRuleset('jantama'));
     document.getElementById('btnMleague').addEventListener('click', () => setRuleset('mleague'));
 
