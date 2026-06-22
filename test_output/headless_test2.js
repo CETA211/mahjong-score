@@ -34,7 +34,7 @@ const score = id => parseInt(d.getElementById('score-' + id).textContent.replace
 t('スコア復元 north=31,000', score('north') === 31000);
 t('スコア復元 east=40,000', score('east') === 40000);
 t('局復元 南3局 (kyoku=6)', d.getElementById('ciKyoku').textContent === '南3局');
-t('本場・供託復元 3本場・供託1', d.getElementById('ciSub').textContent === '3本場・供託1');
+t('本場・供託復元 3本場・供託1', d.getElementById('ciSub').textContent === '3本場供託1');
 t('親復元 south', d.querySelector('[data-dealer-for="south"]').classList.contains('is-dealer'));
 
 console.log('--- Mリーグ: 流局モーダルに途中流局なし ---');
