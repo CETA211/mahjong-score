@@ -19,7 +19,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await page.goto(APP, { waitUntil: 'networkidle0' });
   await sleep(400);
   await page.evaluate(() => document.getElementById('diceBtn').click());
-  await sleep(900); // ロール完了後（settle）
+  await sleep(1500); // 回転停止後（DICE_MS=1150）
   // 出目を固定確認のため値を読む
   const sum = await page.evaluate(() => document.getElementById('diceSum').textContent);
   console.log('sum:', sum);

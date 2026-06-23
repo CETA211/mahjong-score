@@ -90,29 +90,29 @@ d.querySelector('#presetList .pi-del').click(); await tick();
 t('削除でプリセットが空に', JSON.parse(w.localStorage.getItem('mahjong_member_presets')).length === 0);
 t('一覧が空表示に', !!d.querySelector('#presetList .preset-empty'));
 
-console.log('--- サイコロ（2個振り）---');
+console.log('--- サイコロ（3Dキューブ）---');
 w = boot({ mahjong_tutorial_shown: '1' });
 d = w.document;
 d.getElementById('diceBtn').click();
 t('サイコロモーダルが開く', d.getElementById('diceModal').classList.contains('show'));
-await tick(800); // ロール完了待ち
-const die1 = d.getElementById('die1'), die2 = d.getElementById('die2');
-const v1 = die1.querySelectorAll('.pip.on').length;
-const v2 = die2.querySelectorAll('.pip.on').length;
-t('die1 の出目が1〜6', v1 >= 1 && v1 <= 6);
-t('die2 の出目が1〜6', v2 >= 1 && v2 <= 6);
+const die1 = d.getElementById('die1');
+const cube1 = die1.querySelector('.cube');
+t('die1 に3Dキューブが構築される', !!cube1);
+t('キューブは6面', die1.querySelectorAll('.face').length === 6);
+t('f1面は1ピップ', die1.querySelectorAll('.face.f1 .pip').length === 1);
+t('f6面は6ピップ', die1.querySelectorAll('.face.f6 .pip').length === 6);
+t('全面のピップ合計21（1+2+..+6）', die1.querySelectorAll('.pip').length === 21);
+await tick(1300); // 回転完了待ち（DICE_MS=1150）
+const transform = die1.querySelector('.cube').style.transform;
+t('回転transformが適用される', /rotateX/.test(transform) && /rotateY/.test(transform));
 const sumTxt = d.getElementById('diceSum').textContent;
 const shown = parseInt((sumTxt.match(/(\d+)/) || [])[1], 10);
-t('合計表示 = 出目の和', shown === v1 + v2);
-t('各サイコロにピップ9セル', die1.querySelectorAll('.pip').length === 9);
-// 1の目は face-1 クラスで赤
-d.getElementById('diceModal').classList.remove('show');
-w.setDieFace ? null : null; // setDieFaceはクロージャ内なのでDOM経由で確認
-// 振り直しでまた1〜6
+t('合計表示が2〜12', shown >= 2 && shown <= 12);
+// 振り直し
+const beforeT = die1.querySelector('.cube').style.transform;
 d.getElementById('diceRollBtn').click();
-await tick(800);
-const r2 = d.getElementById('die1').querySelectorAll('.pip.on').length;
-t('振り直しで再び1〜6', r2 >= 1 && r2 <= 6);
+await tick(1300);
+t('振り直しでtransformが変化', die1.querySelector('.cube').style.transform !== beforeT);
 d.getElementById('diceCloseBtn').click();
 t('閉じるで非表示', !d.getElementById('diceModal').classList.contains('show'));
 

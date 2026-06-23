@@ -1268,45 +1268,55 @@
     /* 破壊的アクションの確認は赤を主役に */
     [data-skin="mleague"] #confirmModal .modal-btn.confirm { background: #cd0000; }
 
-    /* ── サイコロ ─────────────────────────────────── */
+    /* ── サイコロ（3Dキューブ・高FPS回転） ───────────── */
     .dice-tray {
-      display: flex; gap: 22px; justify-content: center; align-items: center;
-      padding: 22px 0 10px;
+      display: flex; gap: 30px; justify-content: center; align-items: center;
+      padding: 34px 0 16px;
+      perspective: 620px;
     }
     .die {
+      --ds: clamp(76px, 21vw, 96px);
+      width: var(--ds); height: var(--ds);
       position: relative;
-      width: clamp(72px, 20vw, 92px); height: clamp(72px, 20vw, 92px);
-      background: linear-gradient(145deg, #ffffff, #ece4d2);
-      border-radius: 18px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.35), inset 0 -3px 6px rgba(0,0,0,0.12), inset 0 2px 4px rgba(255,255,255,0.8);
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,0.4));
     }
-    .die .pip {
-      position: absolute; width: 20%; height: 20%; border-radius: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      transition: transform 0.12s;
+    .cube {
+      position: absolute; width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transform: rotateX(-22deg) rotateY(16deg);
+      transition: transform 1.15s cubic-bezier(0.16, 0.86, 0.22, 1);
+      will-change: transform;
+    }
+    .cube.spin { transition: transform 1.15s cubic-bezier(0.16, 0.86, 0.22, 1); }
+    .face {
+      position: absolute; width: 100%; height: 100%;
+      border-radius: 19%;
+      background: linear-gradient(145deg, #fffefb, #e9dfc9);
+      box-shadow: inset 0 -4px 8px rgba(0,0,0,0.14), inset 0 3px 6px rgba(255,255,255,0.85);
+      backface-visibility: hidden;
+    }
+    .face.f1 { transform: rotateY(0deg)   translateZ(calc(var(--ds) / 2)); }
+    .face.f2 { transform: rotateY(90deg)  translateZ(calc(var(--ds) / 2)); }
+    .face.f3 { transform: rotateX(90deg)  translateZ(calc(var(--ds) / 2)); }
+    .face.f4 { transform: rotateX(-90deg) translateZ(calc(var(--ds) / 2)); }
+    .face.f5 { transform: rotateY(-90deg) translateZ(calc(var(--ds) / 2)); }
+    .face.f6 { transform: rotateY(180deg) translateZ(calc(var(--ds) / 2)); }
+    .face .pip {
+      position: absolute; width: 19%; height: 19%; border-radius: 50%;
+      transform: translate(-50%, -50%);
       background: radial-gradient(circle at 35% 30%, #4a4a4a, #111);
       box-shadow: inset 0 1px 1px rgba(255,255,255,0.25);
     }
-    .die .pip.on { transform: translate(-50%, -50%) scale(1); }
-    /* 1の目は赤（和風）で少し大きく */
-    .die.face-1 .pip.on {
-      width: 27%; height: 27%;
+    .face.f1 .pip { /* 1の目は赤・大 */
+      width: 28%; height: 28%;
       background: radial-gradient(circle at 35% 30%, #e23b3b, #b01515);
     }
-    @keyframes diceTumble {
-      0%   { transform: rotate(0deg)   translateY(0)    scale(1); }
-      25%  { transform: rotate(-18deg) translateY(-14px) scale(1.05); }
-      50%  { transform: rotate(14deg)  translateY(0)    scale(0.98); }
-      75%  { transform: rotate(-10deg) translateY(-8px) scale(1.03); }
-      100% { transform: rotate(0deg)   translateY(0)    scale(1); }
-    }
-    .die.rolling { animation: diceTumble 0.42s ease-in-out infinite; }
-    @keyframes diceSettle { 0% { transform: scale(1.12); } 60% { transform: scale(0.96); } 100% { transform: scale(1); } }
-    .die.settle { animation: diceSettle 0.28s ease-out; }
     .dice-sum {
-      text-align: center; margin: 6px 0 4px;
+      text-align: center; margin: 10px 0 4px;
       font-size: 1rem; font-weight: 700; color: var(--muted); letter-spacing: 1px;
+      transition: opacity 0.2s;
     }
+    .dice-sum.rolling { opacity: 0.35; }
     .dice-sum b { color: var(--gold); font-size: 1.9rem; font-weight: 800; margin: 0 4px; font-feature-settings: "tnum"; }
     .dice-hint { text-align: center; font-size: 0.72rem; color: var(--muted); opacity: 0.7; margin-bottom: 12px; }
   </style>
@@ -2203,49 +2213,72 @@
                 + `<span><span class="ci-unit">供託</span><span class="ci-num">${kyotaku}</span></span>`;
   }
 
-  /* ── サイコロ（2個振り）─────────────────────────── */
+  /* ── サイコロ（3Dキューブ・高FPS回転→減速して停止）─── */
   const PIP_MAP = { 1:[4], 2:[0,8], 3:[0,4,8], 4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8] };
-  const PIP_POS = [25, 50, 75];   /* 3x3 グリッドの%位置 */
+  const PIP_POS = [25, 50, 75];
+  /* 各面を正面に向けるためのキューブ回転（度）[rotateX, rotateY] */
+  const DIE_ORI = { 1:[0,0], 2:[0,-90], 3:[-90,0], 4:[90,0], 5:[0,90], 6:[0,180] };
+  const REST_TILT = { x: -22, y: 16 };   /* 静止時に3Dに見せる傾き */
+  const DICE_MS = 1150;
   let diceRolling = false;
-  function setDieFace(el, v) {
-    el.classList.toggle('face-1', v === 1);
-    const on = PIP_MAP[v];
-    el.innerHTML = '';
-    for (let i = 0; i < 9; i++) {
-      const p = document.createElement('span');
-      p.className = 'pip' + (on.includes(i) ? ' on' : '');
-      p.style.left = PIP_POS[i % 3] + '%';
-      p.style.top  = PIP_POS[Math.floor(i / 3)] + '%';
-      el.appendChild(p);
+  const diceSpin = { die1: { x: 0, y: 0 }, die2: { x: 0, y: 0 } };
+
+  function buildDie(dieEl) {
+    const cube = document.createElement('div');
+    cube.className = 'cube';
+    for (let v = 1; v <= 6; v++) {
+      const face = document.createElement('div');
+      face.className = 'face f' + v;
+      const on = PIP_MAP[v];
+      for (let i = 0; i < 9; i++) {
+        if (!on.includes(i)) continue;
+        const p = document.createElement('span');
+        p.className = 'pip';
+        p.style.left = PIP_POS[i % 3] + '%';
+        p.style.top  = PIP_POS[Math.floor(i / 3)] + '%';
+        face.appendChild(p);
+      }
+      cube.appendChild(face);
     }
+    dieEl.innerHTML = '';
+    dieEl.appendChild(cube);
+    return cube;
+  }
+  function getCube(id) {
+    const die = document.getElementById(id);
+    return die.querySelector('.cube') || buildDie(die);
+  }
+  function spinDie(id, v) {
+    const cube = getCube(id);
+    const s = diceSpin[id];
+    s.x += 4 + Math.floor(Math.random() * 2);   /* 4〜5回転 */
+    s.y += 4 + Math.floor(Math.random() * 2);
+    const [ox, oy] = DIE_ORI[v];
+    cube.style.transform = `rotateX(${ox + 360 * s.x + REST_TILT.x}deg) rotateY(${oy + 360 * s.y + REST_TILT.y}deg)`;
   }
   function rollDice() {
     if (diceRolling) return;
     diceRolling = true;
-    const d1 = document.getElementById('die1'), d2 = document.getElementById('die2');
-    const sumEl = document.getElementById('diceSum');
     const rnd = () => 1 + Math.floor(Math.random() * 6);
-    d1.classList.remove('settle'); d2.classList.remove('settle');
-    d1.classList.add('rolling');   d2.classList.add('rolling');
-    sumEl.innerHTML = '合計 <b>…</b>';
-    const iv = setInterval(() => { setDieFace(d1, rnd()); setDieFace(d2, rnd()); }, 80);
+    const v1 = rnd(), v2 = rnd();
+    const sumEl = document.getElementById('diceSum');
+    sumEl.classList.add('rolling');
+    spinDie('die1', v1);
+    spinDie('die2', v2);
     setTimeout(() => {
-      clearInterval(iv);
-      const v1 = rnd(), v2 = rnd();
-      setDieFace(d1, v1); setDieFace(d2, v2);
-      d1.classList.remove('rolling'); d2.classList.remove('rolling');
-      void d1.offsetWidth; void d2.offsetWidth;
-      d1.classList.add('settle'); d2.classList.add('settle');
       sumEl.innerHTML = `合計 <b>${v1 + v2}</b>`;
+      sumEl.classList.remove('rolling');
       diceRolling = false;
-    }, 700);
+    }, DICE_MS);
   }
   function openDiceModal() {
-    setDieFace(document.getElementById('die1'), 1);
-    setDieFace(document.getElementById('die2'), 1);
+    buildDie(document.getElementById('die1'));
+    buildDie(document.getElementById('die2'));
+    diceSpin.die1 = { x: 0, y: 0 }; diceSpin.die2 = { x: 0, y: 0 };
     document.getElementById('diceSum').innerHTML = '合計 <b>—</b>';
     document.getElementById('diceModal').classList.add('show');
-    rollDice();
+    /* 表示後に回転開始（transitionを効かせる） */
+    requestAnimationFrame(() => requestAnimationFrame(rollDice));
   }
   let mode = 'ron', tsumoType = 'ko';
   let ronSrc = null, ronTgt = null, ronInput = '0';
