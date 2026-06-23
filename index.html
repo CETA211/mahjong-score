@@ -1319,6 +1319,53 @@
     .dice-sum.rolling { opacity: 0.35; }
     .dice-sum b { color: var(--gold); font-size: 1.9rem; font-weight: 800; margin: 0 4px; font-feature-settings: "tnum"; }
     .dice-hint { text-align: center; font-size: 0.72rem; color: var(--muted); opacity: 0.7; margin-bottom: 12px; }
+
+    /* ══════════════════════════════════════════════════
+       横画面＝卓中央表示モード（4方向へ点数を向けて大きく表示）
+       スマホを横にして麻雀卓の中央に置く用途
+       ══════════════════════════════════════════════════ */
+    @media (orientation: landscape) and (max-height: 560px) {
+      body { padding: 0; overflow: hidden; }
+      .app { max-width: none; width: 100vw; height: 100dvh; }
+      /* 操作系・ヘッダー・固定ボタンは隠す（表示専用） */
+      .app-header, .action-bar, .footer-note,
+      .theme-toggle, .settings-fixed-btn, .hist-fixed-btn, .dice-fixed-btn { display: none !important; }
+
+      .grid {
+        position: relative; display: block;
+        width: 100vw; height: 100dvh; margin: 0; gap: 0;
+      }
+      .player-cell {
+        position: absolute; gap: 4px;
+        width: 44vw; max-width: 420px;
+      }
+      .player-card {
+        pointer-events: none; max-width: none; width: 100%;
+        padding: 10px 18px; border-radius: 16px;
+      }
+      .player-card::before { display: none; }
+      /* 4辺に配置し、各プレイヤーの方向へ回転 */
+      .pos-south { left: 50%; bottom: 6px;  transform: translateX(-50%); }
+      .pos-north { left: 50%; top: 6px;     transform: translateX(-50%) rotate(180deg); }
+      .pos-west  { left: 6px;  top: 50%;    transform: translateY(-50%) rotate(90deg);  transform-origin: center; }
+      .pos-east  { right: 6px; top: 50%;    transform: translateY(-50%) rotate(-90deg); transform-origin: center; }
+      .grid.sanma .pos-west { display: none; }
+
+      /* 点数を最大限大きく */
+      .player-name {
+        font-size: clamp(0.85rem, 3.4vh, 1.15rem); margin-bottom: 1px;
+        pointer-events: none;
+      }
+      .score { font-size: clamp(3rem, 16vh, 6rem); letter-spacing: -3px; }
+      .dealer-indicator { font-size: 0.7rem; padding: 3px 12px; pointer-events: none; }
+      .dealer-indicator.is-dealer .di-oya { max-width: 40px; }
+
+      /* 中央: 局・本場・供託（コンパクト） */
+      .center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+      .center-inner { min-width: 0; padding: 6px 12px; }
+      .ci-kyoku { font-size: 1rem; }
+      .ci-sub { font-size: 0.66rem; }
+    }
   </style>
 </head>
 <body>
@@ -1762,6 +1809,14 @@
       <div class="help-row">
         <span class="help-op">🎲 左上</span>
         <span class="help-desc">左上のサイコロボタンで2個振り（起家決めなどに）<br>タップ／「振り直す」でもう一度</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">横画面（卓中央表示）</div>
+      <div class="help-row">
+        <span class="help-op">横にする</span>
+        <span class="help-desc">スマホを横向きにして卓の中央に置くと、各プレイヤーの<br>方向へ点数が大きく表示されます（表示専用・編集は縦画面で）</span>
       </div>
     </div>
 
