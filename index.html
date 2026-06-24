@@ -220,20 +220,44 @@
       box-shadow: 0 0 0 1px rgba(160,120,32,0.18), 0 0 14px rgba(160,120,32,0.14);
     }
 
+    /* カード上の名前は表示専用（タップで名前モーダル） */
     .player-name {
-      display: block; width: 100%;
-      background: none; border: none;
-      border-bottom: 1px solid transparent;
+      display: inline-flex; align-items: center; gap: 4px;
+      max-width: 100%;
       color: var(--muted);
       font-size: clamp(0.72rem, 1.4vw, 1rem); font-weight: 700;
       letter-spacing: 1px; text-align: center;
-      padding: 2px 4px;
-      margin-bottom: clamp(8px, 1.5vw, 14px);
-      outline: none; cursor: text;
-      transition: color 0.15s, border-color 0.15s;
+      padding: 2px 8px;
+      margin: 0 auto clamp(8px, 1.5vw, 14px);
+      border-radius: 8px; cursor: pointer;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s, background 0.15s;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .player-name:focus { color: var(--text); border-bottom-color: var(--gold); }
-    .player-name::placeholder { color: var(--muted); opacity: 0.4; }
+    .player-name:active { background: rgba(200,168,64,0.14); }
+    .player-name::after {
+      content: '✎'; font-size: 0.72em; opacity: 0.45; flex-shrink: 0;
+    }
+    /* 名前編集モーダル */
+    .name-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .name-wind {
+      flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; font-weight: 800; color: var(--gold);
+      background: var(--gold-dim); border: 1px solid var(--gold-line);
+    }
+    .name-row input {
+      flex: 1; min-width: 0;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px;
+      color: var(--text); font-size: 1rem; font-weight: 700; outline: none;
+      transition: border-color 0.15s;
+    }
+    .name-row input:focus { border-color: var(--gold); }
+    .name-row input::placeholder { color: var(--muted); opacity: 0.5; }
+    [data-theme="light"] .name-row input { background: rgba(0,0,0,0.03); }
+    [data-skin="mleague"] .name-wind { color: #1c7622; background: rgba(28,118,34,0.1); border-color: rgba(28,118,34,0.4); }
+    [data-skin="mleague"] .name-row input:focus { border-color: #1c7622; }
 
     .score {
       font-size: clamp(1.5rem, 4vw, 3.2rem);
@@ -1495,7 +1519,7 @@
       <button class="dealer-indicator" data-dealer-for="north"><span class="di-wind">北</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="north">
         <span class="card-rank" id="rank-north"></span>
-        <input class="player-name" id="name-north" type="text" value="プレイヤー4" maxlength="8" placeholder="名前">
+        <div class="player-name" id="cardname-north" data-name-for="north" role="button" tabindex="0">プレイヤー4</div>
         <div class="score" id="score-north">25,000</div>
         <div class="top-diff" id="diff-north"></div>
       </div>
@@ -1506,7 +1530,7 @@
       <button class="dealer-indicator" data-dealer-for="west"><span class="di-wind">西</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="west">
         <span class="card-rank" id="rank-west"></span>
-        <input class="player-name" id="name-west" type="text" value="プレイヤー3" maxlength="8" placeholder="名前">
+        <div class="player-name" id="cardname-west" data-name-for="west" role="button" tabindex="0">プレイヤー3</div>
         <div class="score" id="score-west">25,000</div>
         <div class="top-diff" id="diff-west"></div>
       </div>
@@ -1524,7 +1548,7 @@
       <button class="dealer-indicator" data-dealer-for="east"><span class="di-wind">東</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="east">
         <span class="card-rank" id="rank-east"></span>
-        <input class="player-name" id="name-east" type="text" value="プレイヤー1" maxlength="8" placeholder="名前">
+        <div class="player-name" id="cardname-east" data-name-for="east" role="button" tabindex="0">プレイヤー1</div>
         <div class="score" id="score-east">25,000</div>
         <div class="top-diff" id="diff-east"></div>
       </div>
@@ -1535,7 +1559,7 @@
       <button class="dealer-indicator" data-dealer-for="south"><span class="di-wind">南</span><span class="di-oya"> · 親</span></button>
       <div class="player-card" data-player-id="south">
         <span class="card-rank" id="rank-south"></span>
-        <input class="player-name" id="name-south" type="text" value="プレイヤー2" maxlength="8" placeholder="名前">
+        <div class="player-name" id="cardname-south" data-name-for="south" role="button" tabindex="0">プレイヤー2</div>
         <div class="score" id="score-south">25,000</div>
         <div class="top-diff" id="diff-south"></div>
       </div>
@@ -1725,6 +1749,24 @@
 </div>
 
 <!-- ── 局・本場・供託 修正モーダル ─────────────────── -->
+<!-- ── プレイヤー名 編集モーダル ───────────────────── -->
+<div class="modal-overlay" id="nameModal">
+  <div class="modal-sheet" style="max-width:380px;">
+    <div class="sheet-handle"></div>
+    <div class="modal-label">プレイヤー名</div>
+    <div id="nameFields">
+      <div class="name-row" data-name-id="east"><span class="name-wind">東</span><input id="name-east" type="text" value="プレイヤー1" maxlength="8" placeholder="プレイヤー1" autocomplete="off"></div>
+      <div class="name-row" data-name-id="south"><span class="name-wind">南</span><input id="name-south" type="text" value="プレイヤー2" maxlength="8" placeholder="プレイヤー2" autocomplete="off"></div>
+      <div class="name-row" data-name-id="west"><span class="name-wind">西</span><input id="name-west" type="text" value="プレイヤー3" maxlength="8" placeholder="プレイヤー3" autocomplete="off"></div>
+      <div class="name-row" data-name-id="north"><span class="name-wind">北</span><input id="name-north" type="text" value="プレイヤー4" maxlength="8" placeholder="プレイヤー4" autocomplete="off"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel"  id="nameResetBtn">初期化</button>
+      <button class="modal-btn confirm" id="nameCloseBtn">完了</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="infoEditModal">
   <div class="modal-sheet">
     <div class="sheet-handle"></div>
@@ -1827,6 +1869,14 @@
       <div class="help-row">
         <span class="help-op">タップ</span>
         <span class="help-desc">プレイヤーをタップして任意の点数を加算 / 減算</span>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">プレイヤー名</div>
+      <div class="help-row">
+        <span class="help-op">名前✎</span>
+        <span class="help-desc">カード上の名前をタップで編集モーダルを表示<br>4人まとめて入力（設定の「名前を編集」からも開けます）</span>
       </div>
     </div>
 
@@ -1985,6 +2035,13 @@
         <button class="set-seg-btn" data-length="tonpu">東風戦</button>
         <button class="set-seg-btn active" data-length="hanchan">半荘戦</button>
       </div>
+    </div>
+    <div class="set-row" style="display:block;">
+      <div class="set-info">
+        <div class="set-label">プレイヤー名</div>
+        <div class="set-desc">4人の名前をまとめて編集（カードの名前タップでも開けます）</div>
+      </div>
+      <button class="preset-save-btn" id="openNameBtn" style="border-color:var(--gold-line);">✎ 名前を編集</button>
     </div>
     <div class="set-row" style="display:block;">
       <div class="set-info">
@@ -2426,7 +2483,8 @@
 
   /* ── DOM refs ───────────────────────────────────── */
   const scoreEls     = Object.fromEntries(IDS.map(id => [id, document.getElementById('score-'+id)]));
-  const nameEls      = Object.fromEntries(IDS.map(id => [id, document.getElementById('name-'+id)]));
+  const nameEls      = Object.fromEntries(YONMA_IDS.map(id => [id, document.getElementById('name-'+id)]));      // 編集用input（名前モーダル）
+  const cardNameEls  = Object.fromEntries(YONMA_IDS.map(id => [id, document.getElementById('cardname-'+id)])); // カード表示用
   const modal        = document.getElementById('modal');
   const modalSheet   = document.getElementById('modalSheet');
   const transferInfo = document.getElementById('transferInfo');
@@ -2448,6 +2506,24 @@
   /* 席順番号: 東=1 南=2 西=3 北=4（デフォルト名と一致） */
   const SEAT_NUM = { east: 1, south: 2, west: 3, north: 4 };
   function getName(id) { return nameEls[id].value.trim() || `P${SEAT_NUM[id]}`; }
+
+  /* ── プレイヤー名（表示はカード、編集はモーダル）──── */
+  function renderNames() {
+    for (const id of YONMA_IDS) {
+      if (cardNameEls[id]) cardNameEls[id].textContent = getName(id);
+    }
+  }
+  function openNameModal(focusId) {
+    /* 三麻は西を隠す */
+    const westRow = document.querySelector('.name-row[data-name-id="west"]');
+    if (westRow) westRow.style.display = sanmaMode ? 'none' : '';
+    document.getElementById('nameModal').classList.add('show');
+    if (focusId && nameEls[focusId]) {
+      const inp = nameEls[focusId];
+      setTimeout(() => { inp.focus(); inp.select(); }, 60);
+    }
+  }
+  function closeNameModal() { document.getElementById('nameModal').classList.remove('show'); }
 
   /* ── Scores ─────────────────────────────────────── */
   let suppressFloat = true;   /* init完了までフローティング表示を抑止 */
@@ -3691,12 +3767,16 @@
 
     document.querySelectorAll('.player-card').forEach(card => {
       const pid = card.dataset.playerId;
-      const isInput = e => e.target.tagName === 'INPUT';
-      card.addEventListener('touchstart',  e => { if (!isInput(e)) swipeStart(e, pid); }, { passive: false });
-      card.addEventListener('touchmove',   e => { if (!isInput(e)) swipeMove(e); },       { passive: false });
-      card.addEventListener('touchend',    e => { if (!isInput(e)) swipeEnd(e); });
-      card.addEventListener('touchcancel', e => { if (!isInput(e)) { hideLongPressOverlay(); resetSwipe(); } });
-      card.addEventListener('mousedown',   e => { if (!isInput(e) && e.button === 0) { swipeStart(e, pid); e.preventDefault(); } });
+      /* 名前要素の上ではスワイプ/タップを無効化（名前モーダルを開く） */
+      const onName = e => !!e.target.closest('.player-name');
+      card.addEventListener('touchstart',  e => { if (!onName(e)) swipeStart(e, pid); }, { passive: false });
+      card.addEventListener('touchmove',   e => { if (!onName(e)) swipeMove(e); },       { passive: false });
+      card.addEventListener('touchend',    e => { if (!onName(e)) swipeEnd(e); });
+      card.addEventListener('touchcancel', e => { if (!onName(e)) { hideLongPressOverlay(); resetSwipe(); } });
+      card.addEventListener('mousedown',   e => { if (!onName(e) && e.button === 0) { swipeStart(e, pid); e.preventDefault(); } });
+      /* 名前タップ → 名前モーダル（その席にフォーカス） */
+      const nm = cardNameEls[pid];
+      if (nm) nm.addEventListener('click', e => { e.stopPropagation(); openNameModal(pid); });
     });
     window.addEventListener('mousemove',  e => { if (swiping) { swipeMove(e); e.preventDefault(); } });
     window.addEventListener('mouseup',    e => { if (swipeOrigin) swipeEnd(e); });
@@ -3903,7 +3983,7 @@
       if (e.target === document.getElementById('diceModal')) document.getElementById('diceModal').classList.remove('show');
     });
 
-    /* プレイヤー名の保存・復元 */
+    /* プレイヤー名の保存・復元（編集はモーダル、表示はカード） */
     try {
       const savedNames = JSON.parse(localStorage.getItem(LS_NAMES)) || {};
       for (const id of YONMA_IDS) {
@@ -3913,7 +3993,26 @@
     const saveNames = () => {
       lsSet(LS_NAMES, Object.fromEntries(YONMA_IDS.map(id => [id, nameEls[id].value])));
     };
-    for (const id of YONMA_IDS) nameEls[id].addEventListener('input', saveNames);
+    for (const id of YONMA_IDS) {
+      nameEls[id].addEventListener('input', () => { saveNames(); renderNames(); });
+    }
+    renderNames();
+
+    /* 名前モーダルの開閉・初期化 */
+    document.getElementById('openNameBtn').addEventListener('click', () => {
+      document.getElementById('settingsModal').classList.remove('show');
+      openNameModal();
+    });
+    document.getElementById('nameCloseBtn').addEventListener('click', closeNameModal);
+    document.getElementById('nameModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('nameModal')) closeNameModal();
+    });
+    document.getElementById('nameResetBtn').addEventListener('click', async () => {
+      if (!(await appConfirm('プレイヤー名を初期値（東/南/西/北）に戻しますか？', '初期化'))) return;
+      const defaults = { east: 'プレイヤー1', south: 'プレイヤー2', west: 'プレイヤー3', north: 'プレイヤー4' };
+      for (const id of YONMA_IDS) nameEls[id].value = defaults[id];
+      saveNames(); renderNames();
+    });
 
     /* 対局の長さ（東風 / 半荘）を復元・配線 */
     setGameLength(localStorage.getItem(LS_LENGTH) === 'tonpu' ? 'tonpu' : 'hanchan', true);
@@ -3927,7 +4026,7 @@
     function loadPreset(idx) {
       const p = getPresets()[idx]; if (!p) return;
       for (const id of YONMA_IDS) { if (typeof p[id] === 'string') nameEls[id].value = p[id]; }
-      saveNames();
+      saveNames(); renderNames();
       showToast('メンバーを呼び出しました');
     }
     function renderPresets() {

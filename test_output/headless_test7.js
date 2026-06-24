@@ -147,6 +147,29 @@ d.getElementById('landRyuuBtn').click();
 await tick();
 t('横用流局ボタンで流局モーダルが開く', d.getElementById('ryuukyokuModal').classList.contains('show'));
 
+console.log('--- プレイヤー名 編集モーダル ---');
+w = boot({ mahjong_tutorial_shown: '1', mahjong_player_names: JSON.stringify({ east: 'あきら', south: 'はるか', west: 'けんた', north: 'みさき' }) });
+d = w.document;
+t('カード名は表示専用div（inputではない）', d.getElementById('cardname-east').tagName === 'DIV');
+t('カードに保存名が表示される', d.getElementById('cardname-east').textContent === 'あきら');
+// カード名タップ → 名前モーダル
+d.getElementById('cardname-east').click();
+await tick();
+t('名前タップで名前モーダルが開く', d.getElementById('nameModal').classList.contains('show'));
+t('モーダル入力に現在名が反映', d.getElementById('name-east').value === 'あきら');
+// 名前を変更 → カード表示とLSが更新
+d.getElementById('name-south').value = 'しんじ';
+d.getElementById('name-south').dispatchEvent(new w.Event('input', { bubbles: true }));
+t('変更でカード表示が更新', d.getElementById('cardname-south').textContent === 'しんじ');
+t('変更でLS_NAMESが更新', JSON.parse(w.localStorage.getItem('mahjong_player_names')).south === 'しんじ');
+// 設定からも開ける
+d.getElementById('nameCloseBtn').click();
+t('完了でモーダルが閉じる', !d.getElementById('nameModal').classList.contains('show'));
+d.getElementById('settingsBtn').click(); await tick();
+d.getElementById('openNameBtn').click(); await tick();
+t('設定の「名前を編集」で開く', d.getElementById('nameModal').classList.contains('show'));
+t('設定は閉じる', !d.getElementById('settingsModal').classList.contains('show'));
+
 console.log('');
 console.log('RESULT: pass=' + pass + ' fail=' + fail);
 process.exit(fail ? 1 : 0);
