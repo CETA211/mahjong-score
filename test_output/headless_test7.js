@@ -116,6 +116,37 @@ t('振り直しでtransformが変化', die1.querySelector('.cube').style.transfo
 d.getElementById('diceCloseBtn').click();
 t('閉じるで非表示', !d.getElementById('diceModal').classList.contains('show'));
 
+console.log('--- 長押し点差表示 ---');
+w = boot({ mahjong_tutorial_shown: '1',
+  mahjong_live_state: JSON.stringify({ scores: { east: 30000, south: 25000, west: 20000, north: 25000 }, dealerId: 'east', kyoku: 0, honbaGame: 0, kyotaku: 0 }) });
+d = w.document;
+const eastCard = d.querySelector('[data-player-id="east"]');
+eastCard.dispatchEvent(new w.MouseEvent('mousedown', { button: 0, bubbles: true }));
+await tick(470); // LP_DELAY=400 を超えて長押し成立
+const lpDiffs = [...d.querySelectorAll('.lp-diff')];
+t('長押しで4カードに点差バッジ', lpDiffs.length === 4);
+const eastDiff = d.querySelector('[data-player-id="east"] .lp-diff');
+t('基準カードは「基準」', eastDiff && eastDiff.textContent === '基準' && eastDiff.classList.contains('base'));
+const westDiff = d.querySelector('[data-player-id="west"] .lp-diff');
+t('西(20000)との差は+10,000', westDiff && westDiff.textContent === '+10,000' && westDiff.classList.contains('plus'));
+const southDiff = d.querySelector('[data-player-id="south"] .lp-diff');
+t('南(25000)との差は+5,000', southDiff && southDiff.textContent === '+5,000');
+// 離すと消える
+w.dispatchEvent(new w.MouseEvent('mouseup', { bubbles: true }));
+await tick(50);
+t('離すと点差バッジが消える', d.querySelectorAll('.lp-diff').length === 0);
+
+console.log('--- 横画面用 立直/流局ボタン ---');
+t('landRiichiBtn が存在', !!d.getElementById('landRiichiBtn'));
+t('landRyuuBtn が存在', !!d.getElementById('landRyuuBtn'));
+d.getElementById('landRiichiBtn').click();
+await tick();
+t('横用立直ボタンでリーチモーダルが開く', d.getElementById('riichiModal').classList.contains('show'));
+d.getElementById('riichiCancelBtn').click();
+d.getElementById('landRyuuBtn').click();
+await tick();
+t('横用流局ボタンで流局モーダルが開く', d.getElementById('ryuukyokuModal').classList.contains('show'));
+
 console.log('');
 console.log('RESULT: pass=' + pass + ' fail=' + fail);
 process.exit(fail ? 1 : 0);
