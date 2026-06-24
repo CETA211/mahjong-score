@@ -31,12 +31,13 @@ workflows:
         script: |
           if [ ! -d "ios" ]; then npx cap add ios; fi
           npx cap sync ios
-      - name: アイコン/スプラッシュを反映（任意）
+      - name: アイコン/スプラッシュを生成（assets/ から全サイズ）
         script: |
+          npm i -D @capacitor/assets
           npx @capacitor/assets generate --ios \
             --iconBackgroundColor '#060e06' \
-            --splashBackgroundColor '#060e06' || true
-        # appstore/icon-1024.png・splash-2732.png を assets/ に置けば自動生成可
+            --splashBackgroundColor '#060e06'
+        # 入力: assets/icon.png(1024)・assets/splash.png / splash-dark.png(2732) … 準備済み
       - name: CocoaPods
         script: |
           cd ios/App && pod install
