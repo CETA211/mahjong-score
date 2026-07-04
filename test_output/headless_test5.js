@@ -1,7 +1,7 @@
 /* 点棒いらず ヘッドレス検証 その5: 設定モーダル（順位/点差のON/OFF） */
 const fs = require('fs');
 const path = require('path');
-const { JSDOM } = require(path.join(process.env.TEMP, 'mahjong-test', 'node_modules', 'jsdom'));
+const { JSDOM } = require('./_jsdom');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 

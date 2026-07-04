@@ -1,15 +1,24 @@
-/* App Store スクショ生成（6.7" = 1290x2796・キャプション付き）
- * node tools/make_store_shots.js
- * 出力: appstore/screenshots/6.7/01..05.png
+/* App Store スクショ生成（キャプション付き）
+ * iPhone 6.7" (1290x2796):  node tools/make_store_shots.js
+ * iPad 13"   (2064x2752):  node tools/make_store_shots.js ipad
+ * 出力: appstore/screenshots/<6.7|13>/01..05.png
  */
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require(path.join(process.env.TEMP, 'mahjong-test', 'node_modules', 'puppeteer-core'));
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const APP = 'file:///' + path.join(__dirname, '..', 'index.html').replace(/\\/g, '/');
-const OUT = path.join(__dirname, '..', 'appstore', 'screenshots', '6.7');
 const TMP = path.join(__dirname, '..', 'test_output', 'tmp');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* 出力サイズプリセット（App Store Connect の必須枠に対応） */
+const PRESETS = {
+  '6.7':  { w: 1290, h: 2796, dir: '6.7', app: { w: 390, h: 844,  dsf: 3 }, shotW: 1010, capSize: 90,  capTop: 150, shotTop: 600, radius: 62 },
+  'ipad': { w: 2064, h: 2752, dir: '13',  app: { w: 780, h: 1040, dsf: 2 }, shotW: 1560, capSize: 110, capTop: 170, shotTop: 640, radius: 48 },
+};
+const P = PRESETS[process.argv[2] || '6.7'];
+if (!P) { console.error('usage: node tools/make_store_shots.js [ipad]'); process.exit(1); }
+const OUT = path.join(__dirname, '..', 'appstore', 'screenshots', P.dir);
 
 const NAMES = { east: 'あきら', south: 'はるか', west: 'けんた', north: 'みさき' };
 const SCENES = [
@@ -24,7 +33,7 @@ async function appShot(scene) {
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true,
     args: ['--allow-file-access-from-files', `--user-data-dir=${path.join(TMP, 'pf-store-' + scene)}`, '--no-first-run', '--force-color-profile=srgb'] });
   const page = await browser.newPage();
-  await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 3 });
+  await page.setViewport({ width: P.app.w, height: P.app.h, deviceScaleFactor: P.app.dsf });
   const live = scene === 'gameend'
     ? { scores: { east: 41000, south: 27000, west: 18000, north: 14000 }, dealerId: 'east', kyoku: 7, honbaGame: 0, kyotaku: 0 }
     : null;
@@ -70,35 +79,36 @@ async function frameShot(browser, sc, b64, outPath) {
   const page = await browser.newPage();
   const frame = `<!doctype html><html><head><meta charset="utf-8"><style>
     *{margin:0;padding:0;box-sizing:border-box}
-    html,body{width:1290px;height:2796px;overflow:hidden}
-    .bg{width:1290px;height:2796px;position:relative;
+    html,body{width:${P.w}px;height:${P.h}px;overflow:hidden}
+    .bg{width:${P.w}px;height:${P.h}px;position:relative;
       background:linear-gradient(160deg,#0e3a20 0%,#0a2614 45%,#06160c 100%);
       font-family:'Hiragino Mincho ProN','Yu Mincho','MS Mincho',serif;}
-    .cap{position:absolute;top:150px;left:0;right:0;text-align:center;padding:0 80px;}
-    .cap h1{color:#f2ead2;font-size:90px;font-weight:700;letter-spacing:5px;line-height:1.32;
+    .cap{position:absolute;top:${P.capTop}px;left:0;right:0;text-align:center;padding:0 80px;}
+    .cap h1{color:#f2ead2;font-size:${P.capSize}px;font-weight:700;letter-spacing:5px;line-height:1.32;
       text-shadow:0 2px 18px rgba(0,0,0,.5);}
     .cap .rule{width:120px;height:5px;margin:44px auto 0;border-radius:3px;
       background:linear-gradient(90deg,transparent,#c8a840,transparent);}
-    .shot{position:absolute;left:50%;top:600px;transform:translateX(-50%);
-      width:1010px;border-radius:62px;overflow:hidden;
+    .shot{position:absolute;left:50%;top:${P.shotTop}px;transform:translateX(-50%);
+      width:${P.shotW}px;border-radius:${P.radius}px;overflow:hidden;
       box-shadow:0 40px 90px rgba(0,0,0,.55), 0 0 0 2px rgba(200,168,64,.25);}
-    .shot img{display:block;width:1010px;}
+    .shot img{display:block;width:${P.shotW}px;}
   </style></head><body>
     <div class="bg">
       <div class="cap"><h1>${sc.caption}</h1><div class="rule"></div></div>
       <div class="shot"><img src="data:image/png;base64,${b64}"></div>
     </div>
   </body></html>`;
-  await page.setViewport({ width: 1290, height: 2796, deviceScaleFactor: 1 });
+  await page.setViewport({ width: P.w, height: P.h, deviceScaleFactor: 1 });
   await page.setContent(frame, { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => document.fonts && document.fonts.ready);
   await sleep(300);
-  await page.screenshot({ path: outPath, clip: { x: 0, y: 0, width: 1290, height: 2796 } });
+  await page.screenshot({ path: outPath, clip: { x: 0, y: 0, width: P.w, height: P.h } });
   await page.close();
 }
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
+  fs.mkdirSync(TMP, { recursive: true });
   const fb = await puppeteer.launch({ executablePath: CHROME, headless: true,
     args: [`--user-data-dir=${path.join(TMP, 'pf-frame')}`, '--no-first-run', '--force-color-profile=srgb'] });
   let n = 0;

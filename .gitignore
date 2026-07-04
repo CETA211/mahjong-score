@@ -6,5 +6,4 @@ test_output/edgeprofile/
 node_modules/
 www/
 ios/
-package-lock.json
 .gradle/

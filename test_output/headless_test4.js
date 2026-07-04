@@ -1,7 +1,7 @@
 /* 点棒いらず ヘッドレス検証 その4: ⑦改善（名前永続化・リーチバッジ・順位/点差・float・カスタムconfirm） */
 const fs = require('fs');
 const path = require('path');
-const { JSDOM } = require(path.join(process.env.TEMP, 'mahjong-test', 'node_modules', 'jsdom'));
+const { JSDOM } = require('./_jsdom');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 

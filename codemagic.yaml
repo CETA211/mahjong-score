@@ -11,6 +11,13 @@ workflows:
     max_build_duration: 60
     integrations:
       app_store_connect: CodemagicApiKey   # ← Codemagic UI で作成したAPIキー名に置換
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+      cancel_previous_builds: true
     environment:
       ios_signing:
         distribution_type: app_store
@@ -20,11 +27,13 @@ workflows:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
       node: 20
+      # xcode は latest を維持（Apple の SDK 要件更新に自動追従するため）。
+      # メジャー更新でビルドが壊れた場合は一時的に "16.2" のように固定して切り分けること。
       xcode: latest
       cocoapods: default
     scripts:
-      - name: npm 依存をインストール
-        script: npm install
+      - name: npm 依存をインストール（lockfile による決定的ビルド）
+        script: npm ci
       - name: Web資産を www/ に生成
         script: npm run build:web
       - name: iOSプラットフォームを追加（無ければ）＋同期
@@ -33,11 +42,24 @@ workflows:
           npx cap sync ios
       - name: アイコン/スプラッシュを生成（assets/ から全サイズ）
         script: |
-          npm i -D @capacitor/assets
           npx @capacitor/assets generate --ios \
             --iconBackgroundColor '#060e06' \
             --splashBackgroundColor '#060e06'
         # 入力: assets/icon.png(1024)・assets/splash.png / splash-dark.png(2732) … 準備済み
+        # @capacitor/assets は devDependencies（npm ci で導入済み）
+      - name: 輸出コンプライアンス回答を焼き込み
+        script: |
+          # ios/ は毎ビルド雛形から再生成されるため、ここで毎回パッチする
+          # デバイスは Capacitor 既定の iPhone + iPad 両対応（13インチiPadスクショは appstore/screenshots/13/ に用意済み）
+          # 通信ゼロ・独自暗号なしのため false。未設定だと毎回 Missing Compliance で配信が止まる
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" ios/App/App/Info.plist || \
+          /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" ios/App/App/Info.plist
+      - name: バージョン/ビルド番号を設定（2本目以降のTestFlight拒否を防止）
+        script: |
+          MARKETING_VERSION=$(node -p "require('./package.json').version")
+          cd ios/App
+          agvtool new-marketing-version "$MARKETING_VERSION"
+          agvtool new-version -all "$BUILD_NUMBER"   # Codemagic のビルド連番を CFBundleVersion に採用
       - name: CocoaPods
         script: |
           cd ios/App && pod install

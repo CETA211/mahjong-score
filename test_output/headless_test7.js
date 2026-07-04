@@ -1,7 +1,7 @@
 /* 点棒いらず ヘッドレス検証 その7: 同点タイブレーク・東風/半荘・メンバープリセット */
 const fs = require('fs');
 const path = require('path');
-const { JSDOM } = require(path.join(process.env.TEMP, 'mahjong-test', 'node_modules', 'jsdom'));
+const { JSDOM } = require('./_jsdom');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
 let pass = 0, fail = 0;
@@ -85,8 +85,10 @@ d.getElementById('name-east').value = 'XXX';
 d.querySelector('#presetList .pi-names').click(); await tick();
 t('呼び出しで名前が復元（east=たろう）', d.getElementById('name-east').value === 'たろう');
 t('呼び出しでLS_NAMESも更新', JSON.parse(w.localStorage.getItem('mahjong_player_names')).east === 'たろう');
-// 削除
+// 削除（確認ダイアログを承認する）
 d.querySelector('#presetList .pi-del').click(); await tick();
+t('削除前に確認ダイアログ表示', d.getElementById('confirmModal').classList.contains('show'));
+d.getElementById('confirmYesBtn').click(); await tick();
 t('削除でプリセットが空に', JSON.parse(w.localStorage.getItem('mahjong_member_presets')).length === 0);
 t('一覧が空表示に', !!d.querySelector('#presetList .preset-empty'));
 

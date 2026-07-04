@@ -79,7 +79,7 @@
     .theme-toggle, .hist-fixed-btn, .settings-fixed-btn, .dice-fixed-btn {
       position: fixed;
       top: calc(env(safe-area-inset-top) + 12px);
-      width: 36px; height: 36px;
+      width: 44px; height: 44px;  /* Apple HIG 最小タップ領域 */
       background: rgba(200,168,64,0.1);
       border: 1px solid rgba(200,168,64,0.3);
       border-radius: 50%;
@@ -91,9 +91,9 @@
       -webkit-tap-highlight-color: transparent;
     }
     .theme-toggle  { right: 16px; }
-    .settings-fixed-btn { right: 60px; }
+    .settings-fixed-btn { right: 68px; }
     .hist-fixed-btn { left: 16px; }
-    .dice-fixed-btn { left: 60px; }
+    .dice-fixed-btn { left: 68px; }
     .theme-toggle:active, .hist-fixed-btn:active, .settings-fixed-btn:active, .dice-fixed-btn:active { background: rgba(200,168,64,0.25); }
     [data-theme="light"] .theme-toggle,
     [data-theme="light"] .hist-fixed-btn,
@@ -190,7 +190,7 @@
     .di-oya {
       display: inline-block;
       max-width: 0; overflow: hidden; opacity: 0;
-      font-size: 0.52rem; letter-spacing: 1px;
+      font-size: 0.6rem; letter-spacing: 1px;
       transition: max-width 0.24s ease, opacity 0.24s ease;
     }
     .dealer-indicator.is-dealer {
@@ -224,7 +224,7 @@
     .player-name {
       display: inline-flex; align-items: center; gap: 4px;
       max-width: 100%;
-      color: var(--muted);
+      color: var(--dim);  /* --muted はコントラスト比2.2:1で薄暗い場所では判読困難 */
       font-size: clamp(0.72rem, 1.4vw, 1rem); font-weight: 700;
       letter-spacing: 1px; text-align: center;
       padding: 2px 8px;
@@ -453,7 +453,7 @@
     .preset-item .pi-names { flex: 1; font-size: 0.78rem; font-weight: 600; color: var(--text); cursor: pointer; touch-action: manipulation; }
     .preset-item .pi-load { font-size: 0.66rem; color: var(--gold); font-weight: 700; flex-shrink: 0; }
     .preset-item .pi-del {
-      flex-shrink: 0; width: 26px; height: 26px; border-radius: 7px; border: none;
+      flex-shrink: 0; width: 34px; height: 34px; border-radius: 8px; border: none;
       background: rgba(200,64,64,0.12); color: var(--red); font-size: 0.9rem; cursor: pointer;
       touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     }
@@ -512,7 +512,7 @@
     }
     .pick-btn:active { background: rgba(255,255,255,0.1); }
     .pick-btn.on { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
-    .pick-btn .pick-sub { display: block; font-size: 0.6rem; color: var(--muted); margin-top: 3px; }
+    .pick-btn .pick-sub { display: block; font-size: 0.7rem; color: var(--dim); margin-top: 3px; }
     .pick-btn.on .pick-sub { color: var(--gold); }
     [data-theme="light"] .pick-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
 
@@ -578,9 +578,27 @@
       display: flex; align-items: center; justify-content: center;
       padding: clamp(14px, 4vw, 28px);
       z-index: 1000; visibility: hidden; opacity: 0;
+      pointer-events: none; /* フェードアウト中の誤タップで確定が二重実行されるのを防ぐ */
       transition: opacity 0.22s, visibility 0s 0.22s;
     }
-    .modal-overlay.show { visibility: visible; opacity: 1; transition: opacity 0.22s; }
+    .modal-overlay.show { visibility: visible; opacity: 1; pointer-events: auto; transition: opacity 0.22s; }
+
+    .noadv-row {
+      display: flex; align-items: center; gap: 8px;
+      margin: 8px 4px 0;
+      font-size: 0.78rem; color: var(--dim);
+      user-select: none; -webkit-user-select: none;
+    }
+    .noadv-row input { width: 18px; height: 18px; }
+
+    /* undo で取り消した点数ログはグレー表示（記録は残す） */
+    .hist-entry.undone { opacity: 0.45; }
+    .hist-entry.undone .hist-desc { text-decoration: line-through; }
+    .hist-undone-tag {
+      margin-left: 6px; padding: 1px 6px;
+      border: 1px solid currentColor; border-radius: 8px;
+      font-size: 0.62rem; text-decoration: none; display: inline-block;
+    }
 
     .modal-sheet {
       width: 100%; max-width: 520px;
@@ -679,7 +697,7 @@
       line-height: 1.15; font-feature-settings: "tnum";
     }
     .score-chip-lbl {
-      font-size: 0.54rem; color: var(--muted);
+      font-size: 0.7rem; color: var(--dim);  /* 8.6px相当では対局距離で判読不能のため底上げ */
       margin-top: 3px; line-height: 1.2; white-space: pre-line;
     }
     [data-theme="light"] .score-chip.selected { background: rgba(200,168,64,0.3); }
@@ -698,7 +716,7 @@
       transition: background 0.12s;
     }
     .honba-btn:active { background: rgba(255,255,255,0.12); }
-    .honba-btn.dec { flex: 0 0 38px; font-size: 0.95rem; }
+    .honba-btn.dec { flex: 0 0 44px; font-size: 0.95rem; }
     [data-theme="light"] .honba-btn {
       background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a1a;
     }
@@ -737,7 +755,7 @@
     }
     .tif-tab.active { border-color: var(--gold-line); background: var(--gold-dim); }
     .tif-tab-label {
-      display: block; font-size: 0.58rem; font-weight: 700;
+      display: block; font-size: 0.68rem; font-weight: 700;
       letter-spacing: 2px; color: var(--dim); margin-bottom: 3px;
     }
     .tif-tab.active .tif-tab-label { color: var(--gold); }
@@ -854,7 +872,7 @@
     .hist-icon { font-size: 0.9rem; flex-shrink: 0; }
     .hist-body { flex: 1; }
     .hist-desc { font-size: 0.82rem; font-weight: 600; color: var(--text); }
-    .hist-time { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.5px; margin-top: 2px; }
+    .hist-time { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.5px; margin-top: 2px; }
     .hist-empty { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 32px 0; }
 
     /* Game history entry */
@@ -922,7 +940,7 @@
       color: var(--text); letter-spacing: -0.5px;
     }
     .rank-detail {
-      font-size: 0.6rem; color: var(--muted); margin-top: 1px;
+      font-size: 0.68rem; color: var(--dim); margin-top: 1px;
       font-feature-settings: "tnum";
     }
     .rank-total {
@@ -1616,6 +1634,7 @@
     <!-- Ron presets (score table chips) -->
     <div id="ronPresets">
       <div class="score-rail" id="ronScoreRail"></div>
+      <label class="noadv-row"><input type="checkbox" id="noAdvanceChk"> 局を進めない（ダブロン2件目・点数修正用）</label>
     </div>
 
     <!-- Tsumo top controls -->
@@ -1722,7 +1741,7 @@
 <div class="modal-overlay" id="riichiModal">
   <div class="modal-sheet">
     <div class="sheet-handle"></div>
-    <div class="modal-label">リーチ宣言</div>
+    <div class="modal-label">立直宣言</div>
     <div class="modal-transfer" style="font-size:0.9rem;">宣言者を選択（1,000点を供託）</div>
     <div id="riichiPlayerList"></div>
     <div class="modal-actions">
@@ -1831,6 +1850,9 @@
     <div class="gameover-title">試合終了</div>
     <div id="rankingList"></div>
     <div class="gameover-actions">
+      <button class="modal-btn cancel" id="shareResBtn">📋 結果をコピー / 共有</button>
+    </div>
+    <div class="gameover-actions">
       <button class="modal-btn cancel"  id="closeEndBtn">閉じる</button>
       <!-- ② text changed -->
       <button class="modal-btn confirm" id="newGameBtn">もう1試合</button>
@@ -1901,7 +1923,7 @@
     </div>
 
     <div class="help-section">
-      <div class="help-section-title">リーチ / 流局</div>
+      <div class="help-section-title">立直 / 流局</div>
       <div class="help-row">
         <span class="help-op">立直</span>
         <span class="help-desc">「立直」ボタン→宣言者を選択で1,000点を供託へ<br>和了時に供託は自動で和了者へ</span>
@@ -2184,7 +2206,9 @@
     { score: 5800,  label: '2飜60符\n3飜30符' },
     { score: 6800,  label: '2飜70符' },
     { score: 7700,  label: '2飜80符\n3飜40符' },
-    { score: 9600,  label: '3飜50符\n4飜25符' },
+    { score: 8700,  label: '2飜90符' },
+    { score: 9600,  label: '2飜100符\n3飜50符\n4飜25符' },
+    { score: 10600, label: '2飜110符' },
     { score: 11600, label: '3飜60符\n4飜30符', kiriage: true },
     { score: 12000, label: '満貫' },
     { score: 18000, label: '跳満' },
@@ -2207,11 +2231,11 @@
     { ko: 800,  oya: 1500,  label: '1飜90符' },
     { ko: 800,  oya: 1600,  label: '2飜50符\n3飜25符' },
     { ko: 900,  oya: 1800,  label: '1飜110符' },
-    { ko: 1000, oya: 2000,  label: '2飜60符\n3飜30符\n4飜20符' },
+    { ko: 1000, oya: 2000,  label: '2飜60符\n3飜30符' },
     { ko: 1200, oya: 2300,  label: '2飜70符' },
-    { ko: 1300, oya: 2600,  label: '2飜80符\n3飜40符\n4飜25符' },
+    { ko: 1300, oya: 2600,  label: '2飜80符\n3飜40符\n4飜20符' },
     { ko: 1500, oya: 2900,  label: '2飜90符' },
-    { ko: 1600, oya: 3200,  label: '2飜100符\n3飜50符' },
+    { ko: 1600, oya: 3200,  label: '2飜100符\n3飜50符\n4飜25符' },
     { ko: 1800, oya: 3600,  label: '2飜110符' },
     { ko: 2000, oya: 3900,  label: '3飜60符\n4飜30符', kiriage: true },
     { ko: 2000, oya: 4000,  label: '満貫' },
@@ -2235,11 +2259,11 @@
     { all: 1500,  label: '1飜90符' },
     { all: 1600,  label: '2飜50符\n3飜25符' },
     { all: 1800,  label: '1飜110符' },
-    { all: 2000,  label: '2飜60符\n3飜30符\n4飜20符' },
+    { all: 2000,  label: '2飜60符\n3飜30符' },
     { all: 2300,  label: '2飜70符' },
-    { all: 2600,  label: '2飜80符\n3飜40符\n4飜25符' },
+    { all: 2600,  label: '2飜80符\n3飜40符\n4飜20符' },
     { all: 2900,  label: '2飜90符' },
-    { all: 3200,  label: '2飜100符\n3飜50符' },
+    { all: 3200,  label: '2飜100符\n3飜50符\n4飜25符' },
     { all: 3600,  label: '2飜110符' },
     { all: 3900,  label: '3飜60符\n4飜30符', kiriage: true },
     { all: 4000,  label: '満貫' },
@@ -2296,6 +2320,7 @@
       scores: Object.fromEntries(IDS.map(id => [id, players[id].score])),
       dealerId, kyoku, honbaGame, kyotaku,
       riichiIds: riichiIds.slice(),
+      logLen: lsGet(LS_TRANSFER).length,  /* undo/redo時に点数ログの取消状態も同期する */
     };
   }
   function saveState() {
@@ -2310,6 +2335,16 @@
       honbaGame = s.honbaGame; kyotaku = s.kyotaku;
       riichiIds = (s.riichiIds || []).slice();
       localStorage.setItem(LS_DEALER, dealerId);
+      if (typeof s.logLen === 'number') {
+        /* スナップショット時点より後のログは「取消」扱いにする（redoで復活） */
+        const log = lsGet(LS_TRANSFER);
+        let changed = false;
+        log.forEach((en, i) => {
+          if (i >= s.logLen) { if (!en.undone) { en.undone = true; changed = true; } }
+          else if (en.undone) { delete en.undone; changed = true; }
+        });
+        if (changed) lsSet(LS_TRANSFER, log);
+      }
     } else {
       for (const id of IDS) players[id].score = s[id];
     }
@@ -2320,7 +2355,7 @@
   function saveLive() {
     lsSet(LS_LIVE, {
       scores: Object.fromEntries(YONMA_IDS.map(id => [id, players[id].score])),
-      dealerId, kyoku, honbaGame, kyotaku,
+      dealerId, kiichaId, kyoku, honbaGame, kyotaku,
       riichiIds: riichiIds.slice(),
     });
   }
@@ -2332,6 +2367,7 @@
       if (typeof s.scores[id] === 'number') players[id].score = s.scores[id];
     }
     if (YONMA_IDS.includes(s.dealerId))    dealerId  = s.dealerId;
+    if (YONMA_IDS.includes(s.kiichaId))    kiichaId  = s.kiichaId;
     if (typeof s.kyoku     === 'number')   kyoku     = s.kyoku;
     if (typeof s.honbaGame === 'number')   honbaGame = s.honbaGame;
     if (typeof s.kyotaku   === 'number')   kyotaku   = s.kyotaku;
@@ -2358,6 +2394,7 @@
 
   /* ── Mode / Tsumo state ─────────────────────────── */
   let dealerId = 'east';   // 初期親 = 東家
+  let kiichaId = 'east';   // 起家（同点時の順位決定に使用。開局前の親変更で更新）
   let ronCat = 'ko';       // 'ko' | 'oya'（ロン点数表のカテゴリ）
   let honba = 0;           // 本場カウンタ（モーダル内・honbaGameから初期化）
 
@@ -2575,20 +2612,28 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), dur);
   }
 
-  /* ── カスタム確認ダイアログ（confirm代替） ───────── */
+  /* ── カスタム確認ダイアログ（confirm代替・多重呼び出しはキュー処理） ───────── */
   let confirmResolve = null;
+  const confirmQueue = [];
   function appConfirm(msg, okText = 'OK', cancelText = 'キャンセル') {
     return new Promise(res => {
-      confirmResolve = res;
-      document.getElementById('confirmMsg').textContent = msg;
-      document.getElementById('confirmYesBtn').textContent = okText;
-      document.getElementById('confirmNoBtn').textContent = cancelText;
-      document.getElementById('confirmModal').classList.add('show');
+      confirmQueue.push({ msg, okText, cancelText, res });
+      if (!confirmResolve) showNextConfirm();
     });
   }
+  function showNextConfirm() {
+    const next = confirmQueue.shift();
+    if (!next) return;
+    confirmResolve = next.res;
+    document.getElementById('confirmMsg').textContent = next.msg;
+    document.getElementById('confirmYesBtn').textContent = next.okText;
+    document.getElementById('confirmNoBtn').textContent = next.cancelText;
+    document.getElementById('confirmModal').classList.add('show');
+  }
   function settleConfirm(v) {
-    document.getElementById('confirmModal').classList.remove('show');
     if (confirmResolve) { confirmResolve(v); confirmResolve = null; }
+    if (confirmQueue.length) { showNextConfirm(); return; }  /* 保留中の確認（トビ×終局など）を順に表示 */
+    document.getElementById('confirmModal').classList.remove('show');
   }
 
   /* ── Theme（dark=和 / mleague / light の3種） ──────
@@ -2815,6 +2860,7 @@
   function setDealer(id) {
     if (!IDS.includes(id)) return;
     dealerId = id;
+    if (kyoku === 0 && honbaGame === 0) kiichaId = id;  /* 開局前の親設定は起家の変更とみなす */
     localStorage.setItem(LS_DEALER, id);
     renderDealerBadges(); renderCenterInfo(); saveLive();
     if (modal.classList.contains('show')) {
@@ -2844,8 +2890,9 @@
 
   /* ── チップ表示フィルタ（ルール軸） ──────────────── */
   function chipVisible(e) {
-    if (e.kiriage && RULESETS[ruleset].kiriage) return false;   /* 競技: 切り上げ満貫 */
-    if (e.jantama && ruleset !== 'jantama')     return false;   /* ダブル役満以上は標準のみ */
+    if (e.kiriage && RULESETS[ruleset].kiriage) return false;   /* 標準: 切り上げ満貫 */
+    /* 競技(Mリーグ)でも純粋な複合役満(2〜4倍)は認められる。5倍・6倍のみ標準限定 */
+    if (e.jantama && ruleset !== 'jantama')     return !/[56]倍役満/.test(e.label);
     return true;
   }
   function chipLabel(e) {
@@ -3035,7 +3082,9 @@
     if (btn) { btn.textContent = '⌨︎ 手入力'; btn.classList.remove('active'); }
   }
   function openRonModal(src, tgt) {
-    ronSrc = src; ronTgt = tgt; tsumoWinner = src;
+    ronSrc = src; ronTgt = tgt; tsumoWinner = tgt; /* ツモ切替時の和了者はスワイプ先（=和了者） */
+    const noAdv = document.getElementById('noAdvanceChk');
+    if (noAdv) noAdv.checked = false;
     /* 現在の本場を自動適用（+300/本場） */
     honba = honbaGame; updateHonbaDisplay();
     ronInput = String(honba * 300); scoreDisplay.textContent = fmt(ronInput);
@@ -3070,6 +3119,7 @@
     document.getElementById('adjustModal').classList.remove('show');
   }
   function doAdjust() {
+    if (!document.getElementById('adjustModal').classList.contains('show')) return false;  /* 二重送信ガード */
     const amt = parseInt(adjInput, 10);
     if (!adjustPid || amt <= 0) { showToast('1点以上入力してください', true); return false; }
     saveState();
@@ -3113,7 +3163,9 @@
     const suddenMax  = gameLength === 'tonpu' ? 2 * N : 3 * N;   /* 延長(入)の上限 */
     if (kyoku < endKyoku) return;        /* 規定局数内 */
     const top = Math.max(...IDS.map(id => players[id].score));
-    if (ruleset === 'jantama' && top < 30000 && kyoku < suddenMax) {
+    /* サドンデス（延長）は標準ルール・四麻のみ。閾値30,000は雀魂系の西入/南入条件。
+       三麻(35,000点持ち)ではトップが30,000点未満になり得ないため対象外 */
+    if (ruleset === 'jantama' && !sanmaMode && top < 30000 && kyoku < suddenMax) {
       showToast(`${gameLength === 'tonpu' ? '南入' : '西入'}サドンデス（1位が30,000点未満・標準ルール）`, false, 3200);
       return;
     }
@@ -3143,30 +3195,36 @@
 
   /* ── Transfers ──────────────────────────────────── */
   function doRon() {
+    if (!modal.classList.contains('show')) return false;  /* 二重送信ガード */
     const amt = parseInt(ronInput, 10);
     if (!ronSrc || !ronTgt) return false;
     if (amt <= 0) { showToast('1点以上入力してください', true); return false; }
+    const noAdvChk = document.getElementById('noAdvanceChk');
+    const noAdvance = !!(noAdvChk && noAdvChk.checked);   /* ダブロン2件目・修正用: 局を進めない */
     saveState();
     players[ronSrc].score -= amt; players[ronTgt].score += amt;
     let desc = `${getName(ronSrc)} → ${getName(ronTgt)}　${amt.toLocaleString()}点`;
-    if (kyotaku > 0) {
+    if (!noAdvance && kyotaku > 0) {
       players[ronTgt].score += kyotaku * 1000;
       desc += `（供託+${(kyotaku * 1000).toLocaleString()}）`;
       kyotaku = 0;
     }
-    const renchan = ronTgt === dealerId;
+    const renchan = !noAdvance && ronTgt === dealerId;
     lsPush(LS_TRANSFER, { timestamp: Date.now(), from: ronSrc, to: ronTgt, fromName: getName(ronSrc), toName: getName(ronTgt), amount: amt, type: 'ron' }, 200);
-    advanceAfterWin(ronTgt);
-    clearRiichi();
+    if (!noAdvance) {
+      advanceAfterWin(ronTgt);
+      clearRiichi();
+    }
     renderScores();
     showToast(desc + (renchan ? '　連荘' : ''));
     saveLive();
     checkTobi();
-    checkEndSuggest();
+    if (!noAdvance) checkEndSuggest();
     return true;
   }
 
   function doTsumo() {
+    if (!modal.classList.contains('show')) return false;  /* 二重送信ガード */
     if (!tsumoWinner) return false;
     const { koAmt, oyaAmt } = getTsumoAmounts();
     const payers = IDS.filter(id => id !== tsumoWinner);
@@ -3214,8 +3272,9 @@
     document.getElementById('riichiModal').classList.add('show');
   }
   function doRiichi(pid) {
-    if (riichiIds.includes(pid)) { showToast(`${getName(pid)} は既にリーチ中です`, true); return; }
-    if (players[pid].score < 1000) { showToast('持ち点1,000点未満はリーチできません', true); return; }
+    if (riichiIds.includes(pid)) { showToast(`${getName(pid)} は既に立直中です`, true); return; }
+    /* 1,000点未満立直不可は標準ルールのみ。競技はトビなし・マイナス続行のため宣言可 */
+    if (ruleset === 'jantama' && players[pid].score < 1000) { showToast('持ち点1,000点未満は立直できません（標準ルール）', true); return; }
     saveState();
     players[pid].score -= 1000;
     kyotaku++;
@@ -3223,7 +3282,7 @@
     lsPush(LS_TRANSFER, { timestamp: Date.now(), pid, playerName: getName(pid), amount: 1000, type: 'riichi' }, 200);
     renderScores(); renderCenterInfo(); renderRiichiBadges(); saveLive();
     document.getElementById('riichiModal').classList.remove('show');
-    showToast(`${getName(pid)} リーチ！（供託 ${kyotaku}本）`);
+    showToast(`${getName(pid)} 立直！（供託 ${kyotaku}本）`);
   }
 
   /* ── 流局 ───────────────────────────────────────── */
@@ -3251,6 +3310,7 @@
     document.getElementById('ryuukyokuModal').classList.add('show');
   }
   function doRyuukyoku() {
+    if (!document.getElementById('ryuukyokuModal').classList.contains('show')) return;  /* 二重送信ガード */
     saveState();
     const tenpai = IDS.filter(id => tenpaiSel.has(id));
     const noten  = IDS.filter(id => !tenpaiSel.has(id));
@@ -3271,6 +3331,7 @@
     checkEndSuggest();
   }
   function doChuuto() {
+    if (!document.getElementById('ryuukyokuModal').classList.contains('show')) return;  /* 二重送信ガード */
     saveState();
     honbaGame++;
     clearRiichi();
@@ -3290,6 +3351,8 @@
       : `${getName(pid)} のチョンボを記録します。\n競技ルールでは点数移動なし（場外で-20P減算）。`;
     if (!(await appConfirm(msg, 'チョンボ処理'))) return;
     let moved = false;
+    /* チョンボは同局やり直し: 今局のリーチ棒は宣言者に返却する（両ルール共通） */
+    const refundIds = riichiIds.slice();
     if (ruleset === 'jantama') {
       saveState();
       for (const id of IDS) {
@@ -3298,9 +3361,17 @@
         players[id].score += get;
         players[pid].score -= get;
       }
+      refundIds.forEach(id => { if (players[id]) players[id].score += 1000; });
+      kyotaku = Math.max(0, kyotaku - refundIds.length);
       moved = true;
       clearRiichi();
-      renderScores(); saveLive();
+      renderScores(); renderCenterInfo(); saveLive();
+    } else if (refundIds.length) {
+      saveState();
+      refundIds.forEach(id => { if (players[id]) players[id].score += 1000; });
+      kyotaku = Math.max(0, kyotaku - refundIds.length);
+      clearRiichi();
+      renderScores(); renderCenterInfo(); saveLive();
     }
     lsPush(LS_TRANSFER, { timestamp: Date.now(), pid, playerName: getName(pid), type: 'chombo', moved }, 200);
     showToast(`${getName(pid)} チョンボ${moved ? '（罰符精算・同局再ゲーム）' : '（記録のみ・場外-20P）'}`);
@@ -3323,6 +3394,7 @@
     kyoku = 0; honbaGame = 0; kyotaku = 0;
     clearRiichi();
     dealerId = 'east';
+    kiichaId = 'east';
     localStorage.setItem(LS_DEALER, 'east');
     renderDealerBadges(); renderCenterInfo();
   }
@@ -3353,13 +3425,30 @@
     undoStack.length = 0; redoStack.length = 0;
     syncBtns(); renderScores(); saveLive();
     document.querySelector('.grid').classList.toggle('sanma', enabled);
+    /* 三麻の標準は東・南・西の3人（北家なし）。3人目の席(内部id: north)の風表示だけ西に切替える */
+    const northWind = document.querySelector('.dealer-indicator[data-dealer-for="north"] .di-wind');
+    if (northWind) northWind.textContent = enabled ? '西' : '北';
     document.getElementById('btnYonma').classList.toggle('active', !enabled);
     document.getElementById('btnSanma').classList.toggle('active',  enabled);
     localStorage.setItem(LS_MODE, enabled ? 'sanma' : 'yonma');
   }
 
   /* ── Game-end modal ─────────────────────────────── */
+  let lastResults = null;   /* 共有テキスト用に直近の精算結果を保持 */
+  /* 精算ptの表示: 整数ならそのまま、端数があれば小数1桁 */
+  function fmtPt(v) {
+    const r = Math.round(v * 10) / 10;
+    const s = Number.isInteger(r) ? String(r) : r.toFixed(1);
+    return (r >= 0 ? '+' : '') + s;
+  }
   function openGameEndModal() {
+    /* 供託込みで合計を先に検証（不一致時に供託だけ動いてしまうのを防ぐ） */
+    const total         = IDS.reduce((s, id) => s + players[id].score, 0) + kyotaku * 1000;
+    const expectedTotal = IDS.length * START_SCORE;
+    if (total !== expectedTotal) {
+      showToast(`供託込み合計 ${total.toLocaleString()}点 — ${expectedTotal.toLocaleString()}点でないと計算できません`, true, 3500);
+      return;
+    }
     /* 残留供託は1位に付与（トップ取り） */
     if (kyotaku > 0) {
       const topId = IDS.reduce((a, b) => players[b].score > players[a].score ? b : a);
@@ -3369,14 +3458,10 @@
       kyotaku = 0;
       renderScores(); renderCenterInfo(); saveLive();
     }
-    const total        = IDS.reduce((s, id) => s + players[id].score, 0);
-    const expectedTotal = IDS.length * START_SCORE;
-    if (total !== expectedTotal) {
-      showToast(`合計 ${total.toLocaleString()}点 — ${expectedTotal.toLocaleString()}点でないと計算できません`, true, 3500);
-      return;
-    }
-    /* 同点は起家（東家）に近い席順が上位（東→南→西→北） */
-    const seatOrder = ROTATION();
+    /* 同点は起家に近い席順が上位 */
+    const rot  = ROTATION();
+    const kIdx = Math.max(0, rot.indexOf(kiichaId));
+    const seatOrder = rot.slice(kIdx).concat(rot.slice(0, kIdx));
     const sorted = IDS
       .map(id => ({ id, name: getName(id), score: players[id].score }))
       .sort((a, b) => b.score - a.score || seatOrder.indexOf(a.id) - seatOrder.indexOf(b.id));
@@ -3384,10 +3469,10 @@
     const okaTotal = Math.round((BASE_SCORE - START_SCORE) * IDS.length / 1000);
     const results = sorted.map((p, i) => {
       const rank       = i + 1;
-      const rawPoint   = Math.round((p.score - BASE_SCORE) / 1000);
+      const rawPoint   = Math.round((p.score - BASE_SCORE) / 100) / 10;  /* 小数1桁保持でゼロサムを保証 */
       const uma        = UMA[i];
       const oka        = i === 0 ? okaTotal : 0;
-      const totalPoint = rawPoint + uma + oka;
+      const totalPoint = Math.round((rawPoint + uma + oka) * 10) / 10;
       return { wind: p.id, name: p.name, finalScore: p.score, rawPoint, uma, oka, totalPoint, rank };
     });
 
@@ -3395,10 +3480,10 @@
     results.forEach(r => {
       const row    = document.createElement('div');
       row.className = `rank-row rank-${r.rank}`;
-      const rawStr = (r.rawPoint >= 0 ? '+' : '') + r.rawPoint;
-      const umaStr = (r.uma       >= 0 ? '+' : '') + r.uma;
-      const totStr = (r.totalPoint >= 0 ? '+' : '') + r.totalPoint;
-      const okaStr = (r.oka        >= 0 ? '+' : '') + r.oka;
+      const rawStr = fmtPt(r.rawPoint);
+      const umaStr = fmtPt(r.uma);
+      const totStr = fmtPt(r.totalPoint);
+      const okaStr = fmtPt(r.oka);
       const detail = r.oka !== 0
         ? `素点 ${rawStr}　ウマ ${umaStr}　オカ ${okaStr}`
         : `素点 ${rawStr}　ウマ ${umaStr}`;
@@ -3413,8 +3498,32 @@
       rankingList.appendChild(row);
     });
 
-    lsPush(LS_GAME, { date: new Date().toISOString(), results }, 50);
+    lastResults = results;
+    /* 「見るだけ」で開き直しても同一結果は履歴に重複記録しない */
+    const hist  = lsGet(LS_GAME);
+    const last  = hist[hist.length - 1];
+    const sigOf = res => JSON.stringify((res || []).map(r => [r.wind, r.finalScore, r.totalPoint]));
+    if (!last || sigOf(last.results) !== sigOf(results)) {
+      lsPush(LS_GAME, { date: new Date().toISOString(), results }, 50);
+    }
     gameEndModal.classList.add('show');
+  }
+
+  /* ── 精算結果の共有 ─────────────────────────────── */
+  function buildResultText() {
+    if (!lastResults) return '';
+    const lines = lastResults.map(r =>
+      `${r.rank}位 ${r.name}　${r.finalScore.toLocaleString()}点（${fmtPt(r.totalPoint)}）`);
+    return `【点棒いらず】精算結果\n${lines.join('\n')}`;
+  }
+  async function shareResults() {
+    const text = buildResultText();
+    if (!text) { showToast('共有できる結果がありません', true); return; }
+    if (navigator.share) {
+      try { await navigator.share({ text }); return; } catch (e) { /* キャンセル時はコピーにフォールバックしない */ if (e && e.name === 'AbortError') return; }
+    }
+    try { await navigator.clipboard.writeText(text); showToast('結果をコピーしました'); }
+    catch { showToast('コピーできませんでした', true); }
   }
 
   /* ── newGame ────────────────────────────────────── */
@@ -3467,16 +3576,16 @@
         const sign = e.sign === '+' ? '+' : '-';
         return `${e.playerName||(e.pid?getName(e.pid):e.pid)} ${sign}${(e.amount||0).toLocaleString()}点 調整`;
       },
-      riichi:    e => `${e.playerName||'-'} リーチ（供託 +1,000）`,
+      riichi:    e => `${e.playerName||'-'} 立直（供託 +1,000）`,
       ryuukyoku: e => `流局（テンパイ: ${(e.tenpaiNames && e.tenpaiNames.length) ? e.tenpaiNames.join('・') : 'なし'}）`,
       chuuto:    () => '途中流局（連荘）',
       chombo:    e => `${e.playerName||'-'} チョンボ${e.moved ? '（罰符精算）' : '（記録のみ）'}`,
     };
     [...log].reverse().forEach(e => {
       const div = document.createElement('div');
-      div.className = 'hist-entry';
+      div.className = 'hist-entry' + (e.undone ? ' undone' : '');
       const icon = iconMap[e.type] || '•';
-      const desc = descMap[e.type] ? descMap[e.type](e) : e.type;
+      const desc = (descMap[e.type] ? descMap[e.type](e) : e.type) + (e.undone ? '<span class="hist-undone-tag">取消</span>' : '');
       div.innerHTML = `<span class="hist-icon">${icon}</span><div class="hist-body"><div class="hist-desc">${desc}</div><div class="hist-time">${fmtDateTime(e.timestamp)}</div></div>`;
       list.appendChild(div);
     });
@@ -3671,10 +3780,22 @@
   }
 
   /* ── Swipe handlers ─────────────────────────────── */
+  /* 追跡中の指（identifier）に対応する Touch を返す。無関係の指のイベントは null */
+  function pickTouch(e) {
+    if (!e.changedTouches) return e;                     /* マウスイベント */
+    if (swipeOrigin && swipeOrigin.touchId != null) {
+      for (const t of e.changedTouches) if (t.identifier === swipeOrigin.touchId) return t;
+      return null;
+    }
+    return e.changedTouches[0];
+  }
   function swipeStart(e, pid) {
+    if (swiping) return;                                 /* 2本目の指は無視（卓中央での同時タッチ対策） */
+    if (singleTapTimer) { clearTimeout(singleTapTimer); singleTapTimer = null; }  /* タップ→即スワイプで調整モーダルが被るのを防ぐ */
+    if (themePopover.classList.contains('show')) toggleThemePopover(false);  /* touchstartはclickを合成しないため明示的に閉じる */
     swiping = true;
-    const p = e.touches ? e.touches[0] : e;
-    swipeOrigin = { pid, x: p.clientX, y: p.clientY };
+    const p = e.changedTouches ? e.changedTouches[0] : e;
+    swipeOrigin = { pid, x: p.clientX, y: p.clientY, touchId: e.changedTouches ? p.identifier : null };
     const card = getCard(pid);
     if (card) card.classList.add('swiping');
     if (e.cancelable) e.preventDefault();
@@ -3685,7 +3806,8 @@
   function swipeMove(e) {
     if (!swiping || !swipeOrigin) return;
     if (e.cancelable) e.preventDefault();
-    const p  = e.touches ? e.touches[0] : e;
+    const p = pickTouch(e);
+    if (!p) return;
     const dx = p.clientX - swipeOrigin.x, dy = p.clientY - swipeOrigin.y;
     if (lpActive) {
       /* long press active: track finger direction for highlight and show arrow */
@@ -3699,9 +3821,10 @@
   }
 
   function swipeEnd(e) {
+    if (!swiping || !swipeOrigin) { if (!lpActive) cancelLongPress(); resetSwipe(); return; }
+    const p = pickTouch(e);
+    if (!p) return;                                      /* 追跡外の指の touchend は無視 */
     if (!lpActive) cancelLongPress();
-    if (!swiping || !swipeOrigin) { resetSwipe(); return; }
-    const p   = e.changedTouches ? e.changedTouches[0] : e;
     const dx  = p.clientX - swipeOrigin.x, dy = p.clientY - swipeOrigin.y;
     const pid = swipeOrigin.pid;
 
@@ -3726,10 +3849,8 @@
     hideSwipeArrow();
     highlightLpTarget(null);
     clearDiffs();
-    if (swipeOrigin) {
-      const card = getCard(swipeOrigin.pid);
-      if (card) { card.classList.remove('swiping'); clearArrowHighlights(swipeOrigin.pid); }
-    }
+    document.querySelectorAll('.player-card.swiping').forEach(c => c.classList.remove('swiping'));
+    if (swipeOrigin) clearArrowHighlights(swipeOrigin.pid);
     swiping = false; swipeOrigin = null;
   }
 
@@ -3747,6 +3868,7 @@
       openTsumoModal(pid);
       lastTapTime = 0; lastTapPid = null;
     } else {
+      if (singleTapTimer) clearTimeout(singleTapTimer);  /* 旧タイマーの取り残しで調整モーダルが二重に開くのを防ぐ */
       lastTapTime = now; lastTapPid = pid;
       /* wait to see if a second tap comes */
       singleTapTimer = setTimeout(() => {
@@ -3780,7 +3902,7 @@
     });
     window.addEventListener('mousemove',  e => { if (swiping) { swipeMove(e); e.preventDefault(); } });
     window.addEventListener('mouseup',    e => { if (swipeOrigin) swipeEnd(e); });
-    window.addEventListener('mouseleave', () => { if (swiping) resetSwipe(); });
+    window.addEventListener('mouseleave', () => { if (swiping || lpActive) { hideLongPressOverlay(); resetSwipe(); } });
 
     /* ④ overlay background tap → close */
     document.getElementById('longPressOverlay').addEventListener('click', () => {
@@ -3792,7 +3914,7 @@
       if (mode !== 'ron') { if (ronSrc && ronTgt) setMode('ron'); else showToast('点数移動はプレイヤーをスワイプして開始', true); }
     });
     document.getElementById('modeTsumo').addEventListener('click', () => {
-      if (mode !== 'tsumo') { if (!tsumoWinner) tsumoWinner = ronSrc; setMode('tsumo'); setTsumoType((tsumoWinner === dealerId) ? 'oya' : 'ko'); }
+      if (mode !== 'tsumo') { if (!tsumoWinner) tsumoWinner = ronTgt; setMode('tsumo'); setTsumoType((tsumoWinner === dealerId) ? 'oya' : 'ko'); }
     });
 
     /* 手入力トグル */
@@ -3893,7 +4015,9 @@
       document.getElementById('ieHonba').textContent   = honbaGame;
       document.getElementById('ieKyotaku').textContent = kyotaku;
     }
+    let ieDirty = false;  /* モーダル1回の編集セッションにつき undo 1ステップ */
     document.getElementById('centerInfo').addEventListener('click', () => {
+      ieDirty = false;
       renderInfoEdit();
       document.getElementById('infoEditModal').classList.add('show');
     });
@@ -3901,12 +4025,21 @@
       const d = parseInt(b.dataset.d, 10);
       if (b.dataset.ie === 'kyoku') {
         if (kyoku + d < 0) return;
+        if (!ieDirty) { saveState(); ieDirty = true; }
         kyoku += d;
+        /* 注記どおり親を局に連動させる（起家起点のローテーション） */
+        const rot  = ROTATION();
+        const kIdx = Math.max(0, rot.indexOf(kiichaId));
+        dealerId = rot[(kIdx + kyoku) % rot.length];
+        localStorage.setItem(LS_DEALER, dealerId);
+        renderDealerBadges();
       } else if (b.dataset.ie === 'honba') {
         if (honbaGame + d < 0) return;
+        if (!ieDirty) { saveState(); ieDirty = true; }
         honbaGame += d;
       } else {
         if (kyotaku + d < 0) return;
+        if (!ieDirty) { saveState(); ieDirty = true; }
         kyotaku += d;
       }
       renderInfoEdit(); renderCenterInfo(); saveLive();
@@ -4008,7 +4141,7 @@
       if (e.target === document.getElementById('nameModal')) closeNameModal();
     });
     document.getElementById('nameResetBtn').addEventListener('click', async () => {
-      if (!(await appConfirm('プレイヤー名を初期値（東/南/西/北）に戻しますか？', '初期化'))) return;
+      if (!(await appConfirm('プレイヤー名を初期値（プレイヤー1〜4）に戻しますか？', '初期化'))) return;
       const defaults = { east: 'プレイヤー1', south: 'プレイヤー2', west: 'プレイヤー3', north: 'プレイヤー4' };
       for (const id of YONMA_IDS) nameEls[id].value = defaults[id];
       saveNames(); renderNames();
@@ -4042,7 +4175,10 @@
         const load = document.createElement('span'); load.className = 'pi-load'; load.textContent = '呼出';
         load.addEventListener('click', () => loadPreset(idx));
         const del = document.createElement('button'); del.className = 'pi-del'; del.title = '削除'; del.textContent = '×';
-        del.addEventListener('click', () => { const ps = getPresets(); ps.splice(idx, 1); lsSet(LS_PRESETS, ps); renderPresets(); });
+        del.addEventListener('click', async () => {
+          if (!(await appConfirm('このメンバープリセットを削除しますか？', '削除'))) return;
+          const ps = getPresets(); ps.splice(idx, 1); lsSet(LS_PRESETS, ps); renderPresets();
+        });
         item.appendChild(names); item.appendChild(load); item.appendChild(del);
         list.appendChild(item);
       });
@@ -4076,6 +4212,7 @@
     histModal.addEventListener('click', e => { if (e.target === histModal) histModal.classList.remove('show'); });
 
     /* Game-end modal */
+    document.getElementById('shareResBtn').addEventListener('click', shareResults);
     document.getElementById('closeEndBtn').addEventListener('click', () => gameEndModal.classList.remove('show'));
     document.getElementById('newGameBtn').addEventListener('click', newGame);
     gameEndModal.addEventListener('click', e => { if (e.target === gameEndModal) gameEndModal.classList.remove('show'); });
@@ -4110,16 +4247,10 @@
 })();
 </script>
 <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
-      .then(reg => {
-        reg.addEventListener('updatefound', () => {
-          const newSW = reg.installing;
-          newSW.addEventListener('statechange', () => {
-            if (newSW.state === 'activated') window.location.reload();
-          });
-        });
-      });
+  /* Capacitor(WKWebView)では SW が動作しないため登録しない（毎起動の unhandled rejection 防止）。
+     更新の適用は次回起動時（index.html はネットワーク優先取得のため対局中の強制リロードは不要） */
+  if ('serviceWorker' in navigator && location.protocol !== 'capacitor:') {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {});
   }
 </script>
 </body>

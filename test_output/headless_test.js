@@ -1,7 +1,7 @@
 /* 点棒いらず ヘッドレス検証（jsdom）— 一時テスト・コミット不要 */
 const fs = require('fs');
 const path = require('path');
-const { JSDOM } = require(path.join(process.env.TEMP, 'mahjong-test', 'node_modules', 'jsdom'));
+const { JSDOM } = require('./_jsdom');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
@@ -33,7 +33,10 @@ console.log('--- シナリオ2: Mリーグ チップに7700なし・満貫統合
 let chips = [...document.querySelectorAll('#ronScoreRail .score-chip')].map(c => c.dataset.score);
 t('Mリーグ: 7700チップなし', !chips.includes('7700'));
 t('Mリーグ: 8000(満貫)あり', chips.includes('8000'));
-t('Mリーグ: ダブル役満(64000)なし', !chips.includes('64000'));
+/* 競技(Mリーグ)は純粋な複合役満(2〜4倍)を認めるためチップ表示あり。5倍・6倍のみ標準限定 */
+t('Mリーグ: 複合役満64000あり', chips.includes('64000'));
+t('Mリーグ: 5倍役満(160000)なし', !chips.includes('160000'));
+t('Mリーグ: 6倍役満(192000)なし', !chips.includes('192000'));
 const manganChip = [...document.querySelectorAll('#ronScoreRail .score-chip')].find(c => c.dataset.score === '8000');
 t('Mリーグ: 満貫ラベルに4飜30符', manganChip && manganChip.textContent.includes('4飜30符'));
 

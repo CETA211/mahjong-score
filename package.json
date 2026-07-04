@@ -6,7 +6,8 @@
   "scripts": {
     "build:web": "node tools/build_www.js",
     "sync": "npm run build:web && npx cap sync",
-    "open:ios": "npx cap open ios"
+    "open:ios": "npx cap open ios",
+    "test": "node test_output/headless_test.js && node test_output/headless_test2.js && node test_output/headless_test3.js && node test_output/headless_test4.js && node test_output/headless_test5.js && node test_output/headless_test6.js && node test_output/headless_test7.js"
   },
   "dependencies": {
     "@capacitor/app": "^6.0.0",
@@ -16,6 +17,8 @@
     "@capacitor/status-bar": "^6.0.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.1.0"
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^6.1.0",
+    "jsdom": "^24.1.0"
   }
 }

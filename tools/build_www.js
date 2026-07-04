@@ -6,7 +6,9 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const WWW = path.join(ROOT, 'www');
 
-const FILES = ['index.html', 'sw.js', 'manifest.json'];
+/* sw.js / manifest.json はネイティブ(WKWebView)では機能せず、
+ * 「PWAの再パッケージ」感を強めるだけなので同梱しない（審査ガイドライン4.2対策） */
+const FILES = ['index.html'];
 const DIRS  = ['icons'];
 
 function copyDir(src, dest) {

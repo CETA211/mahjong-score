@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サポート — 点棒いらず</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic UI', system-ui, sans-serif;
+    line-height: 1.85; color: #1a1a1a; background: #f7f7f4;
+    max-width: 720px; margin: 0 auto; padding: 32px 20px 64px;
+  }
+  h1 { font-size: 1.5rem; border-bottom: 3px solid #1c7622; padding-bottom: 10px; }
+  h2 { font-size: 1.1rem; margin-top: 32px; color: #1c7622; }
+  p, li, td, th { font-size: 0.96rem; }
+  ul { padding-left: 1.3em; }
+  .meta { color: #777; font-size: 0.85rem; }
+  .box { background: #fff; border: 1px solid #e3e3e0; border-radius: 12px; padding: 18px 22px; }
+  a { color: #1c7622; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #e3e3e0; padding: 8px 12px; text-align: left; }
+  th { background: rgba(28,118,34,0.08); }
+  @media (prefers-color-scheme: dark) {
+    body { background: #0f120f; color: #e6e6e0; }
+    .box { background: #171a17; border-color: #2a2e2a; }
+    .meta { color: #999; }
+    th, td { border-color: #2a2e2a; }
+    th { background: rgba(28,118,34,0.2); }
+  }
+</style>
+</head>
+<body>
+  <h1>点棒いらず — サポート</h1>
+  <p class="meta">麻雀の点数移動をスワイプ操作で記録できる点数管理アプリ</p>
+
+  <div class="box">
+    <p>本アプリは完全オフラインで動作する麻雀点数管理ツールです。アカウント登録・ネット接続は不要で、個人情報は一切収集しません（詳細は<a href="./privacy-policy.html">プライバシーポリシー</a>）。</p>
+  </div>
+
+  <h2>基本操作</h2>
+  <table>
+    <tr><th>操作</th><th>動作</th></tr>
+    <tr><td>カードをスワイプ</td><td>相手への点数移動（ロン）。支払う人のカードから和了者の方向へ</td></tr>
+    <tr><td>カードを2回タップ</td><td>ツモ入力</td></tr>
+    <tr><td>カードを1回タップ</td><td>点数の調整（加算・減算・チョンボ）</td></tr>
+    <tr><td>方角ラベルをタップ</td><td>親の設定</td></tr>
+    <tr><td>中央パネルをタップ</td><td>局・本場・供託の手動修正</td></tr>
+    <tr><td>立直ボタン</td><td>立直宣言（−1,000点を供託へ）</td></tr>
+    <tr><td>流局ボタン</td><td>テンパイ選択 → ノーテン罰符の自動分配</td></tr>
+    <tr><td>🏁 試合終了</td><td>素点・ウマ・オカ込みの精算表を表示。結果のコピー／共有も可能</td></tr>
+  </table>
+
+  <h2>よくある質問</h2>
+  <ul>
+    <li><strong>誤って点数を動かしてしまった</strong> — 画面下の「← 戻る」でいつでも取り消せます。取り消した操作は点数ログにグレー表示で残ります。</li>
+    <li><strong>ダブロン（1人の放銃で2人が和了）を記録したい</strong> — 1人目は通常どおり入力し、2人目はロン入力画面の「局を進めない」にチェックを入れて入力してください。</li>
+    <li><strong>データはどこに保存される？</strong> — すべて端末内にのみ保存されます。外部送信はありません。アプリを削除するとデータも消えます。</li>
+    <li><strong>ルールの違いは？</strong> — 「標準」はウマ5-15・切り上げ満貫なし・飛びあり、「競技」はウマ10-30・オカ20・飛びなしです。設定からいつでも切り替えられます。</li>
+  </ul>
+
+  <h2>お問い合わせ</h2>
+  <p>不具合のご報告・ご要望・その他のお問い合わせは、下記メールアドレスまでご連絡ください。</p>
+  <p>メール：<a href="mailto:REPLACE_WITH_CONTACT@example.com">REPLACE_WITH_CONTACT@example.com</a></p>
+  <p class="meta">※ 公開前に、ご自身の連絡先メールアドレスに置き換えてください（privacy-policy.html と同時に差し替え）。</p>
+
+  <p class="meta">最終更新日：2026年7月4日</p>
+</body>
+</html>

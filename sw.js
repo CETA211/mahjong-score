@@ -1,4 +1,4 @@
-const CACHE = 'mahjong-v5';
+const CACHE = 'mahjong-v6';
 const ASSETS = ['./index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -25,7 +25,8 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(e.request, r.clone()));
           return r;
         })
-        .catch(() => caches.match(e.request))
+        /* start_url "./" 等キー不一致でも必ずプリキャッシュ済み index.html に落とす（オフライン白画面防止） */
+        .catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
     );
   } else {
     /* アイコン等: キャッシュ優先 */

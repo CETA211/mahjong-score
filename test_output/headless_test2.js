@@ -1,7 +1,7 @@
 /* 点棒いらず ヘッドレス検証 その2: リロード復元・三麻・Mリーグ流局UI */
 const fs = require('fs');
 const path = require('path');
-const { JSDOM } = require(path.join(process.env.TEMP, 'mahjong-test', 'node_modules', 'jsdom'));
+const { JSDOM } = require('./_jsdom');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 

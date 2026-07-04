@@ -3,7 +3,7 @@
   "appName": "点棒いらず",
   "webDir": "www",
   "ios": {
-    "contentInset": "always",
+    "contentInset": "never",
     "backgroundColor": "#060e06"
   },
   "plugins": {

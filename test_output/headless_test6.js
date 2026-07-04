@@ -1,7 +1,7 @@
 /* 点棒いらず ヘッドレス検証 その6: テーマ選択（標準/Mリーグ/ライト） */
 const fs = require('fs');
 const path = require('path');
-const { JSDOM } = require(path.join(process.env.TEMP, 'mahjong-test', 'node_modules', 'jsdom'));
+const { JSDOM } = require('./_jsdom');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
