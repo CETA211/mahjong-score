@@ -2315,15 +2315,23 @@
   /* ── Undo / Redo stacks ─────────────────────────── */
   const undoStack = [], redoStack = [];
 
+  /* HTMLエスケープ（プレイヤー名等を innerHTML に埋め込む際の自衛） */
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
   function snapshot() {
     return {
       scores: Object.fromEntries(IDS.map(id => [id, players[id].score])),
       dealerId, kyoku, honbaGame, kyotaku,
       riichiIds: riichiIds.slice(),
-      logLen: lsGet(LS_TRANSFER).length,  /* undo/redo時に点数ログの取消状態も同期する */
+      /* undo/redo時に点数ログの取消状態も同期する（有効エントリ数を保持） */
+      logLen: lsGet(LS_TRANSFER).filter(e => !e.undone).length,
     };
   }
   function saveState() {
+    /* 新しい操作が入った時点で redo は不能になるため、取消済みログはここで確定削除する */
+    const log = lsGet(LS_TRANSFER);
+    const active = log.filter(e => !e.undone);
+    if (active.length !== log.length) lsSet(LS_TRANSFER, active);
     undoStack.push(snapshot()); redoStack.length = 0;
     if (undoStack.length > 50) undoStack.shift();
     syncBtns();
@@ -3264,7 +3272,7 @@
     IDS.forEach(id => {
       const b = document.createElement('button');
       b.className = 'pick-btn';
-      b.innerHTML = `${getName(id)}<span class="pick-sub">${players[id].score.toLocaleString()}点</span>`;
+      b.innerHTML = `${esc(getName(id))}<span class="pick-sub">${players[id].score.toLocaleString()}点</span>`;
       b.addEventListener('click', () => doRiichi(id));
       row.appendChild(b);
     });
@@ -3296,7 +3304,7 @@
       const pre = tenpaiSel.has(id);
       const b = document.createElement('button');
       b.className = 'pick-btn' + (pre ? ' on' : '');
-      b.innerHTML = `${getName(id)}<span class="pick-sub">${pre ? 'テンパイ' : 'ノーテン'}</span>`;
+      b.innerHTML = `${esc(getName(id))}<span class="pick-sub">${pre ? 'テンパイ' : 'ノーテン'}</span>`;
       b.addEventListener('click', () => {
         if (tenpaiSel.has(id)) tenpaiSel.delete(id); else tenpaiSel.add(id);
         b.classList.toggle('on', tenpaiSel.has(id));
@@ -3489,7 +3497,7 @@
         : `素点 ${rawStr}　ウマ ${umaStr}`;
       row.innerHTML = `
         <span class="rank-badge rank-${r.rank}">${r.rank}</span>
-        <span class="rank-pname">${r.name}</span>
+        <span class="rank-pname">${esc(r.name)}</span>
         <div class="rank-scores">
           <div class="rank-score">${r.finalScore.toLocaleString()}</div>
           <div class="rank-detail">${detail}</div>
@@ -3569,17 +3577,17 @@
     if (!log.length) { list.innerHTML = '<div class="hist-empty">点数ログはありません</div>'; return; }
     const iconMap = { ron:'🀄', tsumo:'🀅', reset:'🔄', adjust:'⚖︎', riichi:'🔔', ryuukyoku:'🌊', chuuto:'⏸︎', chombo:'⚠️' };
     const descMap = {
-      ron:    e => `${e.fromName||(e.from?getName(e.from):'-')} → ${e.toName||(e.to?getName(e.to):'-')}　${(e.amount||0).toLocaleString()}点`,
-      tsumo:  e => `${e.toName||(e.to?getName(e.to):'-')} ツモ +${(e.amount||0).toLocaleString()}点`,
+      ron:    e => `${esc(e.fromName||(e.from?getName(e.from):'-'))} → ${esc(e.toName||(e.to?getName(e.to):'-'))}　${(e.amount||0).toLocaleString()}点`,
+      tsumo:  e => `${esc(e.toName||(e.to?getName(e.to):'-'))} ツモ +${(e.amount||0).toLocaleString()}点`,
       reset:  e   => `全員リセット ${(e.startScore||25000).toLocaleString()}点`,
       adjust: e   => {
         const sign = e.sign === '+' ? '+' : '-';
-        return `${e.playerName||(e.pid?getName(e.pid):e.pid)} ${sign}${(e.amount||0).toLocaleString()}点 調整`;
+        return `${esc(e.playerName||(e.pid?getName(e.pid):e.pid))} ${sign}${(e.amount||0).toLocaleString()}点 調整`;
       },
-      riichi:    e => `${e.playerName||'-'} 立直（供託 +1,000）`,
-      ryuukyoku: e => `流局（テンパイ: ${(e.tenpaiNames && e.tenpaiNames.length) ? e.tenpaiNames.join('・') : 'なし'}）`,
+      riichi:    e => `${esc(e.playerName||'-')} 立直（供託 +1,000）`,
+      ryuukyoku: e => `流局（テンパイ: ${(e.tenpaiNames && e.tenpaiNames.length) ? esc(e.tenpaiNames.join('・')) : 'なし'}）`,
       chuuto:    () => '途中流局（連荘）',
-      chombo:    e => `${e.playerName||'-'} チョンボ${e.moved ? '（罰符精算）' : '（記録のみ）'}`,
+      chombo:    e => `${esc(e.playerName||'-')} チョンボ${e.moved ? '（罰符精算）' : '（記録のみ）'}`,
     };
     [...log].reverse().forEach(e => {
       const div = document.createElement('div');
@@ -3607,7 +3615,7 @@
         const smBadge = `<span class="rank-badge rank-${r.rank}" style="width:20px;height:20px;font-size:0.68rem;">${r.rank}</span>`;
         /* ① use r.name first, fall back to JP wind name */
         const displayName = r.name || WIND_JP[r.wind] || r.wind;
-        rows += `<div class="game-hist-row">${smBadge}<span class="game-hist-name">${displayName}</span><span class="game-hist-pts">${sign}${r.totalPoint}</span></div>`;
+        rows += `<div class="game-hist-row">${smBadge}<span class="game-hist-name">${esc(displayName)}</span><span class="game-hist-pts">${sign}${r.totalPoint}</span></div>`;
       });
       div.innerHTML = `<div class="game-hist-date">${dateStr}</div>${rows}`;
       list.appendChild(div);
