@@ -4,17 +4,17 @@
   "webDir": "www",
   "ios": {
     "contentInset": "never",
-    "backgroundColor": "#060e06"
+    "backgroundColor": "#eef1ee"
   },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 600,
-      "backgroundColor": "#060e06",
+      "backgroundColor": "#eef1ee",
       "showSpinner": false
     },
     "StatusBar": {
-      "style": "DARK",
-      "backgroundColor": "#060e06",
+      "style": "LIGHT",
+      "backgroundColor": "#eef1ee",
       "overlaysWebView": true
     }
   }

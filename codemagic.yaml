@@ -43,8 +43,9 @@ workflows:
       - name: アイコン/スプラッシュを生成（assets/ から全サイズ）
         script: |
           npx @capacitor/assets generate --ios \
-            --iconBackgroundColor '#060e06' \
-            --splashBackgroundColor '#060e06'
+            --iconBackgroundColor '#1c7622' \
+            --splashBackgroundColor '#eef1ee' \
+            --splashBackgroundColorDark '#06160c'
         # 入力: assets/icon.png(1024)・assets/splash.png / splash-dark.png(2732) … 準備済み
         # @capacitor/assets は devDependencies（npm ci で導入済み）
       - name: 輸出コンプライアンス回答を焼き込み

@@ -38,8 +38,12 @@ async function renderSvg(page, svgPath, size, outPath) {
   await renderSvg(page, iconSvg, 1024, tmpIcon);
   execFileSync('ffmpeg', ['-y', '-i', tmpIcon, '-pix_fmt', 'rgb24', path.join(ROOT, 'appstore', 'icon-1024.png')], { stdio: 'ignore' });
 
-  // スプラッシュ（2732）
+  // スプラッシュ（2732・ライト/ダーク）
   await renderSvg(page, splashSvg, 2732, path.join(ROOT, 'appstore', 'splash-2732.png'));
+  const splashDarkSvg = path.join(ROOT, 'appstore', 'splash-dark.svg');
+  if (fs.existsSync(splashDarkSvg)) {
+    await renderSvg(page, splashDarkSvg, 2732, path.join(ROOT, 'appstore', 'splash-dark-2732.png'));
+  }
 
   // PWA/Apple touch 各サイズ（透過なしでOK）
   for (const s of [180, 192, 512]) {
@@ -47,7 +51,18 @@ async function renderSvg(page, svgPath, size, outPath) {
   }
 
   await browser.close();
-  for (const f of ['appstore/icon-1024.png', 'appstore/splash-2732.png', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png']) {
+
+  // CI（@capacitor/assets）入力用の assets/ へ同期
+  fs.mkdirSync(path.join(ROOT, 'assets'), { recursive: true });
+  fs.copyFileSync(path.join(ROOT, 'appstore', 'icon-1024.png'),  path.join(ROOT, 'assets', 'icon.png'));
+  fs.copyFileSync(path.join(ROOT, 'appstore', 'splash-2732.png'), path.join(ROOT, 'assets', 'splash.png'));
+  fs.copyFileSync(
+    fs.existsSync(path.join(ROOT, 'appstore', 'splash-dark-2732.png'))
+      ? path.join(ROOT, 'appstore', 'splash-dark-2732.png')
+      : path.join(ROOT, 'appstore', 'splash-2732.png'),
+    path.join(ROOT, 'assets', 'splash-dark.png'));
+
+  for (const f of ['appstore/icon-1024.png', 'appstore/splash-2732.png', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'assets/icon.png', 'assets/splash.png', 'assets/splash-dark.png']) {
     const st = fs.statSync(path.join(ROOT, f));
     console.log(f, Math.round(st.size / 1024) + 'KB');
   }

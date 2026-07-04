@@ -40,7 +40,7 @@ async function appShot(scene) {
   await page.evaluateOnNewDocument((names, live) => {
     localStorage.clear();
     localStorage.setItem('mahjong_tutorial_shown', '1');
-    localStorage.setItem('mahjong_theme', 'dark');
+    localStorage.setItem('mahjong_theme', 'green');
     localStorage.setItem('mahjong_player_names', JSON.stringify(names));
     if (live) localStorage.setItem('mahjong_live_state', JSON.stringify(live));
   }, NAMES, live);

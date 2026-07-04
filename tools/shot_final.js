@@ -13,7 +13,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await page.setViewport({ width: 400, height: 820, deviceScaleFactor: 1.5 });
   await page.evaluateOnNewDocument((scene) => {
     localStorage.setItem('mahjong_tutorial_shown', '1');
-    localStorage.setItem('mahjong_theme', 'mleague');
+    localStorage.setItem('mahjong_theme', 'green');
     localStorage.setItem('mahjong_player_names', JSON.stringify({ east:'あきら', south:'はるか', west:'けんた', north:'みさき' }));
     if (scene === 'historylog') {
       const now = Date.now();
