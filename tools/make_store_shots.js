@@ -81,16 +81,15 @@ async function frameShot(browser, sc, b64, outPath) {
     *{margin:0;padding:0;box-sizing:border-box}
     html,body{width:${P.w}px;height:${P.h}px;overflow:hidden}
     .bg{width:${P.w}px;height:${P.h}px;position:relative;
-      background:linear-gradient(160deg,#0e3a20 0%,#0a2614 45%,#06160c 100%);
+      background:linear-gradient(165deg,#f7faf7 0%,#eef1ee 55%,#e2eae2 100%);
       font-family:'Hiragino Mincho ProN','Yu Mincho','MS Mincho',serif;}
     .cap{position:absolute;top:${P.capTop}px;left:0;right:0;text-align:center;padding:0 80px;}
-    .cap h1{color:#f2ead2;font-size:${P.capSize}px;font-weight:700;letter-spacing:5px;line-height:1.32;
-      text-shadow:0 2px 18px rgba(0,0,0,.5);}
+    .cap h1{color:#1c7622;font-size:${P.capSize}px;font-weight:700;letter-spacing:5px;line-height:1.32;}
     .cap .rule{width:120px;height:5px;margin:44px auto 0;border-radius:3px;
-      background:linear-gradient(90deg,transparent,#c8a840,transparent);}
+      background:linear-gradient(90deg,transparent,#1c7622,transparent);}
     .shot{position:absolute;left:50%;top:${P.shotTop}px;transform:translateX(-50%);
       width:${P.shotW}px;border-radius:${P.radius}px;overflow:hidden;
-      box-shadow:0 40px 90px rgba(0,0,0,.55), 0 0 0 2px rgba(200,168,64,.25);}
+      box-shadow:0 36px 80px rgba(18,58,24,.28), 0 0 0 2px rgba(28,118,34,.35);}
     .shot img{display:block;width:${P.shotW}px;}
   </style></head><body>
     <div class="bg">

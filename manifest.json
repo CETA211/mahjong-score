@@ -4,8 +4,8 @@
   "description": "麻雀の点数をスマホで管理",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#060e06",
-  "theme_color": "#060e06",
+  "background_color": "#eef1ee",
+  "theme_color": "#eef1ee",
   "orientation": "any",
   "icons": [
     {

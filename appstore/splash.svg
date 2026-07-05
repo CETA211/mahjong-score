@@ -37,8 +37,8 @@
           stroke="#7e0d12" stroke-width="4" paint-order="stroke">中</text>
   </g>
 
-  <!-- タイトル -->
+  <!-- タイトル（緑枠の内側に収まる幅: 5文字×140 + 字間36×4 = 844px < 枠内幅1092px） -->
   <text x="1366" y="1720" text-anchor="middle"
         font-family="'Yu Mincho','YuMincho','MS Mincho','Hiragino Mincho ProN',serif"
-        font-size="150" font-weight="700" fill="#1c7622" letter-spacing="28">点 棒 い ら ず</text>
+        font-size="140" font-weight="700" fill="#1c7622" letter-spacing="36">点棒いらず</text>
 </svg>
