@@ -12,6 +12,8 @@ ios/
 *.p8
 AuthKey_*.p8
 *.p12
+*.pem
+*.key
 *.cer
 *.certSigningRequest
 *.mobileprovision

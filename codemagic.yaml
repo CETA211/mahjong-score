@@ -3,9 +3,11 @@
 #   1. App Store Connect API キーを連携（Integrations → Developer Portal）
 #      → 名前を "CodemagicApiKey" にして下の integrations と一致させる
 #   2. Bundle ID `com.cetacompany.tenboirazu` は登録済み（App Store Connect / Identifiers）
-# 署名は Codemagic の自動署名（environment.ios_signing + integrations.app_store_connect）に一本化。
-# App Store Connect API 経由で配布証明書・プロファイルをビルド時に自動作成・取得する
-# （新規アカウントで既存アセットが無くても新規作成される。追加の環境変数や秘密鍵は不要）。
+# 署名: 手動フロー（fetch-signing-files に証明書秘密鍵 CERTIFICATE_PRIVATE_KEY を渡す）。
+# 新規アカウントは配布証明書が0枚のため、自動署名(ios_signing)は "No matching profiles found" で
+# 失敗する。秘密鍵を渡すと --create が「証明書・Bundle ID・プロファイル」を新規作成できる。
+# 【Codemagic UI で1回だけ設定】: 環境変数グループ "signing" を作り、CERTIFICATE_PRIVATE_KEY に
+#   CETA-secrets/ios-signing/certificate_private_key.pem の全文を Secure で登録すること。
 workflows:
   ios-release:
     name: 点棒いらず iOS Release
@@ -21,9 +23,9 @@ workflows:
           include: true
       cancel_previous_builds: true
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.cetacompany.tenboirazu
+      # 証明書秘密鍵 CERTIFICATE_PRIVATE_KEY を含むグループ（Codemagic UI で作成）
+      groups:
+        - signing
       vars:
         BUNDLE_ID: "com.cetacompany.tenboirazu"
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
@@ -66,12 +68,18 @@ workflows:
       - name: CocoaPods
         script: |
           cd ios/App && pod install
-      - name: 署名設定を Xcode プロジェクトに適用
+      - name: 署名アセットを作成/取得（証明書秘密鍵を渡す）
         script: |
           set -e
-          # 証明書・プロファイルは environment.ios_signing + integrations により
-          # Codemagic が API 経由でビルド時に自動作成・取得済み。ここでは App.xcodeproj に書き込むだけ。
-          # ios/ は毎ビルド再生成される（Capacitor既定は Automatic 署名）ため、毎回 use-profiles で Manual に上書きする。
+          keychain initialize
+          # CERTIFICATE_PRIVATE_KEY を渡すことで、配布証明書が1枚も無くても
+          # --create が「証明書・Bundle ID・プロファイル」を新規作成しディスクへ保存する
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
+            --create
+          keychain add-certificates
+          # ios/ は毎ビルド再生成される（Capacitor既定は Automatic 署名）ため、毎回 Manual に上書き
           xcode-project use-profiles --project "ios/App/App.xcodeproj"
           # 取得できているか可視化（0件ならアーカイブが失敗するので早期に気付ける）
           echo "=== 取得済みプロビジョニングプロファイル ==="
