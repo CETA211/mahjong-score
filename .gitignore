@@ -7,3 +7,13 @@ node_modules/
 www/
 ios/
 .gradle/
+
+# 署名・シークレット（絶対にコミットしない。CodemagicのUIに登録するのでリポジトリには置かない）
+*.p8
+AuthKey_*.p8
+*.p12
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.keystore
+*.jks
