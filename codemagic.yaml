@@ -3,9 +3,9 @@
 #   1. App Store Connect API キーを連携（Integrations → Developer Portal）
 #      → 名前を "CodemagicApiKey" にして下の integrations と一致させる
 #   2. Bundle ID `com.cetacompany.tenboirazu` は登録済み（App Store Connect / Identifiers）
-# 署名は「手動フロー」に一本化: 初回ビルドで配布証明書とプロファイルを新規作成する
-# （environment.ios_signing による自動署名は、初回に既存プロファイルが無く
-#  "No matching profiles found" で失敗するため使わない）
+# 署名は Codemagic の自動署名（environment.ios_signing + integrations.app_store_connect）に一本化。
+# App Store Connect API 経由で配布証明書・プロファイルをビルド時に自動作成・取得する
+# （新規アカウントで既存アセットが無くても新規作成される。追加の環境変数や秘密鍵は不要）。
 workflows:
   ios-release:
     name: 点棒いらず iOS Release
@@ -21,7 +21,9 @@ workflows:
           include: true
       cancel_previous_builds: true
     environment:
-      # ios_signing ブロックは使わない（署名は下の手動ステップで作成・適用する）
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.cetacompany.tenboirazu
       vars:
         BUNDLE_ID: "com.cetacompany.tenboirazu"
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
@@ -64,23 +66,24 @@ workflows:
       - name: CocoaPods
         script: |
           cd ios/App && pod install
-      - name: 署名アセットを取得（初回のみ配布証明書を新規作成）
+      - name: 署名設定を Xcode プロジェクトに適用
         script: |
-          keychain initialize
-          # まず既存の証明書でプロファイル作成/取得を試みる
-          # 初回は配布証明書が無く失敗するので、その場合だけ証明書を新規作成して再試行
-          if ! app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create; then
-            echo "配布証明書が無いため新規作成して再試行します"
-            app-store-connect create-certificate --type IOS_DISTRIBUTION --save
-            app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-          fi
-          keychain add-certificates
-          xcode-project use-profiles
+          set -e
+          # 証明書・プロファイルは environment.ios_signing + integrations により
+          # Codemagic が API 経由でビルド時に自動作成・取得済み。ここでは App.xcodeproj に書き込むだけ。
+          # ios/ は毎ビルド再生成される（Capacitor既定は Automatic 署名）ため、毎回 use-profiles で Manual に上書きする。
+          xcode-project use-profiles --project "ios/App/App.xcodeproj"
+          # 取得できているか可視化（0件ならアーカイブが失敗するので早期に気付ける）
+          echo "=== 取得済みプロビジョニングプロファイル ==="
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" 2>/dev/null || true
+          ls -la "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/" 2>/dev/null || true
       - name: ビルド（.ipa 生成）
         script: |
+          # -destination 'generic/platform=iOS' で archive の宛先を固定（mac_mini_m2 の既知事象を回避）
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+            --scheme "$XCODE_SCHEME" \
+            --archive-flags="-destination 'generic/platform=iOS'"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
