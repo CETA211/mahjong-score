@@ -1,9 +1,11 @@
 # 点棒いらず — iOS 無人ビルド（Codemagic / Mac不要）
 # 前提（Codemagic UI 側で1回だけ設定）:
-#   1. App Store Connect API キーを連携（Integrations → App Store Connect）
-#      → 環境変数グループ "appstore" を作り、integration を割り当て
-#   2. Bundle ID `com.cetacompany.tenboirazu` を App Store Connect 側で作成済みにする
-#      （または下の自動署名 fetch-signing-files が --create で作成）
+#   1. App Store Connect API キーを連携（Integrations → Developer Portal）
+#      → 名前を "CodemagicApiKey" にして下の integrations と一致させる
+#   2. Bundle ID `com.cetacompany.tenboirazu` は登録済み（App Store Connect / Identifiers）
+# 署名は「手動フロー」に一本化: 初回ビルドで配布証明書とプロファイルを新規作成する
+# （environment.ios_signing による自動署名は、初回に既存プロファイルが無く
+#  "No matching profiles found" で失敗するため使わない）
 workflows:
   ios-release:
     name: 点棒いらず iOS Release
@@ -19,9 +21,7 @@ workflows:
           include: true
       cancel_previous_builds: true
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.cetacompany.tenboirazu
+      # ios_signing ブロックは使わない（署名は下の手動ステップで作成・適用する）
       vars:
         BUNDLE_ID: "com.cetacompany.tenboirazu"
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
@@ -64,11 +64,16 @@ workflows:
       - name: CocoaPods
         script: |
           cd ios/App && pod install
-      - name: 署名プロファイル取得
+      - name: 署名アセットを取得（初回のみ配布証明書を新規作成）
         script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE --create
           keychain initialize
+          # まず既存の証明書でプロファイル作成/取得を試みる
+          # 初回は配布証明書が無く失敗するので、その場合だけ証明書を新規作成して再試行
+          if ! app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create; then
+            echo "配布証明書が無いため新規作成して再試行します"
+            app-store-connect create-certificate --type IOS_DISTRIBUTION --save
+            app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          fi
           keychain add-certificates
           xcode-project use-profiles
       - name: ビルド（.ipa 生成）
