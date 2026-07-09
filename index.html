@@ -466,11 +466,24 @@
       white-space: pre-line;
     }
 
-    .pos-north { grid-column: 2/3; grid-row: 1/2; }
-    .pos-west  { grid-column: 1/2; grid-row: 2/3; }
-    .pos-east  { grid-column: 3/4; grid-row: 2/3; }
-    .pos-south { grid-column: 2/3; grid-row: 3/4; }
+    /* 席配置: 東=下（親・操作者）、南=右、西=上、北=左（反時計回りの実卓配置） */
+    .pos-west  { grid-column: 2/3; grid-row: 1/2; }  /* 上 */
+    .pos-north { grid-column: 1/2; grid-row: 2/3; }  /* 左 */
+    .pos-south { grid-column: 3/4; grid-row: 2/3; }  /* 右 */
+    .pos-east  { grid-column: 2/3; grid-row: 3/4; }  /* 下 */
     .grid.sanma .pos-west { display: none; }
+
+    /* 名前ホールド→ドラッグで席替え */
+    .player-name { touch-action: none; }
+    .player-name.name-dragging {
+      transform: scale(1.14);
+      background: var(--gold-dim);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+      position: relative; z-index: 60; opacity: 0.96;
+    }
+    .player-card.name-drop-target {
+      outline: 2px dashed var(--gold); outline-offset: 3px;
+    }
 
     .center {
       grid-column: 2/3; grid-row: 2/3;
@@ -1409,10 +1422,11 @@
       }
       .player-card::before { display: none; }
       /* 4辺に配置し、各プレイヤーの方向へ回転（辺から3vhの余白） */
-      .pos-south { left: 50%; bottom: 3vh; transform: translateX(-50%); }
-      .pos-north { left: 50%; top: 3vh;    transform: translateX(-50%) rotate(180deg); }
-      .pos-west  { left: 3vh;  top: 50%;   transform: translateY(-50%) rotate(90deg);  transform-origin: center; }
-      .pos-east  { right: 3vh; top: 50%;   transform: translateY(-50%) rotate(-90deg); transform-origin: center; }
+      /* 横画面（卓中央）: 東=下（親・操作者は正立）、南=右、西=上、北=左 */
+      .pos-east  { left: 50%; bottom: 3vh; transform: translateX(-50%); }
+      .pos-west  { left: 50%; top: 3vh;    transform: translateX(-50%) rotate(180deg); }
+      .pos-north { left: 3vh;  top: 50%;   transform: translateY(-50%) rotate(90deg);  transform-origin: center; }
+      .pos-south { right: 3vh; top: 50%;   transform: translateY(-50%) rotate(-90deg); transform-origin: center; }
       .grid.sanma .pos-west { display: none; }
 
       /* 点数は大きく（ただし余白優先で少し抑える） */
@@ -3735,6 +3749,26 @@
 
   function getCard(pid) { return document.querySelector(`[data-player-id="${pid}"]`); }
 
+  /* ── 名前ホールド→ドラッグで席替え ─────────────── */
+  let nameDrag = null, suppressNameClick = false;
+  function cardUnderPoint(x, y, exceptId) {
+    let best = null, bestD = Infinity;
+    for (const id of IDS) {
+      if (id === exceptId) continue;
+      const c = getCard(id); if (!c) continue;
+      const r = c.getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+        const d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+        if (d < bestD) { bestD = d; best = id; }
+      }
+    }
+    return best;
+  }
+  function highlightNameDrop(id) {
+    document.querySelectorAll('.player-card.name-drop-target').forEach(c => c.classList.remove('name-drop-target'));
+    if (id) { const c = getCard(id); if (c) c.classList.add('name-drop-target'); }
+  }
+
   /* ── ④ Long press functions ─────────────────────── */
   function startLongPress(pid) {
     cancelLongPress();
@@ -3897,6 +3931,13 @@
     syncBtns();
     showTutorialIfNeeded();
 
+    /* 名前を別プレイヤーへ入れ替え（席替え） */
+    const swapNames = (a, b) => {
+      const va = nameEls[a].value, vb = nameEls[b].value;
+      nameEls[a].value = vb; nameEls[b].value = va;
+      saveNames(); renderNames();
+      showToast(`${getName(a)} ⇄ ${getName(b)}　席替え`);
+    };
     document.querySelectorAll('.player-card').forEach(card => {
       const pid = card.dataset.playerId;
       /* 名前要素の上ではスワイプ/タップを無効化（名前モーダルを開く） */
@@ -3906,9 +3947,50 @@
       card.addEventListener('touchend',    e => { if (!onName(e)) swipeEnd(e); });
       card.addEventListener('touchcancel', e => { if (!onName(e)) { hideLongPressOverlay(); resetSwipe(); } });
       card.addEventListener('mousedown',   e => { if (!onName(e) && e.button === 0) { swipeStart(e, pid); e.preventDefault(); } });
-      /* 名前タップ → 名前モーダル（その席にフォーカス） */
+      /* 名前: タップ→編集モーダル / ホールド→ドラッグで席替え */
       const nm = cardNameEls[pid];
-      if (nm) nm.addEventListener('click', e => { e.stopPropagation(); openNameModal(pid); });
+      if (nm) {
+        nm.addEventListener('click', e => { e.stopPropagation(); if (suppressNameClick) return; openNameModal(pid); });
+        nm.addEventListener('pointerdown', e => {
+          if (e.button !== undefined && e.button > 0) return;
+          nameDrag = { srcId: pid, x0: e.clientX, y0: e.clientY, active: false, timer: null };
+          nameDrag.timer = setTimeout(() => {
+            if (!nameDrag || nameDrag.srcId !== pid) return;
+            nameDrag.active = true;
+            nm.classList.add('name-dragging');
+            try { nm.setPointerCapture(e.pointerId); } catch (_) {}
+            showToast('移動先のプレイヤーで指を離すと席替え', false, 1600);
+          }, 330);
+        });
+        nm.addEventListener('pointermove', e => {
+          if (!nameDrag || nameDrag.srcId !== pid) return;
+          if (!nameDrag.active) {
+            if (Math.hypot(e.clientX - nameDrag.x0, e.clientY - nameDrag.y0) > 12) { clearTimeout(nameDrag.timer); nameDrag = null; }
+            return;
+          }
+          e.preventDefault();
+          highlightNameDrop(cardUnderPoint(e.clientX, e.clientY, nameDrag.srcId));
+        });
+        nm.addEventListener('pointerup', e => {
+          if (!nameDrag || nameDrag.srcId !== pid) return;
+          clearTimeout(nameDrag.timer);
+          if (nameDrag.active) {
+            e.preventDefault();
+            const tgt = cardUnderPoint(e.clientX, e.clientY, nameDrag.srcId);
+            nm.classList.remove('name-dragging');
+            highlightNameDrop(null);
+            if (tgt && tgt !== nameDrag.srcId) swapNames(nameDrag.srcId, tgt);
+            suppressNameClick = true;
+            setTimeout(() => { suppressNameClick = false; }, 450);
+          }
+          nameDrag = null;
+        });
+        nm.addEventListener('pointercancel', () => {
+          if (!nameDrag || nameDrag.srcId !== pid) return;
+          clearTimeout(nameDrag.timer);
+          nm.classList.remove('name-dragging'); highlightNameDrop(null); nameDrag = null;
+        });
+      }
     });
     window.addEventListener('mousemove',  e => { if (swiping) { swipeMove(e); e.preventDefault(); } });
     window.addEventListener('mouseup',    e => { if (swipeOrigin) swipeEnd(e); });
