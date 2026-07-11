@@ -9,37 +9,34 @@
       <stop offset="0" stop-color="#1c5a32" stop-opacity="0.5"/>
       <stop offset="1" stop-color="#1c5a32" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fffefb"/>
-      <stop offset="0.5" stop-color="#f6f1e2"/>
-      <stop offset="1" stop-color="#e7dcc2"/>
-    </linearGradient>
-    <linearGradient id="side" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#cdb98e"/>
-      <stop offset="1" stop-color="#a98f5e"/>
-    </linearGradient>
-    <linearGradient id="redChar" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#d62b30"/>
-      <stop offset="1" stop-color="#a8141b"/>
+    <linearGradient id="stickD" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffef8"/><stop offset="0.5" stop-color="#f4ecd8"/><stop offset="1" stop-color="#e6dabf"/>
     </linearGradient>
   </defs>
 
   <rect width="2732" height="2732" fill="url(#bg)"/>
   <rect width="2732" height="2732" fill="url(#glow)"/>
 
-  <!-- 中央の牌（中央クロップ安全圏内） -->
-  <g transform="translate(1366,1230)">
-    <rect x="-210" y="-272" width="420" height="572" rx="58" fill="url(#side)"/>
-    <rect x="-210" y="-292" width="420" height="566" rx="56" fill="url(#tile)" stroke="#d8c8a0" stroke-width="3"/>
-    <rect x="-178" y="-260" width="356" height="502" rx="38" fill="none" stroke="#e3d6b6" stroke-width="3" opacity="0.8"/>
-    <text x="0" y="-8" text-anchor="middle" dominant-baseline="central"
-          font-family="'Yu Mincho','YuMincho','MS Mincho','Hiragino Mincho ProN',serif"
-          font-size="420" font-weight="900" fill="url(#redChar)"
-          stroke="#7e0d12" stroke-width="4" paint-order="stroke">中</text>
+  <!-- 緑フレーム（ライト版と対の構図） -->
+  <rect x="820" y="620" width="1092" height="1492" rx="72" fill="none" stroke="#2e9e43" stroke-opacity="0.45" stroke-width="10"/>
+
+  <!-- 割れた点棒（ダーク: 象牙色×赤ピップ） -->
+  <g transform="translate(1366,1230) scale(1.9)">
+    <g transform="rotate(-6) translate(-16,-6)">
+      <path d="M -260,-30 A 30,30 0 0 1 -230,-60 L -30,-60 L -14,-40 L -36,-22 L -10,-4 L -32,14 L -8,32 L -30,50 L -30,60 L -230,60 A 30,30 0 0 1 -260,30 Z" fill="url(#stickD)" stroke="#cbbf9f" stroke-width="2.5"/>
+      <g fill="#d0322f"><circle cx="-198" cy="0" r="12"/><circle cx="-166" cy="0" r="12"/><circle cx="-134" cy="0" r="12"/></g>
+    </g>
+    <g transform="rotate(8) translate(16,8)">
+      <path d="M 260,-30 A 30,30 0 0 0 230,-60 L 30,-60 L 14,-40 L 36,-22 L 10,-4 L 32,14 L 8,32 L 30,50 L 30,60 L 230,60 A 30,30 0 0 0 260,30 Z" fill="url(#stickD)" stroke="#cbbf9f" stroke-width="2.5"/>
+      <g fill="#d0322f"><circle cx="134" cy="0" r="12"/><circle cx="166" cy="0" r="12"/><circle cx="198" cy="0" r="12"/></g>
+    </g>
+    <g stroke="#ffe9a0" stroke-width="6" stroke-linecap="round" opacity="0.9">
+      <line x1="0" y1="-96" x2="0" y2="-64"/><line x1="34" y1="-78" x2="16" y2="-52"/><line x1="-34" y1="-78" x2="-16" y2="-52"/>
+    </g>
   </g>
 
   <!-- タイトル -->
   <text x="1366" y="1720" text-anchor="middle"
         font-family="'Yu Mincho','YuMincho','MS Mincho','Hiragino Mincho ProN',serif"
-        font-size="150" font-weight="700" fill="#c8a840" letter-spacing="28">点 棒 い ら ず</text>
+        font-size="140" font-weight="700" fill="#7bc788" letter-spacing="36">点棒いらず</text>
 </svg>

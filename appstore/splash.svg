@@ -1,43 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732">
   <defs>
-    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.55">
+    <radialGradient id="gl" cx="0.5" cy="0.42" r="0.55">
       <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
       <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="0.5" stop-color="#f2f6f2"/>
-      <stop offset="1" stop-color="#dfe8df"/>
-    </linearGradient>
-    <linearGradient id="side" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#bccabc"/>
-      <stop offset="1" stop-color="#93a693"/>
-    </linearGradient>
-    <linearGradient id="redChar" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#d62b30"/>
-      <stop offset="1" stop-color="#a8141b"/>
+    <linearGradient id="stick" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="0.5" stop-color="#f6f8f5"/><stop offset="1" stop-color="#e4ebe2"/>
     </linearGradient>
   </defs>
 
   <!-- 背景: グリーンテーマの淡いグレー緑 -->
   <rect width="2732" height="2732" fill="#eef1ee"/>
-  <rect width="2732" height="2732" fill="url(#glow)"/>
+  <rect width="2732" height="2732" fill="url(#gl)"/>
 
-  <!-- 署名的: 画面を囲む緑フレーム（中央クロップされても四辺が残るよう内側に） -->
+  <!-- 署名的: 緑フレーム（中央クロップ安全圏内） -->
   <rect x="820" y="620" width="1092" height="1492" rx="72" fill="none" stroke="#0f8043" stroke-opacity="0.55" stroke-width="10"/>
 
-  <!-- 中央の牌（中央クロップ安全圏内） -->
-  <g transform="translate(1366,1230)">
-    <rect x="-210" y="-272" width="420" height="572" rx="58" fill="url(#side)"/>
-    <rect x="-210" y="-292" width="420" height="566" rx="56" fill="url(#tile)" stroke="#c3d2c3" stroke-width="3"/>
-    <rect x="-178" y="-260" width="356" height="502" rx="38" fill="none" stroke="#cfe0cf" stroke-width="3" opacity="0.9"/>
-    <text x="0" y="-8" text-anchor="middle" dominant-baseline="central"
-          font-family="'Yu Mincho','YuMincho','MS Mincho','Hiragino Mincho ProN',serif"
-          font-size="420" font-weight="900" fill="url(#redChar)"
-          stroke="#7e0d12" stroke-width="4" paint-order="stroke">中</text>
+  <!-- 割れた点棒（アイコンと同一モチーフ） -->
+  <g transform="translate(1366,1230) scale(1.9)">
+    <g transform="rotate(-6) translate(-16,-6)">
+      <path d="M -260,-30 A 30,30 0 0 1 -230,-60 L -30,-60 L -14,-40 L -36,-22 L -10,-4 L -32,14 L -8,32 L -30,50 L -30,60 L -230,60 A 30,30 0 0 1 -260,30 Z" fill="url(#stick)" stroke="#1c7622" stroke-opacity="0.55" stroke-width="4"/>
+      <g fill="#1c7622"><circle cx="-198" cy="0" r="12"/><circle cx="-166" cy="0" r="12"/><circle cx="-134" cy="0" r="12"/></g>
+    </g>
+    <g transform="rotate(8) translate(16,8)">
+      <path d="M 260,-30 A 30,30 0 0 0 230,-60 L 30,-60 L 14,-40 L 36,-22 L 10,-4 L 32,14 L 8,32 L 30,50 L 30,60 L 230,60 A 30,30 0 0 0 260,30 Z" fill="url(#stick)" stroke="#1c7622" stroke-opacity="0.55" stroke-width="4"/>
+      <g fill="#1c7622"><circle cx="134" cy="0" r="12"/><circle cx="166" cy="0" r="12"/><circle cx="198" cy="0" r="12"/></g>
+    </g>
+    <g stroke="#d0322f" stroke-width="6" stroke-linecap="round" opacity="0.85">
+      <line x1="0" y1="-96" x2="0" y2="-64"/><line x1="34" y1="-78" x2="16" y2="-52"/><line x1="-34" y1="-78" x2="-16" y2="-52"/>
+    </g>
   </g>
 
-  <!-- タイトル（緑枠の内側に収まる幅: 5文字×140 + 字間36×4 = 844px < 枠内幅1092px） -->
+  <!-- タイトル（緑枠の内側: 5文字×140 + 字間36×4 = 844px < 枠内幅1092px） -->
   <text x="1366" y="1720" text-anchor="middle"
         font-family="'Yu Mincho','YuMincho','MS Mincho','Hiragino Mincho ProN',serif"
         font-size="140" font-weight="700" fill="#1c7622" letter-spacing="36">点棒いらず</text>
