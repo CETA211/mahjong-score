@@ -483,6 +483,8 @@
     .pos-south { grid-column: 3/4; grid-row: 2/3; }  /* 右 */
     .pos-east  { grid-column: 2/3; grid-row: 3/4; }  /* 下 */
     .grid.sanma .pos-west { display: none; }
+    /* 三麻: 3人目（内部id: north・表示は西）は東の対面=上へ */
+    .grid.sanma .pos-north { grid-column: 2/3; grid-row: 1/2; }
 
     .center {
       grid-column: 2/3; grid-row: 2/3;
@@ -1427,6 +1429,8 @@
       .pos-north { left: 3vh;  top: 50%;   transform: translateY(-50%) rotate(90deg);  transform-origin: center; }
       .pos-south { right: 3vh; top: 50%;   transform: translateY(-50%) rotate(-90deg); transform-origin: center; }
       .grid.sanma .pos-west { display: none; }
+      /* 三麻: 3人目（表示は西）は東の対面=上へ */
+      .grid.sanma .pos-north { left: 50%; top: 3vh; right: auto; bottom: auto; transform: translateX(-50%) rotate(180deg); }
 
       /* 点数は大きく（ただし余白優先で少し抑える） */
       .player-name { font-size: clamp(0.8rem, 3vh, 1.05rem); margin-bottom: 1px; }
@@ -2012,7 +2016,7 @@
       </div>
       <div class="help-row">
         <span class="help-op">三 麻</span>
-        <span class="help-desc">3人・35,000点スタート（西家なし）／ウマ [20, 0, -20]</span>
+        <span class="help-desc">3人（東・南・西、北家なし）・35,000点スタート／ウマ [20, 0, -20]</span>
       </div>
     </div>
 
@@ -2577,9 +2581,11 @@
     }
   }
   function openNameModal(focusId) {
-    /* 三麻は西を隠す */
+    /* 三麻: 未使用の西行を隠し、3人目(内部id: north)の風表示を西にする（東・南・西の3人） */
     const westRow = document.querySelector('.name-row[data-name-id="west"]');
     if (westRow) westRow.style.display = sanmaMode ? 'none' : '';
+    const northWind = document.querySelector('.name-row[data-name-id="north"] .name-wind');
+    if (northWind) northWind.textContent = sanmaMode ? '西' : '北';
     document.getElementById('nameModal').classList.add('show');
     if (focusId && nameEls[focusId]) {
       const inp = nameEls[focusId];
