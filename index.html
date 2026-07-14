@@ -202,6 +202,15 @@
       text-shadow: 0 0 8px rgba(200,168,64,0.55);
     }
     .dealer-indicator.is-dealer .di-oya { max-width: 36px; opacity: 1; }
+    /* 起家マーク（リアル卓の起家マーク風: 白地×赤字の小プレート） */
+    .di-kicha {
+      display: none;
+      margin-left: 5px; padding: 1px 4px;
+      font-size: 0.6rem; font-weight: 800; line-height: 1.3;
+      color: #c22a2a; background: #f7f3e6;
+      border: 1px solid rgba(0,0,0,0.18); border-radius: 4px;
+    }
+    .di-kicha.show { display: inline-block; }
     /* カードの親アウトライン */
     .player-card.is-dealer {
       border-color: rgba(200,168,64,0.48);
@@ -1551,7 +1560,7 @@
   <div class="grid">
     <!-- North -->
     <div class="player-cell pos-north">
-      <button class="dealer-indicator" data-dealer-for="north"><span class="di-wind">北</span><span class="di-oya"> · 親</span></button>
+      <button class="dealer-indicator" data-dealer-for="north"><span class="di-wind">北</span><span class="di-oya"> · 親</span><span class="di-kicha">起</span></button>
       <div class="player-card" data-player-id="north">
         <span class="card-rank" id="rank-north"></span>
         <div class="player-name" id="cardname-north" data-name-for="north" role="button" tabindex="0">プレイヤー4</div>
@@ -1562,7 +1571,7 @@
 
     <!-- West -->
     <div class="player-cell pos-west">
-      <button class="dealer-indicator" data-dealer-for="west"><span class="di-wind">西</span><span class="di-oya"> · 親</span></button>
+      <button class="dealer-indicator" data-dealer-for="west"><span class="di-wind">西</span><span class="di-oya"> · 親</span><span class="di-kicha">起</span></button>
       <div class="player-card" data-player-id="west">
         <span class="card-rank" id="rank-west"></span>
         <div class="player-name" id="cardname-west" data-name-for="west" role="button" tabindex="0">プレイヤー3</div>
@@ -1580,7 +1589,7 @@
 
     <!-- East -->
     <div class="player-cell pos-east">
-      <button class="dealer-indicator" data-dealer-for="east"><span class="di-wind">東</span><span class="di-oya"> · 親</span></button>
+      <button class="dealer-indicator" data-dealer-for="east"><span class="di-wind">東</span><span class="di-oya"> · 親</span><span class="di-kicha">起</span></button>
       <div class="player-card" data-player-id="east">
         <span class="card-rank" id="rank-east"></span>
         <div class="player-name" id="cardname-east" data-name-for="east" role="button" tabindex="0">プレイヤー1</div>
@@ -1591,7 +1600,7 @@
 
     <!-- South -->
     <div class="player-cell pos-south">
-      <button class="dealer-indicator" data-dealer-for="south"><span class="di-wind">南</span><span class="di-oya"> · 親</span></button>
+      <button class="dealer-indicator" data-dealer-for="south"><span class="di-wind">南</span><span class="di-oya"> · 親</span><span class="di-kicha">起</span></button>
       <div class="player-card" data-player-id="south">
         <span class="card-rank" id="rank-south"></span>
         <div class="player-name" id="cardname-south" data-name-for="south" role="button" tabindex="0">プレイヤー2</div>
@@ -1925,10 +1934,14 @@
     </div>
 
     <div class="help-section">
-      <div class="help-section-title">親（東家）の設定</div>
+      <div class="help-section-title">親（東家）と自風</div>
       <div class="help-row">
-        <span class="help-op">方角ラベル</span>
-        <span class="help-desc">各プレイヤー上の「北/西/東/南」をタップで親に設定<br>親になると「東 · 親」のように表示され、カードが光る</span>
+        <span class="help-op">風ラベル</span>
+        <span class="help-desc">各プレイヤー上の風ラベルをタップで親に設定<br>親＝東家となり、局が進むと全員の自風（東南西北）が自動で回る</span>
+      </div>
+      <div class="help-row">
+        <span class="help-op">起</span>
+        <span class="help-desc">最初の親（起家）には赤い「起」マークが付く<br>（対局開始前に親を変えると起家も変わる）</span>
       </div>
     </div>
 
@@ -2581,11 +2594,16 @@
     }
   }
   function openNameModal(focusId) {
-    /* 三麻: 未使用の西行を隠し、3人目(内部id: north)の風表示を西にする（東・南・西の3人） */
+    /* 三麻: 未使用の西行を隠す */
     const westRow = document.querySelector('.name-row[data-name-id="west"]');
     if (westRow) westRow.style.display = sanmaMode ? 'none' : '';
-    const northWind = document.querySelector('.name-row[data-name-id="north"] .name-wind');
-    if (northWind) northWind.textContent = sanmaMode ? '西' : '北';
+    /* 風ラベルは現在の局の自風（親=東家基準で回る）を表示 */
+    for (const id of YONMA_IDS) {
+      const wEl = document.querySelector(`.name-row[data-name-id="${id}"] .name-wind`);
+      if (!wEl) continue;
+      const w = windForPlayer(id);
+      if (w) wEl.textContent = w;
+    }
     document.getElementById('nameModal').classList.add('show');
     if (focusId && nameEls[focusId]) {
       const inp = nameEls[focusId];
@@ -2883,9 +2901,24 @@
   }
 
   /* ── 親（dealer）管理 ─────────────────────────── */
+  /* 自風: 親＝東家として局に合わせて回る（麻雀の席風ルール）。
+     四麻: 東→南→西→北 / 三麻: 東→南→西。前局の南家が次局の東家（親）になる */
+  function windForPlayer(id) {
+    const rot = ROTATION();
+    const di = rot.indexOf(dealerId), pi = rot.indexOf(id);
+    if (di < 0 || pi < 0) return '';
+    return ['東', '南', '西', '北'][(pi - di + rot.length) % rot.length];
+  }
   function renderDealerBadges() {
     document.querySelectorAll('.dealer-indicator').forEach(b => {
-      b.classList.toggle('is-dealer', b.dataset.dealerFor === dealerId);
+      const id = b.dataset.dealerFor;
+      b.classList.toggle('is-dealer', id === dealerId);
+      const wEl = b.querySelector('.di-wind');
+      const wind = windForPlayer(id);
+      if (wEl && wind) wEl.textContent = wind;
+      /* 起家マーク（最初の親）。リアル卓の起家マークを踏襲して常時表示 */
+      const kEl = b.querySelector('.di-kicha');
+      if (kEl) kEl.classList.toggle('show', id === kiichaId);
     });
     document.querySelectorAll('.player-card').forEach(card => {
       card.classList.toggle('is-dealer', card.dataset.playerId === dealerId);
@@ -3459,9 +3492,7 @@
     undoStack.length = 0; redoStack.length = 0;
     syncBtns(); renderScores(); saveLive();
     document.querySelector('.grid').classList.toggle('sanma', enabled);
-    /* 三麻の標準は東・南・西の3人（北家なし）。3人目の席(内部id: north)の風表示だけ西に切替える */
-    const northWind = document.querySelector('.dealer-indicator[data-dealer-for="north"] .di-wind');
-    if (northWind) northWind.textContent = enabled ? '西' : '北';
+    /* 風表示は renderDealerBadges が親基準で動的に描画（三麻は東・南・西の3人） */
     document.getElementById('btnYonma').classList.toggle('active', !enabled);
     document.getElementById('btnSanma').classList.toggle('active',  enabled);
     localStorage.setItem(LS_MODE, enabled ? 'sanma' : 'yonma');
