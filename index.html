@@ -2019,6 +2019,10 @@
         <span class="help-op">試合終了</span>
         <span class="help-desc">「試合終了」ボタンで素点・ウマを自動計算</span>
       </div>
+      <div class="help-row">
+        <span class="help-op">和了止め</span>
+        <span class="help-desc">標準ルール: オーラスで親が1位のまま和了/テンパイ連荘すると<br>「和了止め（聴牌止め）」の確認を表示（続行で連荘も可能）</span>
+      </div>
     </div>
 
     <div class="help-section">
@@ -3240,6 +3244,27 @@
       if (await appConfirm('規定局数を終了しました。精算しますか？', '精算する', '続行')) openGameEndModal();
     }, 500);
   }
+  /* ── 和了止め・聴牌止め（標準ルールのみ・雀魂準拠） ──────
+     オーラスで親が和了（またはテンパイ連荘）し、かつ親が1位のとき、
+     連荘せずゲームを終了する選択ができる（1位のみ・Mリーグ公式は「なし」）。
+     西入サドンデス中は checkEndSuggest 側が精算提案を出すため対象外。 */
+  function checkAgariYame(kind) {
+    if (ruleset !== 'jantama') return;
+    const N = sanmaMode ? 3 : 4;
+    const lastKyoku = (gameLength === 'tonpu' ? N : 2 * N) - 1;  /* 東風=東4 / 半荘=南4 */
+    if (kyoku !== lastKyoku) return;
+    /* 親が1位か（同点は起家に近い方が上位＝精算と同じ判定） */
+    const rot  = ROTATION();
+    const kIdx = Math.max(0, rot.indexOf(kiichaId));
+    const seatOrder = rot.slice(kIdx).concat(rot.slice(0, kIdx));
+    const top = IDS.slice().sort((a, b) =>
+      players[b].score - players[a].score || seatOrder.indexOf(a) - seatOrder.indexOf(b))[0];
+    if (top !== dealerId) return;
+    const label = kind === 'tenpai' ? '聴牌止め' : '和了止め';
+    setTimeout(async () => {
+      if (await appConfirm(`オーラスで親（${getName(dealerId)}）が1位です。\n${label}して精算しますか？`, '精算する', '続行（連荘）')) openGameEndModal();
+    }, 700);
+  }
   function setGameLength(len, silent) {
     gameLength = len === 'tonpu' ? 'tonpu' : 'hanchan';
     localStorage.setItem(LS_LENGTH, gameLength);
@@ -3287,6 +3312,7 @@
     saveLive();
     checkTobi();
     if (!noAdvance) checkEndSuggest();
+    if (renchan) checkAgariYame('agari');
     return true;
   }
 
@@ -3320,6 +3346,7 @@
     saveLive();
     checkTobi();
     checkEndSuggest();
+    if (renchan) checkAgariYame('agari');
     return true;
   }
 
@@ -3396,6 +3423,7 @@
     showToast(`流局　${renchan ? '連荘' : '親流れ'}・${honbaGame}本場`);
     checkTobi();
     checkEndSuggest();
+    if (renchan) checkAgariYame('tenpai');
   }
   function doChuuto() {
     if (!document.getElementById('ryuukyokuModal').classList.contains('show')) return;  /* 二重送信ガード */
