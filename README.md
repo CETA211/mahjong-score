@@ -47,3 +47,20 @@ node tools/record_demo.js
 ```
 
 **iOS（Capacitor）関連の注意**: ローカルで同期するときは素の `npx cap sync` ではなく必ず `npm run sync` を使う（`www/` の再生成を挟まないと古いバンドルが同梱される）。詳細は `ios-build/README.md`。
+
+## ブランチ運用（v1.0.0 以降）
+
+| ブランチ | 役割 |
+|---------|------|
+| `main` | **本番**。GitHub Pages（Web版）が即時配信され、iOSビルドもここから作る。**直接コミットしない** |
+| `develop` | 日常の開発・修正の集約先。テストが通ったものだけを main へ |
+| `feature/*` / `fix/*` | （任意）大きめの変更・実験はここで作業して develop へマージ |
+
+**リリース手順**:
+1. `develop` で開発 → `npm test` 全パス・Web動作確認
+2. ユーザーに見せるバージョンを上げる場合は `package.json` の `version` を更新
+3. `git checkout main` → `git merge --no-ff develop` → `git tag -a vX.Y.Z -m "..."` → `git push origin main --tags`
+4. push で **Web版は数分で本番反映**。iOS は Codemagic で main をビルド → TestFlight → 審査提出
+5. **hotfix**（本番の緊急修正）: main から `fix/xxx` を切る → 修正 → main へマージ＋タグ → `develop` にも必ず取り込む
+
+> タグ `vX.Y.Z` は「App Store に出したバイナリの元コミット」の目印。障害調査時はタグからそのバージョンのソースに即座に戻れる。
