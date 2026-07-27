@@ -1325,7 +1325,7 @@
     /* スウォッチ on を緑に */
     [data-skin="green"] .theme-sw.on { border-color: #1c7622; background: rgba(28,118,34,0.1); }
     [data-skin="green"] .theme-sw.on .sw-name { color: #1c7622; }
-    /* 精算ランキング: 1位は緑ピル＋白文字（グリーンテーマの署名） */
+    /* 最終スコア集計ランキング: 1位は緑ピル＋白文字（グリーンテーマの署名） */
     [data-skin="green"] .rank-row.rank-1 {
       background: #1c7622; border-color: #1c7622;
     }
@@ -1997,7 +1997,7 @@
       <div class="help-section-title">ルール（標準 / 競技）</div>
       <div class="help-row">
         <span class="help-op">標準</span>
-        <span class="help-desc">ウマ +15/+5/−5/−15・オカなし（25,000返し）<br>ダブル役満〜6倍役満チップ・飛び即終了・途中流局あり</span>
+        <span class="help-desc">ウマ +15/+5/−5/−15・オカなし（25,000返し）<br>ダブル役満〜6倍役満まで対応・飛び即終了・途中流局あり</span>
       </div>
       <div class="help-row">
         <span class="help-op">競技</span>
@@ -2014,10 +2014,10 @@
     </div>
 
     <div class="help-section">
-      <div class="help-section-title">試合終了・精算</div>
+      <div class="help-section-title">試合終了・最終スコア集計</div>
       <div class="help-row">
         <span class="help-op">試合終了</span>
-        <span class="help-desc">「試合終了」ボタンで素点・ウマを自動計算</span>
+        <span class="help-desc">「試合終了」ボタンで素点・ウマ・オカ（日本式の順位点ルール）を<br>自動計算し、順位と pt（単位なしのポイント）を表示</span>
       </div>
       <div class="help-row">
         <span class="help-op">和了止め</span>
@@ -2038,7 +2038,8 @@
     </div>
 
     <div class="help-note" style="margin-top:14px; line-height:1.6;">
-      本アプリは点数管理ツールです。特定の麻雀ゲーム・大会・団体とは一切関係ありません。
+      本アプリは点数の記録・計算のみを行うツールです。金銭のやり取り、レート・賭け金の設定、換金、勝敗予想の機能は一切ありません。<br>
+      特定の麻雀ゲーム・大会・団体とも関係ありません。
     </div>
 
     <div class="modal-actions">
@@ -2090,7 +2091,7 @@
     <div class="set-row" style="display:block;">
       <div class="set-info">
         <div class="set-label">対局の長さ</div>
-        <div class="set-desc">規定局数を終えると精算を提案します</div>
+        <div class="set-desc">規定局数を終えると最終スコア集計を提案します</div>
       </div>
       <div class="set-seg" id="lengthSeg">
         <button class="set-seg-btn" data-length="tonpu">東風戦</button>
@@ -3241,19 +3242,19 @@
       return;
     }
     setTimeout(async () => {
-      if (await appConfirm('規定局数を終了しました。精算しますか？', '精算する', '続行')) openGameEndModal();
+      if (await appConfirm('規定局数を終了しました。最終スコアを集計しますか？', '集計する', '続行')) openGameEndModal();
     }, 500);
   }
   /* ── 和了止め・聴牌止め（標準ルールのみ・雀魂準拠） ──────
      オーラスで親が和了（またはテンパイ連荘）し、かつ親が1位のとき、
      連荘せずゲームを終了する選択ができる（1位のみ・Mリーグ公式は「なし」）。
-     西入サドンデス中は checkEndSuggest 側が精算提案を出すため対象外。 */
+     西入サドンデス中は checkEndSuggest 側が集計提案を出すため対象外。 */
   function checkAgariYame(kind) {
     if (ruleset !== 'jantama') return;
     const N = sanmaMode ? 3 : 4;
     const lastKyoku = (gameLength === 'tonpu' ? N : 2 * N) - 1;  /* 東風=東4 / 半荘=南4 */
     if (kyoku !== lastKyoku) return;
-    /* 親が1位か（同点は起家に近い方が上位＝精算と同じ判定） */
+    /* 親が1位か（同点は起家に近い方が上位＝最終スコア集計と同じ判定） */
     const rot  = ROTATION();
     const kIdx = Math.max(0, rot.indexOf(kiichaId));
     const seatOrder = rot.slice(kIdx).concat(rot.slice(0, kIdx));
@@ -3262,7 +3263,7 @@
     if (top !== dealerId) return;
     const label = kind === 'tenpai' ? '聴牌止め' : '和了止め';
     setTimeout(async () => {
-      if (await appConfirm(`オーラスで親（${getName(dealerId)}）が1位です。\n${label}して精算しますか？`, '精算する', '続行（連荘）')) openGameEndModal();
+      if (await appConfirm(`オーラスで親（${getName(dealerId)}）が1位です。\n${label}して最終スコアを集計しますか？`, '集計する', '続行（連荘）')) openGameEndModal();
     }, 700);
   }
   function setGameLength(len, silent) {
@@ -3271,14 +3272,14 @@
     document.querySelectorAll('.set-seg-btn[data-length]').forEach(b => {
       b.classList.toggle('active', b.dataset.length === gameLength);
     });
-    if (!silent) showToast(gameLength === 'tonpu' ? '東風戦に設定（東4で精算）' : '半荘戦に設定（南4で精算）');
+    if (!silent) showToast(gameLength === 'tonpu' ? '東風戦に設定（東4で集計）' : '半荘戦に設定（南4で集計）');
   }
   function checkTobi() {
     const busted = IDS.find(id => players[id].score < 0);
     if (!busted) return;
     if (RULESETS[ruleset].tobiEnd) {
       setTimeout(async () => {
-        if (await appConfirm(`${getName(busted)} が0点未満（飛び）。\n標準ルールでは終局です。精算しますか？`, '精算する', '続行')) openGameEndModal();
+        if (await appConfirm(`${getName(busted)} が0点未満（飛び）。\n標準ルールでは終局です。最終スコアを集計しますか？`, '集計する', '続行')) openGameEndModal();
       }, 600);
     } else {
       showToast(`${getName(busted)} 0点未満（競技ルールでは続行）`, true, 3000);
@@ -3443,7 +3444,7 @@
     const isOya = pid === dealerId;
     const msg = ruleset === 'jantama'
       ? `${getName(pid)} のチョンボ（満貫払い）\n${isOya ? '他家に各4,000点' : '親に4,000点・他の子に各2,000点'}を支払います。\n（同局再ゲーム・本場据え置き）`
-      : `${getName(pid)} のチョンボを記録します。\n競技ルールでは点数移動なし（場外で-20P減算）。`;
+      : `${getName(pid)} のチョンボを記録します。\n競技ルールでは点数移動なし（-20pt を減算）。`;
     if (!(await appConfirm(msg, 'チョンボ処理'))) return;
     let moved = false;
     /* チョンボは同局やり直し: 今局のリーチ棒は宣言者に返却する（両ルール共通） */
@@ -3469,7 +3470,7 @@
       renderScores(); renderCenterInfo(); saveLive();
     }
     lsPush(LS_TRANSFER, { timestamp: Date.now(), pid, playerName: getName(pid), type: 'chombo', moved }, 200);
-    showToast(`${getName(pid)} チョンボ${moved ? '（罰符精算・同局再ゲーム）' : '（記録のみ・場外-20P）'}`);
+    showToast(`${getName(pid)} チョンボ${moved ? '（罰符を記録・同局やり直し）' : '（記録のみ・-20pt）'}`);
     closeAdjustModal();
     if (moved) checkTobi();
   }
@@ -3527,8 +3528,8 @@
   }
 
   /* ── Game-end modal ─────────────────────────────── */
-  let lastResults = null;   /* 共有テキスト用に直近の精算結果を保持 */
-  /* 精算ptの表示: 整数ならそのまま、端数があれば小数1桁 */
+  let lastResults = null;   /* 共有テキスト用に直近の集計結果を保持 */
+  /* 集計ptの表示: 整数ならそのまま、端数があれば小数1桁 */
   function fmtPt(v) {
     const r = Math.round(v * 10) / 10;
     const s = Number.isInteger(r) ? String(r) : r.toFixed(1);
@@ -3602,12 +3603,12 @@
     gameEndModal.classList.add('show');
   }
 
-  /* ── 精算結果の共有 ─────────────────────────────── */
+  /* ── 対局結果の共有 ─────────────────────────────── */
   function buildResultText() {
     if (!lastResults) return '';
     const lines = lastResults.map(r =>
       `${r.rank}位 ${r.name}　${r.finalScore.toLocaleString()}点（${fmtPt(r.totalPoint)}）`);
-    return `【点棒いらず】精算結果\n${lines.join('\n')}`;
+    return `【点棒いらず】対局結果\n${lines.join('\n')}`;
   }
   async function shareResults() {
     const text = buildResultText();
@@ -3672,7 +3673,7 @@
       riichi:    e => `${esc(e.playerName||'-')} 立直（供託 +1,000）`,
       ryuukyoku: e => `流局（テンパイ: ${(e.tenpaiNames && e.tenpaiNames.length) ? esc(e.tenpaiNames.join('・')) : 'なし'}）`,
       chuuto:    () => '途中流局（連荘）',
-      chombo:    e => `${esc(e.playerName||'-')} チョンボ${e.moved ? '（罰符精算）' : '（記録のみ）'}`,
+      chombo:    e => `${esc(e.playerName||'-')} チョンボ${e.moved ? '（罰符）' : '（記録のみ）'}`,
     };
     [...log].reverse().forEach(e => {
       const div = document.createElement('div');

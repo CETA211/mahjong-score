@@ -24,9 +24,9 @@ const NAMES = { east: 'あきら', south: 'はるか', west: 'けんた', north:
 const SCENES = [
   { id: 'home',      caption: 'スワイプで<br>点棒いらず' },
   { id: 'ron',       caption: '点数表から<br>選ぶだけ' },
-  { id: 'gameend',   caption: 'ウマ・オカ込みで<br>自動精算' },
+  { id: 'gameend',   caption: 'ウマ・オカ込みで<br>スコア自動集計' },
   { id: 'picker',    caption: '3つのテーマ' },
-  { id: 'ryuukyoku', caption: 'リーチ・流局・本場も<br>自動で進行' },
+  { id: 'ryuukyoku', caption: '立直・流局・本場も<br>自動で進行' },
 ];
 
 async function appShot(scene) {
