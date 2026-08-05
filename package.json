@@ -1,6 +1,6 @@
 {
   "name": "tenbo-irazu",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "点棒いらず — 麻雀点数管理（Capacitor iOS ラッパー）",
   "scripts": {
