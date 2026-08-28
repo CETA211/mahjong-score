@@ -115,3 +115,56 @@ Attachments: full screenshot set, screen recording, one-page feature list.
 
 **Web版(PWA)は https://ceta211.github.io/mahjong-score/ で稼働中**。App Store 公開が遅れても機能提供は止まらないので、
 焦って Gambling=Yes に折れる必要はない。
+
+---
+
+# 【第3ラウンド】2026-08-06 3回目の却下（version 1.0(10)・同一定型文）
+
+文言修正・メタデータ修正・証拠14枚を添付して再提出したが、**一字一句同じ定型文**が返ってきた。
+審査端末は iPad Air 11-inch (M3) と iPhone 17 Pro Max。
+
+## 状況判断
+- 3回とも同一テンプレート＝個別精査が行われていない可能性が高い
+- Appleは**一度も「どの画面・どの文字列が該当か」を示していない**
+- 新仮説: **サイコロ機能**（ヘッダー常設ボタン＋2個振りモーダル）が引き金の可能性。
+  調査でサイコロユーティリティ「Dice X」が同一の2.3.6ループに長期間ハマった事例あり。
+  ※証拠添付の 10_dice_roll.png はこの観点では逆効果だった可能性がある
+- 別の可能性: "real money skill-based gaming"（＝賭け麻雀）の道具というカテゴリ判断。
+  この場合は文言修正では覆らない → Board申立てが本丸
+
+## 次に送るメッセージ（短く1点だけ聞く・これをそのまま貼る）
+
+```
+Thank you for the response.
+
+We have reviewed the app again in full and cannot identify any feature that relates to
+real money gambling, real money betting, or real money skill-based gaming. To resolve this
+quickly, could you please identify the specific screen, feature, or text string that is
+considered a tip, tool, prediction, or information related to real money gambling?
+We will remove or change it immediately.
+
+The app's complete functionality is: (1) recording point transfers between players during a
+face-to-face game of mahjong played with physical tiles, and (2) showing the finishing order
+when the game ends. There is no money, currency, exchange rate, stake, odds, or prediction
+feature, no in-app purchase, no advertising, and no network connection of any kind.
+
+We are asking rather than simply changing the answer because selecting "Yes" for Gambling
+would declare content that the app does not contain, which conflicts with the accuracy that
+Guideline 2.3.6 itself requires. As an individual developer, it would also place the app in
+conflict with Guideline 5.1.1(ix), which states that apps in highly regulated fields
+including gambling should be submitted by a legal entity rather than an individual developer.
+
+We are willing to remove any feature you identify.
+```
+
+## 回答が来ない / また同じ定型文だった場合の判断
+
+| 選択肢 | 内容 | 判断 |
+|--------|------|------|
+| A. サイコロ機能を削除して再提出 | ヘッダーのサイコロボタンとモーダルを外す。実卓には物理サイコロがあるので実害は小さい | 低コスト・仮説が当たれば一発解決 |
+| B. App Review Board へ申立て | 別チームが判断。1リジェクトにつき1回のみ | 本命。証拠が揃った今なら撃てる |
+| C. 年齢下限を手動で13+/16+に引き上げ | Gambling=No は維持したまま表示年齢だけ上げる妥協案 | 5.1.1(ix)を回避しつつ形式的に応える |
+| D. Gambling=Yes | **選択肢に入れない**（18+固定＋個人開発者は提出不可になる） | 禁止 |
+
+**推奨順序**: 上記メッセージ送信 → 24〜48h待つ → 実質回答がなければ A（サイコロ削除）を実施して再提出、
+それでも同じなら B（Board申立て）。C は最終手段。
